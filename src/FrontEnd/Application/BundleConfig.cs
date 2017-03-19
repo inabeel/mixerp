@@ -88,6 +88,8 @@ namespace MixERP.Net.FrontEnd.Application
                 "~/Scripts/Modules/ScrudFactory/form/form-cancel.js",
                 "~/Scripts/Modules/ScrudFactory/form/form-custom-fields.js",
                 "~/Scripts/Modules/ScrudFactory/form/form-edit.js",
+                "~/Scripts/Modules/ScrudFactory/form/form-navigation.js",
+                "~/Scripts/Modules/ScrudFactory/form/form-actions.js",
                 "~/Scripts/Modules/ScrudFactory/form/form-layout-field-group.js",
                 "~/Scripts/Modules/ScrudFactory/form/form-layout.js",
                 "~/Scripts/Modules/ScrudFactory/form/form-load-default-values.js",
@@ -99,7 +101,7 @@ namespace MixERP.Net.FrontEnd.Application
                 "~/Scripts/Modules/ScrudFactory/form/ajax-request-initialize.js",
                 "~/Scripts/Modules/ScrudFactory/form/event-on-doc-keydown.js",
                 "~/Scripts/Modules/ScrudFactory/form/event-on-doc-ready.js",
-                "~/Scripts/Modules/ScrudFactory/form/event-on-formready.js",
+                "~/Scripts/Modules/ScrudFactory/form/trigger-events.js",
                 "~/Scripts/Modules/ScrudFactory/form/event-on-ajax-stop.js"
             };
         }

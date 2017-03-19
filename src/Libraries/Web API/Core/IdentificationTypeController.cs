@@ -12,6 +12,7 @@ using MixERP.Net.Framework;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using PetaPoco;
+using MixERP.Net.Schemas.Core.Data;
 
 namespace MixERP.Net.Api.Core
 {
@@ -22,9 +23,9 @@ namespace MixERP.Net.Api.Core
     public class IdentificationTypeController : ApiController
     {
         /// <summary>
-        ///     The IdentificationType data context.
+        ///     The IdentificationType repository.
         /// </summary>
-        private readonly MixERP.Net.Schemas.Core.Data.IdentificationType IdentificationTypeContext;
+        private readonly IIdentificationTypeRepository IdentificationTypeRepository;
 
         public IdentificationTypeController()
         {
@@ -33,12 +34,22 @@ namespace MixERP.Net.Api.Core
             this._OfficeId = AppUsers.GetCurrent().View.OfficeId.ToInt();
             this._Catalog = AppUsers.GetCurrentUserDB();
 
-            this.IdentificationTypeContext = new MixERP.Net.Schemas.Core.Data.IdentificationType
+            this.IdentificationTypeRepository = new MixERP.Net.Schemas.Core.Data.IdentificationType
             {
                 _Catalog = this._Catalog,
                 _LoginId = this._LoginId,
                 _UserId = this._UserId
             };
+        }
+
+        public IdentificationTypeController(IIdentificationTypeRepository repository, string catalog, LoginView view)
+        {
+            this._LoginId = view.LoginId.ToLong();
+            this._UserId = view.UserId.ToInt();
+            this._OfficeId = view.OfficeId.ToInt();
+            this._Catalog = catalog;
+
+            this.IdentificationTypeRepository = repository;
         }
 
         public long _LoginId { get; }
@@ -55,6 +66,11 @@ namespace MixERP.Net.Api.Core
         [Route("~/api/core/identification-type/meta")]
         public EntityView GetEntityView()
         {
+            if (this._LoginId == 0)
+            {
+                return new EntityView();
+            }
+
             return new EntityView
             {
                 PrimaryKey = "identification_type_code",
@@ -80,7 +96,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.IdentificationTypeContext.Count();
+                return this.IdentificationTypeRepository.Count();
             }
             catch (UnauthorizedException)
             {
@@ -111,7 +127,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.IdentificationTypeContext.GetAll();
+                return this.IdentificationTypeRepository.GetAll();
             }
             catch (UnauthorizedException)
             {
@@ -142,7 +158,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.IdentificationTypeContext.Export();
+                return this.IdentificationTypeRepository.Export();
             }
             catch (UnauthorizedException)
             {
@@ -174,7 +190,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.IdentificationTypeContext.Get(identificationTypeCode);
+                return this.IdentificationTypeRepository.Get(identificationTypeCode);
             }
             catch (UnauthorizedException)
             {
@@ -201,7 +217,133 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.IdentificationTypeContext.Get(identificationTypeCodes);
+                return this.IdentificationTypeRepository.Get(identificationTypeCodes);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the first instance of identification type.
+        /// </summary>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("first")]
+        [Route("~/api/core/identification-type/first")]
+        public MixERP.Net.Entities.Core.IdentificationType GetFirst()
+        {
+            try
+            {
+                return this.IdentificationTypeRepository.GetFirst();
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the previous instance of identification type.
+        /// </summary>
+        /// <param name="identificationTypeCode">Enter IdentificationTypeCode to search for.</param>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("previous/{identificationTypeCode}")]
+        [Route("~/api/core/identification-type/previous/{identificationTypeCode}")]
+        public MixERP.Net.Entities.Core.IdentificationType GetPrevious(string identificationTypeCode)
+        {
+            try
+            {
+                return this.IdentificationTypeRepository.GetPrevious(identificationTypeCode);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the next instance of identification type.
+        /// </summary>
+        /// <param name="identificationTypeCode">Enter IdentificationTypeCode to search for.</param>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("next/{identificationTypeCode}")]
+        [Route("~/api/core/identification-type/next/{identificationTypeCode}")]
+        public MixERP.Net.Entities.Core.IdentificationType GetNext(string identificationTypeCode)
+        {
+            try
+            {
+                return this.IdentificationTypeRepository.GetNext(identificationTypeCode);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the last instance of identification type.
+        /// </summary>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("last")]
+        [Route("~/api/core/identification-type/last")]
+        public MixERP.Net.Entities.Core.IdentificationType GetLast()
+        {
+            try
+            {
+                return this.IdentificationTypeRepository.GetLast();
             }
             catch (UnauthorizedException)
             {
@@ -232,7 +374,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.IdentificationTypeContext.GetPaginatedResult();
+                return this.IdentificationTypeRepository.GetPaginatedResult();
             }
             catch (UnauthorizedException)
             {
@@ -264,7 +406,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.IdentificationTypeContext.GetPaginatedResult(pageNumber);
+                return this.IdentificationTypeRepository.GetPaginatedResult(pageNumber);
             }
             catch (UnauthorizedException)
             {
@@ -297,7 +439,7 @@ namespace MixERP.Net.Api.Core
             try
             {
                 List<EntityParser.Filter> f = filters.ToObject<List<EntityParser.Filter>>(JsonHelper.GetJsonSerializer());
-                return this.IdentificationTypeContext.CountWhere(f);
+                return this.IdentificationTypeRepository.CountWhere(f);
             }
             catch (UnauthorizedException)
             {
@@ -331,7 +473,7 @@ namespace MixERP.Net.Api.Core
             try
             {
                 List<EntityParser.Filter> f = filters.ToObject<List<EntityParser.Filter>>(JsonHelper.GetJsonSerializer());
-                return this.IdentificationTypeContext.GetWhere(pageNumber, f);
+                return this.IdentificationTypeRepository.GetWhere(pageNumber, f);
             }
             catch (UnauthorizedException)
             {
@@ -363,7 +505,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.IdentificationTypeContext.CountFiltered(filterName);
+                return this.IdentificationTypeRepository.CountFiltered(filterName);
             }
             catch (UnauthorizedException)
             {
@@ -396,7 +538,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.IdentificationTypeContext.GetFiltered(pageNumber, filterName);
+                return this.IdentificationTypeRepository.GetFiltered(pageNumber, filterName);
             }
             catch (UnauthorizedException)
             {
@@ -427,7 +569,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.IdentificationTypeContext.GetDisplayFields();
+                return this.IdentificationTypeRepository.GetDisplayFields();
             }
             catch (UnauthorizedException)
             {
@@ -458,7 +600,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.IdentificationTypeContext.GetCustomFields(null);
+                return this.IdentificationTypeRepository.GetCustomFields(null);
             }
             catch (UnauthorizedException)
             {
@@ -489,7 +631,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.IdentificationTypeContext.GetCustomFields(resourceId);
+                return this.IdentificationTypeRepository.GetCustomFields(resourceId);
             }
             catch (UnauthorizedException)
             {
@@ -528,7 +670,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                return this.IdentificationTypeContext.AddOrEdit(identificationType, customFields);
+                return this.IdentificationTypeRepository.AddOrEdit(identificationType, customFields);
             }
             catch (UnauthorizedException)
             {
@@ -564,7 +706,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                this.IdentificationTypeContext.Add(identificationType);
+                this.IdentificationTypeRepository.Add(identificationType);
             }
             catch (UnauthorizedException)
             {
@@ -601,7 +743,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                this.IdentificationTypeContext.Update(identificationType, identificationTypeCode);
+                this.IdentificationTypeRepository.Update(identificationType, identificationTypeCode);
             }
             catch (UnauthorizedException)
             {
@@ -646,7 +788,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                return this.IdentificationTypeContext.BulkImport(identificationTypeCollection);
+                return this.IdentificationTypeRepository.BulkImport(identificationTypeCollection);
             }
             catch (UnauthorizedException)
             {
@@ -677,7 +819,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                this.IdentificationTypeContext.Delete(identificationTypeCode);
+                this.IdentificationTypeRepository.Delete(identificationTypeCode);
             }
             catch (UnauthorizedException)
             {

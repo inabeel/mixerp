@@ -16,7 +16,7 @@ namespace MixERP.Net.Schemas.Core.Data
     /// <summary>
     /// Provides simplified data access features to perform SCRUD operation on the database table "core.brands".
     /// </summary>
-    public class Brand : DbAccess
+    public class Brand : DbAccess, IBrandRepository
     {
         /// <summary>
         /// The schema of this table. Returns literal "core".
@@ -73,7 +73,7 @@ namespace MixERP.Net.Schemas.Core.Data
         }
 
         /// <summary>
-        /// Executes a select query on the table "core.brands" to return a all instances of the "Brand" class. 
+        /// Executes a select query on the table "core.brands" to return all instances of the "Brand" class. 
         /// </summary>
         /// <returns>Returns a non-live, non-mapped instances of "Brand" class.</returns>
         /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
@@ -102,7 +102,7 @@ namespace MixERP.Net.Schemas.Core.Data
         }
 
         /// <summary>
-        /// Executes a select query on the table "core.brands" to return a all instances of the "Brand" class to export. 
+        /// Executes a select query on the table "core.brands" to return all instances of the "Brand" class to export. 
         /// </summary>
         /// <returns>Returns a non-live, non-mapped instances of "Brand" class.</returns>
         /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
@@ -158,6 +158,125 @@ namespace MixERP.Net.Schemas.Core.Data
 
             const string sql = "SELECT * FROM core.brands WHERE brand_id=@0;";
             return Factory.Get<MixERP.Net.Entities.Core.Brand>(this._Catalog, sql, brandId).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Gets the first record of the table "core.brands". 
+        /// </summary>
+        /// <returns>Returns a non-live, non-mapped instance of "Brand" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.Core.Brand GetFirst()
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the first record of entity \"Brand\" was denied to the user with Login ID {_LoginId}", this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM core.brands ORDER BY brand_id LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.Core.Brand>(this._Catalog, sql).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Gets the previous record of the table "core.brands" sorted by brandId.
+        /// </summary>
+        /// <param name="brandId">The column "brand_id" parameter used to find the next record.</param>
+        /// <returns>Returns a non-live, non-mapped instance of "Brand" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.Core.Brand GetPrevious(int brandId)
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the previous entity of \"Brand\" by \"BrandId\" with value {BrandId} was denied to the user with Login ID {_LoginId}", brandId, this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM core.brands WHERE brand_id < @0 ORDER BY brand_id DESC LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.Core.Brand>(this._Catalog, sql, brandId).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Gets the next record of the table "core.brands" sorted by brandId.
+        /// </summary>
+        /// <param name="brandId">The column "brand_id" parameter used to find the next record.</param>
+        /// <returns>Returns a non-live, non-mapped instance of "Brand" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.Core.Brand GetNext(int brandId)
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the next entity of \"Brand\" by \"BrandId\" with value {BrandId} was denied to the user with Login ID {_LoginId}", brandId, this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM core.brands WHERE brand_id > @0 ORDER BY brand_id LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.Core.Brand>(this._Catalog, sql, brandId).FirstOrDefault();
+        }
+
+
+        /// <summary>
+        /// Gets the last record of the table "core.brands". 
+        /// </summary>
+        /// <returns>Returns a non-live, non-mapped instance of "Brand" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.Core.Brand GetLast()
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the last record of entity \"Brand\" was denied to the user with Login ID {_LoginId}", this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM core.brands ORDER BY brand_id DESC LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.Core.Brand>(this._Catalog, sql).FirstOrDefault();
         }
 
         /// <summary>
@@ -559,7 +678,7 @@ namespace MixERP.Net.Schemas.Core.Data
             return Factory.Get<MixERP.Net.Entities.Core.Brand>(this._Catalog, sql, offset);
         }
 
-        private List<EntityParser.Filter> GetFilters(string catalog, string filterName)
+        public List<EntityParser.Filter> GetFilters(string catalog, string filterName)
         {
             const string sql = "SELECT * FROM core.filters WHERE object_name='core.brands' AND lower(filter_name)=lower(@0);";
             return Factory.Get<EntityParser.Filter>(catalog, sql, filterName).ToList();

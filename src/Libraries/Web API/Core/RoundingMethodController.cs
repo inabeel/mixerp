@@ -12,6 +12,7 @@ using MixERP.Net.Framework;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using PetaPoco;
+using MixERP.Net.Schemas.Core.Data;
 
 namespace MixERP.Net.Api.Core
 {
@@ -22,9 +23,9 @@ namespace MixERP.Net.Api.Core
     public class RoundingMethodController : ApiController
     {
         /// <summary>
-        ///     The RoundingMethod data context.
+        ///     The RoundingMethod repository.
         /// </summary>
-        private readonly MixERP.Net.Schemas.Core.Data.RoundingMethod RoundingMethodContext;
+        private readonly IRoundingMethodRepository RoundingMethodRepository;
 
         public RoundingMethodController()
         {
@@ -33,12 +34,22 @@ namespace MixERP.Net.Api.Core
             this._OfficeId = AppUsers.GetCurrent().View.OfficeId.ToInt();
             this._Catalog = AppUsers.GetCurrentUserDB();
 
-            this.RoundingMethodContext = new MixERP.Net.Schemas.Core.Data.RoundingMethod
+            this.RoundingMethodRepository = new MixERP.Net.Schemas.Core.Data.RoundingMethod
             {
                 _Catalog = this._Catalog,
                 _LoginId = this._LoginId,
                 _UserId = this._UserId
             };
+        }
+
+        public RoundingMethodController(IRoundingMethodRepository repository, string catalog, LoginView view)
+        {
+            this._LoginId = view.LoginId.ToLong();
+            this._UserId = view.UserId.ToInt();
+            this._OfficeId = view.OfficeId.ToInt();
+            this._Catalog = catalog;
+
+            this.RoundingMethodRepository = repository;
         }
 
         public long _LoginId { get; }
@@ -55,6 +66,11 @@ namespace MixERP.Net.Api.Core
         [Route("~/api/core/rounding-method/meta")]
         public EntityView GetEntityView()
         {
+            if (this._LoginId == 0)
+            {
+                return new EntityView();
+            }
+
             return new EntityView
             {
                 PrimaryKey = "rounding_method_code",
@@ -77,7 +93,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.RoundingMethodContext.Count();
+                return this.RoundingMethodRepository.Count();
             }
             catch (UnauthorizedException)
             {
@@ -108,7 +124,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.RoundingMethodContext.GetAll();
+                return this.RoundingMethodRepository.GetAll();
             }
             catch (UnauthorizedException)
             {
@@ -139,7 +155,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.RoundingMethodContext.Export();
+                return this.RoundingMethodRepository.Export();
             }
             catch (UnauthorizedException)
             {
@@ -171,7 +187,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.RoundingMethodContext.Get(roundingMethodCode);
+                return this.RoundingMethodRepository.Get(roundingMethodCode);
             }
             catch (UnauthorizedException)
             {
@@ -198,7 +214,133 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.RoundingMethodContext.Get(roundingMethodCodes);
+                return this.RoundingMethodRepository.Get(roundingMethodCodes);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the first instance of rounding method.
+        /// </summary>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("first")]
+        [Route("~/api/core/rounding-method/first")]
+        public MixERP.Net.Entities.Core.RoundingMethod GetFirst()
+        {
+            try
+            {
+                return this.RoundingMethodRepository.GetFirst();
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the previous instance of rounding method.
+        /// </summary>
+        /// <param name="roundingMethodCode">Enter RoundingMethodCode to search for.</param>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("previous/{roundingMethodCode}")]
+        [Route("~/api/core/rounding-method/previous/{roundingMethodCode}")]
+        public MixERP.Net.Entities.Core.RoundingMethod GetPrevious(string roundingMethodCode)
+        {
+            try
+            {
+                return this.RoundingMethodRepository.GetPrevious(roundingMethodCode);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the next instance of rounding method.
+        /// </summary>
+        /// <param name="roundingMethodCode">Enter RoundingMethodCode to search for.</param>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("next/{roundingMethodCode}")]
+        [Route("~/api/core/rounding-method/next/{roundingMethodCode}")]
+        public MixERP.Net.Entities.Core.RoundingMethod GetNext(string roundingMethodCode)
+        {
+            try
+            {
+                return this.RoundingMethodRepository.GetNext(roundingMethodCode);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the last instance of rounding method.
+        /// </summary>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("last")]
+        [Route("~/api/core/rounding-method/last")]
+        public MixERP.Net.Entities.Core.RoundingMethod GetLast()
+        {
+            try
+            {
+                return this.RoundingMethodRepository.GetLast();
             }
             catch (UnauthorizedException)
             {
@@ -229,7 +371,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.RoundingMethodContext.GetPaginatedResult();
+                return this.RoundingMethodRepository.GetPaginatedResult();
             }
             catch (UnauthorizedException)
             {
@@ -261,7 +403,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.RoundingMethodContext.GetPaginatedResult(pageNumber);
+                return this.RoundingMethodRepository.GetPaginatedResult(pageNumber);
             }
             catch (UnauthorizedException)
             {
@@ -294,7 +436,7 @@ namespace MixERP.Net.Api.Core
             try
             {
                 List<EntityParser.Filter> f = filters.ToObject<List<EntityParser.Filter>>(JsonHelper.GetJsonSerializer());
-                return this.RoundingMethodContext.CountWhere(f);
+                return this.RoundingMethodRepository.CountWhere(f);
             }
             catch (UnauthorizedException)
             {
@@ -328,7 +470,7 @@ namespace MixERP.Net.Api.Core
             try
             {
                 List<EntityParser.Filter> f = filters.ToObject<List<EntityParser.Filter>>(JsonHelper.GetJsonSerializer());
-                return this.RoundingMethodContext.GetWhere(pageNumber, f);
+                return this.RoundingMethodRepository.GetWhere(pageNumber, f);
             }
             catch (UnauthorizedException)
             {
@@ -360,7 +502,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.RoundingMethodContext.CountFiltered(filterName);
+                return this.RoundingMethodRepository.CountFiltered(filterName);
             }
             catch (UnauthorizedException)
             {
@@ -393,7 +535,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.RoundingMethodContext.GetFiltered(pageNumber, filterName);
+                return this.RoundingMethodRepository.GetFiltered(pageNumber, filterName);
             }
             catch (UnauthorizedException)
             {
@@ -424,7 +566,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.RoundingMethodContext.GetDisplayFields();
+                return this.RoundingMethodRepository.GetDisplayFields();
             }
             catch (UnauthorizedException)
             {
@@ -455,7 +597,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.RoundingMethodContext.GetCustomFields(null);
+                return this.RoundingMethodRepository.GetCustomFields(null);
             }
             catch (UnauthorizedException)
             {
@@ -486,7 +628,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.RoundingMethodContext.GetCustomFields(resourceId);
+                return this.RoundingMethodRepository.GetCustomFields(resourceId);
             }
             catch (UnauthorizedException)
             {
@@ -525,7 +667,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                return this.RoundingMethodContext.AddOrEdit(roundingMethod, customFields);
+                return this.RoundingMethodRepository.AddOrEdit(roundingMethod, customFields);
             }
             catch (UnauthorizedException)
             {
@@ -561,7 +703,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                this.RoundingMethodContext.Add(roundingMethod);
+                this.RoundingMethodRepository.Add(roundingMethod);
             }
             catch (UnauthorizedException)
             {
@@ -598,7 +740,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                this.RoundingMethodContext.Update(roundingMethod, roundingMethodCode);
+                this.RoundingMethodRepository.Update(roundingMethod, roundingMethodCode);
             }
             catch (UnauthorizedException)
             {
@@ -643,7 +785,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                return this.RoundingMethodContext.BulkImport(roundingMethodCollection);
+                return this.RoundingMethodRepository.BulkImport(roundingMethodCollection);
             }
             catch (UnauthorizedException)
             {
@@ -674,7 +816,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                this.RoundingMethodContext.Delete(roundingMethodCode);
+                this.RoundingMethodRepository.Delete(roundingMethodCode);
             }
             catch (UnauthorizedException)
             {

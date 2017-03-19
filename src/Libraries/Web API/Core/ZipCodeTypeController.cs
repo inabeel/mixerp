@@ -12,6 +12,7 @@ using MixERP.Net.Framework;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using PetaPoco;
+using MixERP.Net.Schemas.Core.Data;
 
 namespace MixERP.Net.Api.Core
 {
@@ -22,9 +23,9 @@ namespace MixERP.Net.Api.Core
     public class ZipCodeTypeController : ApiController
     {
         /// <summary>
-        ///     The ZipCodeType data context.
+        ///     The ZipCodeType repository.
         /// </summary>
-        private readonly MixERP.Net.Schemas.Core.Data.ZipCodeType ZipCodeTypeContext;
+        private readonly IZipCodeTypeRepository ZipCodeTypeRepository;
 
         public ZipCodeTypeController()
         {
@@ -33,12 +34,22 @@ namespace MixERP.Net.Api.Core
             this._OfficeId = AppUsers.GetCurrent().View.OfficeId.ToInt();
             this._Catalog = AppUsers.GetCurrentUserDB();
 
-            this.ZipCodeTypeContext = new MixERP.Net.Schemas.Core.Data.ZipCodeType
+            this.ZipCodeTypeRepository = new MixERP.Net.Schemas.Core.Data.ZipCodeType
             {
                 _Catalog = this._Catalog,
                 _LoginId = this._LoginId,
                 _UserId = this._UserId
             };
+        }
+
+        public ZipCodeTypeController(IZipCodeTypeRepository repository, string catalog, LoginView view)
+        {
+            this._LoginId = view.LoginId.ToLong();
+            this._UserId = view.UserId.ToInt();
+            this._OfficeId = view.OfficeId.ToInt();
+            this._Catalog = catalog;
+
+            this.ZipCodeTypeRepository = repository;
         }
 
         public long _LoginId { get; }
@@ -55,6 +66,11 @@ namespace MixERP.Net.Api.Core
         [Route("~/api/core/zip-code-type/meta")]
         public EntityView GetEntityView()
         {
+            if (this._LoginId == 0)
+            {
+                return new EntityView();
+            }
+
             return new EntityView
             {
                 PrimaryKey = "zip_code_type_id",
@@ -79,7 +95,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.ZipCodeTypeContext.Count();
+                return this.ZipCodeTypeRepository.Count();
             }
             catch (UnauthorizedException)
             {
@@ -110,7 +126,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.ZipCodeTypeContext.GetAll();
+                return this.ZipCodeTypeRepository.GetAll();
             }
             catch (UnauthorizedException)
             {
@@ -141,7 +157,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.ZipCodeTypeContext.Export();
+                return this.ZipCodeTypeRepository.Export();
             }
             catch (UnauthorizedException)
             {
@@ -173,7 +189,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.ZipCodeTypeContext.Get(zipCodeTypeId);
+                return this.ZipCodeTypeRepository.Get(zipCodeTypeId);
             }
             catch (UnauthorizedException)
             {
@@ -200,7 +216,133 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.ZipCodeTypeContext.Get(zipCodeTypeIds);
+                return this.ZipCodeTypeRepository.Get(zipCodeTypeIds);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the first instance of zip code type.
+        /// </summary>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("first")]
+        [Route("~/api/core/zip-code-type/first")]
+        public MixERP.Net.Entities.Core.ZipCodeType GetFirst()
+        {
+            try
+            {
+                return this.ZipCodeTypeRepository.GetFirst();
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the previous instance of zip code type.
+        /// </summary>
+        /// <param name="zipCodeTypeId">Enter ZipCodeTypeId to search for.</param>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("previous/{zipCodeTypeId}")]
+        [Route("~/api/core/zip-code-type/previous/{zipCodeTypeId}")]
+        public MixERP.Net.Entities.Core.ZipCodeType GetPrevious(int zipCodeTypeId)
+        {
+            try
+            {
+                return this.ZipCodeTypeRepository.GetPrevious(zipCodeTypeId);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the next instance of zip code type.
+        /// </summary>
+        /// <param name="zipCodeTypeId">Enter ZipCodeTypeId to search for.</param>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("next/{zipCodeTypeId}")]
+        [Route("~/api/core/zip-code-type/next/{zipCodeTypeId}")]
+        public MixERP.Net.Entities.Core.ZipCodeType GetNext(int zipCodeTypeId)
+        {
+            try
+            {
+                return this.ZipCodeTypeRepository.GetNext(zipCodeTypeId);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the last instance of zip code type.
+        /// </summary>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("last")]
+        [Route("~/api/core/zip-code-type/last")]
+        public MixERP.Net.Entities.Core.ZipCodeType GetLast()
+        {
+            try
+            {
+                return this.ZipCodeTypeRepository.GetLast();
             }
             catch (UnauthorizedException)
             {
@@ -231,7 +373,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.ZipCodeTypeContext.GetPaginatedResult();
+                return this.ZipCodeTypeRepository.GetPaginatedResult();
             }
             catch (UnauthorizedException)
             {
@@ -263,7 +405,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.ZipCodeTypeContext.GetPaginatedResult(pageNumber);
+                return this.ZipCodeTypeRepository.GetPaginatedResult(pageNumber);
             }
             catch (UnauthorizedException)
             {
@@ -296,7 +438,7 @@ namespace MixERP.Net.Api.Core
             try
             {
                 List<EntityParser.Filter> f = filters.ToObject<List<EntityParser.Filter>>(JsonHelper.GetJsonSerializer());
-                return this.ZipCodeTypeContext.CountWhere(f);
+                return this.ZipCodeTypeRepository.CountWhere(f);
             }
             catch (UnauthorizedException)
             {
@@ -330,7 +472,7 @@ namespace MixERP.Net.Api.Core
             try
             {
                 List<EntityParser.Filter> f = filters.ToObject<List<EntityParser.Filter>>(JsonHelper.GetJsonSerializer());
-                return this.ZipCodeTypeContext.GetWhere(pageNumber, f);
+                return this.ZipCodeTypeRepository.GetWhere(pageNumber, f);
             }
             catch (UnauthorizedException)
             {
@@ -362,7 +504,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.ZipCodeTypeContext.CountFiltered(filterName);
+                return this.ZipCodeTypeRepository.CountFiltered(filterName);
             }
             catch (UnauthorizedException)
             {
@@ -395,7 +537,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.ZipCodeTypeContext.GetFiltered(pageNumber, filterName);
+                return this.ZipCodeTypeRepository.GetFiltered(pageNumber, filterName);
             }
             catch (UnauthorizedException)
             {
@@ -426,7 +568,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.ZipCodeTypeContext.GetDisplayFields();
+                return this.ZipCodeTypeRepository.GetDisplayFields();
             }
             catch (UnauthorizedException)
             {
@@ -457,7 +599,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.ZipCodeTypeContext.GetCustomFields(null);
+                return this.ZipCodeTypeRepository.GetCustomFields(null);
             }
             catch (UnauthorizedException)
             {
@@ -488,7 +630,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.ZipCodeTypeContext.GetCustomFields(resourceId);
+                return this.ZipCodeTypeRepository.GetCustomFields(resourceId);
             }
             catch (UnauthorizedException)
             {
@@ -527,7 +669,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                return this.ZipCodeTypeContext.AddOrEdit(zipCodeType, customFields);
+                return this.ZipCodeTypeRepository.AddOrEdit(zipCodeType, customFields);
             }
             catch (UnauthorizedException)
             {
@@ -563,7 +705,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                this.ZipCodeTypeContext.Add(zipCodeType);
+                this.ZipCodeTypeRepository.Add(zipCodeType);
             }
             catch (UnauthorizedException)
             {
@@ -600,7 +742,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                this.ZipCodeTypeContext.Update(zipCodeType, zipCodeTypeId);
+                this.ZipCodeTypeRepository.Update(zipCodeType, zipCodeTypeId);
             }
             catch (UnauthorizedException)
             {
@@ -645,7 +787,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                return this.ZipCodeTypeContext.BulkImport(zipCodeTypeCollection);
+                return this.ZipCodeTypeRepository.BulkImport(zipCodeTypeCollection);
             }
             catch (UnauthorizedException)
             {
@@ -676,7 +818,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                this.ZipCodeTypeContext.Delete(zipCodeTypeId);
+                this.ZipCodeTypeRepository.Delete(zipCodeTypeId);
             }
             catch (UnauthorizedException)
             {

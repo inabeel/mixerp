@@ -12,6 +12,7 @@ using MixERP.Net.Framework;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using PetaPoco;
+using MixERP.Net.Schemas.Core.Data;
 
 namespace MixERP.Net.Api.Core
 {
@@ -22,9 +23,9 @@ namespace MixERP.Net.Api.Core
     public class AccountMasterController : ApiController
     {
         /// <summary>
-        ///     The AccountMaster data context.
+        ///     The AccountMaster repository.
         /// </summary>
-        private readonly MixERP.Net.Schemas.Core.Data.AccountMaster AccountMasterContext;
+        private readonly IAccountMasterRepository AccountMasterRepository;
 
         public AccountMasterController()
         {
@@ -33,12 +34,22 @@ namespace MixERP.Net.Api.Core
             this._OfficeId = AppUsers.GetCurrent().View.OfficeId.ToInt();
             this._Catalog = AppUsers.GetCurrentUserDB();
 
-            this.AccountMasterContext = new MixERP.Net.Schemas.Core.Data.AccountMaster
+            this.AccountMasterRepository = new MixERP.Net.Schemas.Core.Data.AccountMaster
             {
                 _Catalog = this._Catalog,
                 _LoginId = this._LoginId,
                 _UserId = this._UserId
             };
+        }
+
+        public AccountMasterController(IAccountMasterRepository repository, string catalog, LoginView view)
+        {
+            this._LoginId = view.LoginId.ToLong();
+            this._UserId = view.UserId.ToInt();
+            this._OfficeId = view.OfficeId.ToInt();
+            this._Catalog = catalog;
+
+            this.AccountMasterRepository = repository;
         }
 
         public long _LoginId { get; }
@@ -55,6 +66,11 @@ namespace MixERP.Net.Api.Core
         [Route("~/api/core/account-master/meta")]
         public EntityView GetEntityView()
         {
+            if (this._LoginId == 0)
+            {
+                return new EntityView();
+            }
+
             return new EntityView
             {
                 PrimaryKey = "account_master_id",
@@ -80,7 +96,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.AccountMasterContext.Count();
+                return this.AccountMasterRepository.Count();
             }
             catch (UnauthorizedException)
             {
@@ -111,7 +127,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.AccountMasterContext.GetAll();
+                return this.AccountMasterRepository.GetAll();
             }
             catch (UnauthorizedException)
             {
@@ -142,7 +158,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.AccountMasterContext.Export();
+                return this.AccountMasterRepository.Export();
             }
             catch (UnauthorizedException)
             {
@@ -174,7 +190,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.AccountMasterContext.Get(accountMasterId);
+                return this.AccountMasterRepository.Get(accountMasterId);
             }
             catch (UnauthorizedException)
             {
@@ -201,7 +217,133 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.AccountMasterContext.Get(accountMasterIds);
+                return this.AccountMasterRepository.Get(accountMasterIds);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the first instance of account master.
+        /// </summary>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("first")]
+        [Route("~/api/core/account-master/first")]
+        public MixERP.Net.Entities.Core.AccountMaster GetFirst()
+        {
+            try
+            {
+                return this.AccountMasterRepository.GetFirst();
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the previous instance of account master.
+        /// </summary>
+        /// <param name="accountMasterId">Enter AccountMasterId to search for.</param>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("previous/{accountMasterId}")]
+        [Route("~/api/core/account-master/previous/{accountMasterId}")]
+        public MixERP.Net.Entities.Core.AccountMaster GetPrevious(short accountMasterId)
+        {
+            try
+            {
+                return this.AccountMasterRepository.GetPrevious(accountMasterId);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the next instance of account master.
+        /// </summary>
+        /// <param name="accountMasterId">Enter AccountMasterId to search for.</param>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("next/{accountMasterId}")]
+        [Route("~/api/core/account-master/next/{accountMasterId}")]
+        public MixERP.Net.Entities.Core.AccountMaster GetNext(short accountMasterId)
+        {
+            try
+            {
+                return this.AccountMasterRepository.GetNext(accountMasterId);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the last instance of account master.
+        /// </summary>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("last")]
+        [Route("~/api/core/account-master/last")]
+        public MixERP.Net.Entities.Core.AccountMaster GetLast()
+        {
+            try
+            {
+                return this.AccountMasterRepository.GetLast();
             }
             catch (UnauthorizedException)
             {
@@ -232,7 +374,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.AccountMasterContext.GetPaginatedResult();
+                return this.AccountMasterRepository.GetPaginatedResult();
             }
             catch (UnauthorizedException)
             {
@@ -264,7 +406,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.AccountMasterContext.GetPaginatedResult(pageNumber);
+                return this.AccountMasterRepository.GetPaginatedResult(pageNumber);
             }
             catch (UnauthorizedException)
             {
@@ -297,7 +439,7 @@ namespace MixERP.Net.Api.Core
             try
             {
                 List<EntityParser.Filter> f = filters.ToObject<List<EntityParser.Filter>>(JsonHelper.GetJsonSerializer());
-                return this.AccountMasterContext.CountWhere(f);
+                return this.AccountMasterRepository.CountWhere(f);
             }
             catch (UnauthorizedException)
             {
@@ -331,7 +473,7 @@ namespace MixERP.Net.Api.Core
             try
             {
                 List<EntityParser.Filter> f = filters.ToObject<List<EntityParser.Filter>>(JsonHelper.GetJsonSerializer());
-                return this.AccountMasterContext.GetWhere(pageNumber, f);
+                return this.AccountMasterRepository.GetWhere(pageNumber, f);
             }
             catch (UnauthorizedException)
             {
@@ -363,7 +505,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.AccountMasterContext.CountFiltered(filterName);
+                return this.AccountMasterRepository.CountFiltered(filterName);
             }
             catch (UnauthorizedException)
             {
@@ -396,7 +538,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.AccountMasterContext.GetFiltered(pageNumber, filterName);
+                return this.AccountMasterRepository.GetFiltered(pageNumber, filterName);
             }
             catch (UnauthorizedException)
             {
@@ -427,7 +569,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.AccountMasterContext.GetDisplayFields();
+                return this.AccountMasterRepository.GetDisplayFields();
             }
             catch (UnauthorizedException)
             {
@@ -458,7 +600,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.AccountMasterContext.GetCustomFields(null);
+                return this.AccountMasterRepository.GetCustomFields(null);
             }
             catch (UnauthorizedException)
             {
@@ -489,7 +631,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.AccountMasterContext.GetCustomFields(resourceId);
+                return this.AccountMasterRepository.GetCustomFields(resourceId);
             }
             catch (UnauthorizedException)
             {
@@ -528,7 +670,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                return this.AccountMasterContext.AddOrEdit(accountMaster, customFields);
+                return this.AccountMasterRepository.AddOrEdit(accountMaster, customFields);
             }
             catch (UnauthorizedException)
             {
@@ -564,7 +706,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                this.AccountMasterContext.Add(accountMaster);
+                this.AccountMasterRepository.Add(accountMaster);
             }
             catch (UnauthorizedException)
             {
@@ -601,7 +743,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                this.AccountMasterContext.Update(accountMaster, accountMasterId);
+                this.AccountMasterRepository.Update(accountMaster, accountMasterId);
             }
             catch (UnauthorizedException)
             {
@@ -646,7 +788,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                return this.AccountMasterContext.BulkImport(accountMasterCollection);
+                return this.AccountMasterRepository.BulkImport(accountMasterCollection);
             }
             catch (UnauthorizedException)
             {
@@ -677,7 +819,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                this.AccountMasterContext.Delete(accountMasterId);
+                this.AccountMasterRepository.Delete(accountMasterId);
             }
             catch (UnauthorizedException)
             {

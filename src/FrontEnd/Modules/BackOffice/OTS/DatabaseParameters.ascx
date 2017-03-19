@@ -14,14 +14,10 @@
     scrudFactory.removeImport = true;
 
     scrudFactory.excludedColumns = ["AuditUserId", "AuditTs"];
+    scrudFactory.hidePrimaryKey = false;
 
     scrudFactory.allowDelete = true;
     scrudFactory.allowEdit = true;
-
-    scrudFactory.layout = [
-        ["Key", ""],
-        ["Value", ""]
-    ];
 </script>
 <div data-ng-include="'/Modules/ScrudFactory/View.html'"></div>
 <div data-ng-include="'/Modules/ScrudFactory/Form.html'"></div>

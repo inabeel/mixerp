@@ -12,6 +12,7 @@ using MixERP.Net.Framework;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using PetaPoco;
+using MixERP.Net.Schemas.Core.Data;
 
 namespace MixERP.Net.Api.Core
 {
@@ -22,9 +23,9 @@ namespace MixERP.Net.Api.Core
     public class WidgetController : ApiController
     {
         /// <summary>
-        ///     The Widget data context.
+        ///     The Widget repository.
         /// </summary>
-        private readonly MixERP.Net.Schemas.Core.Data.Widget WidgetContext;
+        private readonly IWidgetRepository WidgetRepository;
 
         public WidgetController()
         {
@@ -33,12 +34,22 @@ namespace MixERP.Net.Api.Core
             this._OfficeId = AppUsers.GetCurrent().View.OfficeId.ToInt();
             this._Catalog = AppUsers.GetCurrentUserDB();
 
-            this.WidgetContext = new MixERP.Net.Schemas.Core.Data.Widget
+            this.WidgetRepository = new MixERP.Net.Schemas.Core.Data.Widget
             {
                 _Catalog = this._Catalog,
                 _LoginId = this._LoginId,
                 _UserId = this._UserId
             };
+        }
+
+        public WidgetController(IWidgetRepository repository, string catalog, LoginView view)
+        {
+            this._LoginId = view.LoginId.ToLong();
+            this._UserId = view.UserId.ToInt();
+            this._OfficeId = view.OfficeId.ToInt();
+            this._Catalog = catalog;
+
+            this.WidgetRepository = repository;
         }
 
         public long _LoginId { get; }
@@ -55,6 +66,11 @@ namespace MixERP.Net.Api.Core
         [Route("~/api/core/widget/meta")]
         public EntityView GetEntityView()
         {
+            if (this._LoginId == 0)
+            {
+                return new EntityView();
+            }
+
             return new EntityView
             {
                 PrimaryKey = "widget_name",
@@ -78,7 +94,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.WidgetContext.Count();
+                return this.WidgetRepository.Count();
             }
             catch (UnauthorizedException)
             {
@@ -109,7 +125,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.WidgetContext.GetAll();
+                return this.WidgetRepository.GetAll();
             }
             catch (UnauthorizedException)
             {
@@ -140,7 +156,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.WidgetContext.Export();
+                return this.WidgetRepository.Export();
             }
             catch (UnauthorizedException)
             {
@@ -172,7 +188,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.WidgetContext.Get(widgetName);
+                return this.WidgetRepository.Get(widgetName);
             }
             catch (UnauthorizedException)
             {
@@ -199,7 +215,133 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.WidgetContext.Get(widgetNames);
+                return this.WidgetRepository.Get(widgetNames);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the first instance of widget.
+        /// </summary>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("first")]
+        [Route("~/api/core/widget/first")]
+        public MixERP.Net.Entities.Core.Widget GetFirst()
+        {
+            try
+            {
+                return this.WidgetRepository.GetFirst();
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the previous instance of widget.
+        /// </summary>
+        /// <param name="widgetName">Enter WidgetName to search for.</param>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("previous/{widgetName}")]
+        [Route("~/api/core/widget/previous/{widgetName}")]
+        public MixERP.Net.Entities.Core.Widget GetPrevious(string widgetName)
+        {
+            try
+            {
+                return this.WidgetRepository.GetPrevious(widgetName);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the next instance of widget.
+        /// </summary>
+        /// <param name="widgetName">Enter WidgetName to search for.</param>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("next/{widgetName}")]
+        [Route("~/api/core/widget/next/{widgetName}")]
+        public MixERP.Net.Entities.Core.Widget GetNext(string widgetName)
+        {
+            try
+            {
+                return this.WidgetRepository.GetNext(widgetName);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the last instance of widget.
+        /// </summary>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("last")]
+        [Route("~/api/core/widget/last")]
+        public MixERP.Net.Entities.Core.Widget GetLast()
+        {
+            try
+            {
+                return this.WidgetRepository.GetLast();
             }
             catch (UnauthorizedException)
             {
@@ -230,7 +372,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.WidgetContext.GetPaginatedResult();
+                return this.WidgetRepository.GetPaginatedResult();
             }
             catch (UnauthorizedException)
             {
@@ -262,7 +404,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.WidgetContext.GetPaginatedResult(pageNumber);
+                return this.WidgetRepository.GetPaginatedResult(pageNumber);
             }
             catch (UnauthorizedException)
             {
@@ -295,7 +437,7 @@ namespace MixERP.Net.Api.Core
             try
             {
                 List<EntityParser.Filter> f = filters.ToObject<List<EntityParser.Filter>>(JsonHelper.GetJsonSerializer());
-                return this.WidgetContext.CountWhere(f);
+                return this.WidgetRepository.CountWhere(f);
             }
             catch (UnauthorizedException)
             {
@@ -329,7 +471,7 @@ namespace MixERP.Net.Api.Core
             try
             {
                 List<EntityParser.Filter> f = filters.ToObject<List<EntityParser.Filter>>(JsonHelper.GetJsonSerializer());
-                return this.WidgetContext.GetWhere(pageNumber, f);
+                return this.WidgetRepository.GetWhere(pageNumber, f);
             }
             catch (UnauthorizedException)
             {
@@ -361,7 +503,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.WidgetContext.CountFiltered(filterName);
+                return this.WidgetRepository.CountFiltered(filterName);
             }
             catch (UnauthorizedException)
             {
@@ -394,7 +536,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.WidgetContext.GetFiltered(pageNumber, filterName);
+                return this.WidgetRepository.GetFiltered(pageNumber, filterName);
             }
             catch (UnauthorizedException)
             {
@@ -425,7 +567,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.WidgetContext.GetDisplayFields();
+                return this.WidgetRepository.GetDisplayFields();
             }
             catch (UnauthorizedException)
             {
@@ -456,7 +598,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.WidgetContext.GetCustomFields(null);
+                return this.WidgetRepository.GetCustomFields(null);
             }
             catch (UnauthorizedException)
             {
@@ -487,7 +629,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.WidgetContext.GetCustomFields(resourceId);
+                return this.WidgetRepository.GetCustomFields(resourceId);
             }
             catch (UnauthorizedException)
             {
@@ -526,7 +668,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                return this.WidgetContext.AddOrEdit(widget, customFields);
+                return this.WidgetRepository.AddOrEdit(widget, customFields);
             }
             catch (UnauthorizedException)
             {
@@ -562,7 +704,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                this.WidgetContext.Add(widget);
+                this.WidgetRepository.Add(widget);
             }
             catch (UnauthorizedException)
             {
@@ -599,7 +741,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                this.WidgetContext.Update(widget, widgetName);
+                this.WidgetRepository.Update(widget, widgetName);
             }
             catch (UnauthorizedException)
             {
@@ -644,7 +786,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                return this.WidgetContext.BulkImport(widgetCollection);
+                return this.WidgetRepository.BulkImport(widgetCollection);
             }
             catch (UnauthorizedException)
             {
@@ -675,7 +817,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                this.WidgetContext.Delete(widgetName);
+                this.WidgetRepository.Delete(widgetName);
             }
             catch (UnauthorizedException)
             {

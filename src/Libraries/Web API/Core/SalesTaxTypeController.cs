@@ -12,6 +12,7 @@ using MixERP.Net.Framework;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using PetaPoco;
+using MixERP.Net.Schemas.Core.Data;
 
 namespace MixERP.Net.Api.Core
 {
@@ -22,9 +23,9 @@ namespace MixERP.Net.Api.Core
     public class SalesTaxTypeController : ApiController
     {
         /// <summary>
-        ///     The SalesTaxType data context.
+        ///     The SalesTaxType repository.
         /// </summary>
-        private readonly MixERP.Net.Schemas.Core.Data.SalesTaxType SalesTaxTypeContext;
+        private readonly ISalesTaxTypeRepository SalesTaxTypeRepository;
 
         public SalesTaxTypeController()
         {
@@ -33,12 +34,22 @@ namespace MixERP.Net.Api.Core
             this._OfficeId = AppUsers.GetCurrent().View.OfficeId.ToInt();
             this._Catalog = AppUsers.GetCurrentUserDB();
 
-            this.SalesTaxTypeContext = new MixERP.Net.Schemas.Core.Data.SalesTaxType
+            this.SalesTaxTypeRepository = new MixERP.Net.Schemas.Core.Data.SalesTaxType
             {
                 _Catalog = this._Catalog,
                 _LoginId = this._LoginId,
                 _UserId = this._UserId
             };
+        }
+
+        public SalesTaxTypeController(ISalesTaxTypeRepository repository, string catalog, LoginView view)
+        {
+            this._LoginId = view.LoginId.ToLong();
+            this._UserId = view.UserId.ToInt();
+            this._OfficeId = view.OfficeId.ToInt();
+            this._Catalog = catalog;
+
+            this.SalesTaxTypeRepository = repository;
         }
 
         public long _LoginId { get; }
@@ -55,6 +66,11 @@ namespace MixERP.Net.Api.Core
         [Route("~/api/core/sales-tax-type/meta")]
         public EntityView GetEntityView()
         {
+            if (this._LoginId == 0)
+            {
+                return new EntityView();
+            }
+
             return new EntityView
             {
                 PrimaryKey = "sales_tax_type_id",
@@ -81,7 +97,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.SalesTaxTypeContext.Count();
+                return this.SalesTaxTypeRepository.Count();
             }
             catch (UnauthorizedException)
             {
@@ -112,7 +128,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.SalesTaxTypeContext.GetAll();
+                return this.SalesTaxTypeRepository.GetAll();
             }
             catch (UnauthorizedException)
             {
@@ -143,7 +159,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.SalesTaxTypeContext.Export();
+                return this.SalesTaxTypeRepository.Export();
             }
             catch (UnauthorizedException)
             {
@@ -175,7 +191,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.SalesTaxTypeContext.Get(salesTaxTypeId);
+                return this.SalesTaxTypeRepository.Get(salesTaxTypeId);
             }
             catch (UnauthorizedException)
             {
@@ -202,7 +218,133 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.SalesTaxTypeContext.Get(salesTaxTypeIds);
+                return this.SalesTaxTypeRepository.Get(salesTaxTypeIds);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the first instance of sales tax type.
+        /// </summary>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("first")]
+        [Route("~/api/core/sales-tax-type/first")]
+        public MixERP.Net.Entities.Core.SalesTaxType GetFirst()
+        {
+            try
+            {
+                return this.SalesTaxTypeRepository.GetFirst();
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the previous instance of sales tax type.
+        /// </summary>
+        /// <param name="salesTaxTypeId">Enter SalesTaxTypeId to search for.</param>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("previous/{salesTaxTypeId}")]
+        [Route("~/api/core/sales-tax-type/previous/{salesTaxTypeId}")]
+        public MixERP.Net.Entities.Core.SalesTaxType GetPrevious(int salesTaxTypeId)
+        {
+            try
+            {
+                return this.SalesTaxTypeRepository.GetPrevious(salesTaxTypeId);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the next instance of sales tax type.
+        /// </summary>
+        /// <param name="salesTaxTypeId">Enter SalesTaxTypeId to search for.</param>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("next/{salesTaxTypeId}")]
+        [Route("~/api/core/sales-tax-type/next/{salesTaxTypeId}")]
+        public MixERP.Net.Entities.Core.SalesTaxType GetNext(int salesTaxTypeId)
+        {
+            try
+            {
+                return this.SalesTaxTypeRepository.GetNext(salesTaxTypeId);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the last instance of sales tax type.
+        /// </summary>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("last")]
+        [Route("~/api/core/sales-tax-type/last")]
+        public MixERP.Net.Entities.Core.SalesTaxType GetLast()
+        {
+            try
+            {
+                return this.SalesTaxTypeRepository.GetLast();
             }
             catch (UnauthorizedException)
             {
@@ -233,7 +375,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.SalesTaxTypeContext.GetPaginatedResult();
+                return this.SalesTaxTypeRepository.GetPaginatedResult();
             }
             catch (UnauthorizedException)
             {
@@ -265,7 +407,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.SalesTaxTypeContext.GetPaginatedResult(pageNumber);
+                return this.SalesTaxTypeRepository.GetPaginatedResult(pageNumber);
             }
             catch (UnauthorizedException)
             {
@@ -298,7 +440,7 @@ namespace MixERP.Net.Api.Core
             try
             {
                 List<EntityParser.Filter> f = filters.ToObject<List<EntityParser.Filter>>(JsonHelper.GetJsonSerializer());
-                return this.SalesTaxTypeContext.CountWhere(f);
+                return this.SalesTaxTypeRepository.CountWhere(f);
             }
             catch (UnauthorizedException)
             {
@@ -332,7 +474,7 @@ namespace MixERP.Net.Api.Core
             try
             {
                 List<EntityParser.Filter> f = filters.ToObject<List<EntityParser.Filter>>(JsonHelper.GetJsonSerializer());
-                return this.SalesTaxTypeContext.GetWhere(pageNumber, f);
+                return this.SalesTaxTypeRepository.GetWhere(pageNumber, f);
             }
             catch (UnauthorizedException)
             {
@@ -364,7 +506,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.SalesTaxTypeContext.CountFiltered(filterName);
+                return this.SalesTaxTypeRepository.CountFiltered(filterName);
             }
             catch (UnauthorizedException)
             {
@@ -397,7 +539,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.SalesTaxTypeContext.GetFiltered(pageNumber, filterName);
+                return this.SalesTaxTypeRepository.GetFiltered(pageNumber, filterName);
             }
             catch (UnauthorizedException)
             {
@@ -428,7 +570,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.SalesTaxTypeContext.GetDisplayFields();
+                return this.SalesTaxTypeRepository.GetDisplayFields();
             }
             catch (UnauthorizedException)
             {
@@ -459,7 +601,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.SalesTaxTypeContext.GetCustomFields(null);
+                return this.SalesTaxTypeRepository.GetCustomFields(null);
             }
             catch (UnauthorizedException)
             {
@@ -490,7 +632,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.SalesTaxTypeContext.GetCustomFields(resourceId);
+                return this.SalesTaxTypeRepository.GetCustomFields(resourceId);
             }
             catch (UnauthorizedException)
             {
@@ -529,7 +671,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                return this.SalesTaxTypeContext.AddOrEdit(salesTaxType, customFields);
+                return this.SalesTaxTypeRepository.AddOrEdit(salesTaxType, customFields);
             }
             catch (UnauthorizedException)
             {
@@ -565,7 +707,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                this.SalesTaxTypeContext.Add(salesTaxType);
+                this.SalesTaxTypeRepository.Add(salesTaxType);
             }
             catch (UnauthorizedException)
             {
@@ -602,7 +744,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                this.SalesTaxTypeContext.Update(salesTaxType, salesTaxTypeId);
+                this.SalesTaxTypeRepository.Update(salesTaxType, salesTaxTypeId);
             }
             catch (UnauthorizedException)
             {
@@ -647,7 +789,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                return this.SalesTaxTypeContext.BulkImport(salesTaxTypeCollection);
+                return this.SalesTaxTypeRepository.BulkImport(salesTaxTypeCollection);
             }
             catch (UnauthorizedException)
             {
@@ -678,7 +820,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                this.SalesTaxTypeContext.Delete(salesTaxTypeId);
+                this.SalesTaxTypeRepository.Delete(salesTaxTypeId);
             }
             catch (UnauthorizedException)
             {

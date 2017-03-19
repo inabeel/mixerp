@@ -12,6 +12,7 @@ using MixERP.Net.Framework;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using PetaPoco;
+using MixERP.Net.Schemas.Core.Data;
 
 namespace MixERP.Net.Api.Core
 {
@@ -22,9 +23,9 @@ namespace MixERP.Net.Api.Core
     public class FlagTypeController : ApiController
     {
         /// <summary>
-        ///     The FlagType data context.
+        ///     The FlagType repository.
         /// </summary>
-        private readonly MixERP.Net.Schemas.Core.Data.FlagType FlagTypeContext;
+        private readonly IFlagTypeRepository FlagTypeRepository;
 
         public FlagTypeController()
         {
@@ -33,12 +34,22 @@ namespace MixERP.Net.Api.Core
             this._OfficeId = AppUsers.GetCurrent().View.OfficeId.ToInt();
             this._Catalog = AppUsers.GetCurrentUserDB();
 
-            this.FlagTypeContext = new MixERP.Net.Schemas.Core.Data.FlagType
+            this.FlagTypeRepository = new MixERP.Net.Schemas.Core.Data.FlagType
             {
                 _Catalog = this._Catalog,
                 _LoginId = this._LoginId,
                 _UserId = this._UserId
             };
+        }
+
+        public FlagTypeController(IFlagTypeRepository repository, string catalog, LoginView view)
+        {
+            this._LoginId = view.LoginId.ToLong();
+            this._UserId = view.UserId.ToInt();
+            this._OfficeId = view.OfficeId.ToInt();
+            this._Catalog = catalog;
+
+            this.FlagTypeRepository = repository;
         }
 
         public long _LoginId { get; }
@@ -55,6 +66,11 @@ namespace MixERP.Net.Api.Core
         [Route("~/api/core/flag-type/meta")]
         public EntityView GetEntityView()
         {
+            if (this._LoginId == 0)
+            {
+                return new EntityView();
+            }
+
             return new EntityView
             {
                 PrimaryKey = "flag_type_id",
@@ -81,7 +97,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.FlagTypeContext.Count();
+                return this.FlagTypeRepository.Count();
             }
             catch (UnauthorizedException)
             {
@@ -112,7 +128,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.FlagTypeContext.GetAll();
+                return this.FlagTypeRepository.GetAll();
             }
             catch (UnauthorizedException)
             {
@@ -143,7 +159,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.FlagTypeContext.Export();
+                return this.FlagTypeRepository.Export();
             }
             catch (UnauthorizedException)
             {
@@ -175,7 +191,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.FlagTypeContext.Get(flagTypeId);
+                return this.FlagTypeRepository.Get(flagTypeId);
             }
             catch (UnauthorizedException)
             {
@@ -202,7 +218,133 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.FlagTypeContext.Get(flagTypeIds);
+                return this.FlagTypeRepository.Get(flagTypeIds);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the first instance of flag type.
+        /// </summary>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("first")]
+        [Route("~/api/core/flag-type/first")]
+        public MixERP.Net.Entities.Core.FlagType GetFirst()
+        {
+            try
+            {
+                return this.FlagTypeRepository.GetFirst();
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the previous instance of flag type.
+        /// </summary>
+        /// <param name="flagTypeId">Enter FlagTypeId to search for.</param>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("previous/{flagTypeId}")]
+        [Route("~/api/core/flag-type/previous/{flagTypeId}")]
+        public MixERP.Net.Entities.Core.FlagType GetPrevious(int flagTypeId)
+        {
+            try
+            {
+                return this.FlagTypeRepository.GetPrevious(flagTypeId);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the next instance of flag type.
+        /// </summary>
+        /// <param name="flagTypeId">Enter FlagTypeId to search for.</param>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("next/{flagTypeId}")]
+        [Route("~/api/core/flag-type/next/{flagTypeId}")]
+        public MixERP.Net.Entities.Core.FlagType GetNext(int flagTypeId)
+        {
+            try
+            {
+                return this.FlagTypeRepository.GetNext(flagTypeId);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the last instance of flag type.
+        /// </summary>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("last")]
+        [Route("~/api/core/flag-type/last")]
+        public MixERP.Net.Entities.Core.FlagType GetLast()
+        {
+            try
+            {
+                return this.FlagTypeRepository.GetLast();
             }
             catch (UnauthorizedException)
             {
@@ -233,7 +375,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.FlagTypeContext.GetPaginatedResult();
+                return this.FlagTypeRepository.GetPaginatedResult();
             }
             catch (UnauthorizedException)
             {
@@ -265,7 +407,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.FlagTypeContext.GetPaginatedResult(pageNumber);
+                return this.FlagTypeRepository.GetPaginatedResult(pageNumber);
             }
             catch (UnauthorizedException)
             {
@@ -298,7 +440,7 @@ namespace MixERP.Net.Api.Core
             try
             {
                 List<EntityParser.Filter> f = filters.ToObject<List<EntityParser.Filter>>(JsonHelper.GetJsonSerializer());
-                return this.FlagTypeContext.CountWhere(f);
+                return this.FlagTypeRepository.CountWhere(f);
             }
             catch (UnauthorizedException)
             {
@@ -332,7 +474,7 @@ namespace MixERP.Net.Api.Core
             try
             {
                 List<EntityParser.Filter> f = filters.ToObject<List<EntityParser.Filter>>(JsonHelper.GetJsonSerializer());
-                return this.FlagTypeContext.GetWhere(pageNumber, f);
+                return this.FlagTypeRepository.GetWhere(pageNumber, f);
             }
             catch (UnauthorizedException)
             {
@@ -364,7 +506,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.FlagTypeContext.CountFiltered(filterName);
+                return this.FlagTypeRepository.CountFiltered(filterName);
             }
             catch (UnauthorizedException)
             {
@@ -397,7 +539,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.FlagTypeContext.GetFiltered(pageNumber, filterName);
+                return this.FlagTypeRepository.GetFiltered(pageNumber, filterName);
             }
             catch (UnauthorizedException)
             {
@@ -428,7 +570,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.FlagTypeContext.GetDisplayFields();
+                return this.FlagTypeRepository.GetDisplayFields();
             }
             catch (UnauthorizedException)
             {
@@ -459,7 +601,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.FlagTypeContext.GetCustomFields(null);
+                return this.FlagTypeRepository.GetCustomFields(null);
             }
             catch (UnauthorizedException)
             {
@@ -490,7 +632,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.FlagTypeContext.GetCustomFields(resourceId);
+                return this.FlagTypeRepository.GetCustomFields(resourceId);
             }
             catch (UnauthorizedException)
             {
@@ -529,7 +671,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                return this.FlagTypeContext.AddOrEdit(flagType, customFields);
+                return this.FlagTypeRepository.AddOrEdit(flagType, customFields);
             }
             catch (UnauthorizedException)
             {
@@ -565,7 +707,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                this.FlagTypeContext.Add(flagType);
+                this.FlagTypeRepository.Add(flagType);
             }
             catch (UnauthorizedException)
             {
@@ -602,7 +744,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                this.FlagTypeContext.Update(flagType, flagTypeId);
+                this.FlagTypeRepository.Update(flagType, flagTypeId);
             }
             catch (UnauthorizedException)
             {
@@ -647,7 +789,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                return this.FlagTypeContext.BulkImport(flagTypeCollection);
+                return this.FlagTypeRepository.BulkImport(flagTypeCollection);
             }
             catch (UnauthorizedException)
             {
@@ -678,7 +820,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                this.FlagTypeContext.Delete(flagTypeId);
+                this.FlagTypeRepository.Delete(flagTypeId);
             }
             catch (UnauthorizedException)
             {

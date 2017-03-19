@@ -12,6 +12,7 @@ using MixERP.Net.Framework;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using PetaPoco;
+using MixERP.Net.Schemas.Office.Data;
 
 namespace MixERP.Net.Api.Office
 {
@@ -22,9 +23,9 @@ namespace MixERP.Net.Api.Office
     public class OfficeController : ApiController
     {
         /// <summary>
-        ///     The Office data context.
+        ///     The Office repository.
         /// </summary>
-        private readonly MixERP.Net.Schemas.Office.Data.Office OfficeContext;
+        private readonly IOfficeRepository OfficeRepository;
 
         public OfficeController()
         {
@@ -33,12 +34,22 @@ namespace MixERP.Net.Api.Office
             this._OfficeId = AppUsers.GetCurrent().View.OfficeId.ToInt();
             this._Catalog = AppUsers.GetCurrentUserDB();
 
-            this.OfficeContext = new MixERP.Net.Schemas.Office.Data.Office
+            this.OfficeRepository = new MixERP.Net.Schemas.Office.Data.Office
             {
                 _Catalog = this._Catalog,
                 _LoginId = this._LoginId,
                 _UserId = this._UserId
             };
+        }
+
+        public OfficeController(IOfficeRepository repository, string catalog, LoginView view)
+        {
+            this._LoginId = view.LoginId.ToLong();
+            this._UserId = view.UserId.ToInt();
+            this._OfficeId = view.OfficeId.ToInt();
+            this._Catalog = catalog;
+
+            this.OfficeRepository = repository;
         }
 
         public long _LoginId { get; }
@@ -55,6 +66,11 @@ namespace MixERP.Net.Api.Office
         [Route("~/api/office/office/meta")]
         public EntityView GetEntityView()
         {
+            if (this._LoginId == 0)
+            {
+                return new EntityView();
+            }
+
             return new EntityView
             {
                 PrimaryKey = "office_id",
@@ -106,7 +122,7 @@ namespace MixERP.Net.Api.Office
         {
             try
             {
-                return this.OfficeContext.Count();
+                return this.OfficeRepository.Count();
             }
             catch (UnauthorizedException)
             {
@@ -137,7 +153,7 @@ namespace MixERP.Net.Api.Office
         {
             try
             {
-                return this.OfficeContext.GetAll();
+                return this.OfficeRepository.GetAll();
             }
             catch (UnauthorizedException)
             {
@@ -168,7 +184,7 @@ namespace MixERP.Net.Api.Office
         {
             try
             {
-                return this.OfficeContext.Export();
+                return this.OfficeRepository.Export();
             }
             catch (UnauthorizedException)
             {
@@ -200,7 +216,7 @@ namespace MixERP.Net.Api.Office
         {
             try
             {
-                return this.OfficeContext.Get(officeId);
+                return this.OfficeRepository.Get(officeId);
             }
             catch (UnauthorizedException)
             {
@@ -227,7 +243,133 @@ namespace MixERP.Net.Api.Office
         {
             try
             {
-                return this.OfficeContext.Get(officeIds);
+                return this.OfficeRepository.Get(officeIds);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the first instance of office.
+        /// </summary>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("first")]
+        [Route("~/api/office/office/first")]
+        public MixERP.Net.Entities.Office.Office GetFirst()
+        {
+            try
+            {
+                return this.OfficeRepository.GetFirst();
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the previous instance of office.
+        /// </summary>
+        /// <param name="officeId">Enter OfficeId to search for.</param>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("previous/{officeId}")]
+        [Route("~/api/office/office/previous/{officeId}")]
+        public MixERP.Net.Entities.Office.Office GetPrevious(int officeId)
+        {
+            try
+            {
+                return this.OfficeRepository.GetPrevious(officeId);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the next instance of office.
+        /// </summary>
+        /// <param name="officeId">Enter OfficeId to search for.</param>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("next/{officeId}")]
+        [Route("~/api/office/office/next/{officeId}")]
+        public MixERP.Net.Entities.Office.Office GetNext(int officeId)
+        {
+            try
+            {
+                return this.OfficeRepository.GetNext(officeId);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the last instance of office.
+        /// </summary>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("last")]
+        [Route("~/api/office/office/last")]
+        public MixERP.Net.Entities.Office.Office GetLast()
+        {
+            try
+            {
+                return this.OfficeRepository.GetLast();
             }
             catch (UnauthorizedException)
             {
@@ -258,7 +400,7 @@ namespace MixERP.Net.Api.Office
         {
             try
             {
-                return this.OfficeContext.GetPaginatedResult();
+                return this.OfficeRepository.GetPaginatedResult();
             }
             catch (UnauthorizedException)
             {
@@ -290,7 +432,7 @@ namespace MixERP.Net.Api.Office
         {
             try
             {
-                return this.OfficeContext.GetPaginatedResult(pageNumber);
+                return this.OfficeRepository.GetPaginatedResult(pageNumber);
             }
             catch (UnauthorizedException)
             {
@@ -323,7 +465,7 @@ namespace MixERP.Net.Api.Office
             try
             {
                 List<EntityParser.Filter> f = filters.ToObject<List<EntityParser.Filter>>(JsonHelper.GetJsonSerializer());
-                return this.OfficeContext.CountWhere(f);
+                return this.OfficeRepository.CountWhere(f);
             }
             catch (UnauthorizedException)
             {
@@ -357,7 +499,7 @@ namespace MixERP.Net.Api.Office
             try
             {
                 List<EntityParser.Filter> f = filters.ToObject<List<EntityParser.Filter>>(JsonHelper.GetJsonSerializer());
-                return this.OfficeContext.GetWhere(pageNumber, f);
+                return this.OfficeRepository.GetWhere(pageNumber, f);
             }
             catch (UnauthorizedException)
             {
@@ -389,7 +531,7 @@ namespace MixERP.Net.Api.Office
         {
             try
             {
-                return this.OfficeContext.CountFiltered(filterName);
+                return this.OfficeRepository.CountFiltered(filterName);
             }
             catch (UnauthorizedException)
             {
@@ -422,7 +564,7 @@ namespace MixERP.Net.Api.Office
         {
             try
             {
-                return this.OfficeContext.GetFiltered(pageNumber, filterName);
+                return this.OfficeRepository.GetFiltered(pageNumber, filterName);
             }
             catch (UnauthorizedException)
             {
@@ -453,7 +595,7 @@ namespace MixERP.Net.Api.Office
         {
             try
             {
-                return this.OfficeContext.GetDisplayFields();
+                return this.OfficeRepository.GetDisplayFields();
             }
             catch (UnauthorizedException)
             {
@@ -484,7 +626,7 @@ namespace MixERP.Net.Api.Office
         {
             try
             {
-                return this.OfficeContext.GetCustomFields(null);
+                return this.OfficeRepository.GetCustomFields(null);
             }
             catch (UnauthorizedException)
             {
@@ -515,7 +657,7 @@ namespace MixERP.Net.Api.Office
         {
             try
             {
-                return this.OfficeContext.GetCustomFields(resourceId);
+                return this.OfficeRepository.GetCustomFields(resourceId);
             }
             catch (UnauthorizedException)
             {
@@ -554,7 +696,7 @@ namespace MixERP.Net.Api.Office
 
             try
             {
-                return this.OfficeContext.AddOrEdit(office, customFields);
+                return this.OfficeRepository.AddOrEdit(office, customFields);
             }
             catch (UnauthorizedException)
             {
@@ -590,7 +732,7 @@ namespace MixERP.Net.Api.Office
 
             try
             {
-                this.OfficeContext.Add(office);
+                this.OfficeRepository.Add(office);
             }
             catch (UnauthorizedException)
             {
@@ -627,7 +769,7 @@ namespace MixERP.Net.Api.Office
 
             try
             {
-                this.OfficeContext.Update(office, officeId);
+                this.OfficeRepository.Update(office, officeId);
             }
             catch (UnauthorizedException)
             {
@@ -672,7 +814,7 @@ namespace MixERP.Net.Api.Office
 
             try
             {
-                return this.OfficeContext.BulkImport(officeCollection);
+                return this.OfficeRepository.BulkImport(officeCollection);
             }
             catch (UnauthorizedException)
             {
@@ -703,7 +845,7 @@ namespace MixERP.Net.Api.Office
         {
             try
             {
-                this.OfficeContext.Delete(officeId);
+                this.OfficeRepository.Delete(officeId);
             }
             catch (UnauthorizedException)
             {

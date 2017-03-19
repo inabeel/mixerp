@@ -16,7 +16,7 @@ namespace MixERP.Net.Schemas.Core.Data
     /// <summary>
     /// Provides simplified data access features to perform SCRUD operation on the database table "core.week_days".
     /// </summary>
-    public class WeekDay : DbAccess
+    public class WeekDay : DbAccess, IWeekDayRepository
     {
         /// <summary>
         /// The schema of this table. Returns literal "core".
@@ -73,7 +73,7 @@ namespace MixERP.Net.Schemas.Core.Data
         }
 
         /// <summary>
-        /// Executes a select query on the table "core.week_days" to return a all instances of the "WeekDay" class. 
+        /// Executes a select query on the table "core.week_days" to return all instances of the "WeekDay" class. 
         /// </summary>
         /// <returns>Returns a non-live, non-mapped instances of "WeekDay" class.</returns>
         /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
@@ -102,7 +102,7 @@ namespace MixERP.Net.Schemas.Core.Data
         }
 
         /// <summary>
-        /// Executes a select query on the table "core.week_days" to return a all instances of the "WeekDay" class to export. 
+        /// Executes a select query on the table "core.week_days" to return all instances of the "WeekDay" class to export. 
         /// </summary>
         /// <returns>Returns a non-live, non-mapped instances of "WeekDay" class.</returns>
         /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
@@ -158,6 +158,125 @@ namespace MixERP.Net.Schemas.Core.Data
 
             const string sql = "SELECT * FROM core.week_days WHERE week_day_id=@0;";
             return Factory.Get<MixERP.Net.Entities.Core.WeekDay>(this._Catalog, sql, weekDayId).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Gets the first record of the table "core.week_days". 
+        /// </summary>
+        /// <returns>Returns a non-live, non-mapped instance of "WeekDay" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.Core.WeekDay GetFirst()
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the first record of entity \"WeekDay\" was denied to the user with Login ID {_LoginId}", this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM core.week_days ORDER BY week_day_id LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.Core.WeekDay>(this._Catalog, sql).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Gets the previous record of the table "core.week_days" sorted by weekDayId.
+        /// </summary>
+        /// <param name="weekDayId">The column "week_day_id" parameter used to find the next record.</param>
+        /// <returns>Returns a non-live, non-mapped instance of "WeekDay" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.Core.WeekDay GetPrevious(int weekDayId)
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the previous entity of \"WeekDay\" by \"WeekDayId\" with value {WeekDayId} was denied to the user with Login ID {_LoginId}", weekDayId, this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM core.week_days WHERE week_day_id < @0 ORDER BY week_day_id DESC LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.Core.WeekDay>(this._Catalog, sql, weekDayId).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Gets the next record of the table "core.week_days" sorted by weekDayId.
+        /// </summary>
+        /// <param name="weekDayId">The column "week_day_id" parameter used to find the next record.</param>
+        /// <returns>Returns a non-live, non-mapped instance of "WeekDay" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.Core.WeekDay GetNext(int weekDayId)
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the next entity of \"WeekDay\" by \"WeekDayId\" with value {WeekDayId} was denied to the user with Login ID {_LoginId}", weekDayId, this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM core.week_days WHERE week_day_id > @0 ORDER BY week_day_id LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.Core.WeekDay>(this._Catalog, sql, weekDayId).FirstOrDefault();
+        }
+
+
+        /// <summary>
+        /// Gets the last record of the table "core.week_days". 
+        /// </summary>
+        /// <returns>Returns a non-live, non-mapped instance of "WeekDay" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.Core.WeekDay GetLast()
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the last record of entity \"WeekDay\" was denied to the user with Login ID {_LoginId}", this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM core.week_days ORDER BY week_day_id DESC LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.Core.WeekDay>(this._Catalog, sql).FirstOrDefault();
         }
 
         /// <summary>
@@ -557,7 +676,7 @@ namespace MixERP.Net.Schemas.Core.Data
             return Factory.Get<MixERP.Net.Entities.Core.WeekDay>(this._Catalog, sql, offset);
         }
 
-        private List<EntityParser.Filter> GetFilters(string catalog, string filterName)
+        public List<EntityParser.Filter> GetFilters(string catalog, string filterName)
         {
             const string sql = "SELECT * FROM core.filters WHERE object_name='core.week_days' AND lower(filter_name)=lower(@0);";
             return Factory.Get<EntityParser.Filter>(catalog, sql, filterName).ToList();

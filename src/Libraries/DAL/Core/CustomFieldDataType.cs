@@ -16,7 +16,7 @@ namespace MixERP.Net.Schemas.Core.Data
     /// <summary>
     /// Provides simplified data access features to perform SCRUD operation on the database table "core.custom_field_data_types".
     /// </summary>
-    public class CustomFieldDataType : DbAccess
+    public class CustomFieldDataType : DbAccess, ICustomFieldDataTypeRepository
     {
         /// <summary>
         /// The schema of this table. Returns literal "core".
@@ -73,7 +73,7 @@ namespace MixERP.Net.Schemas.Core.Data
         }
 
         /// <summary>
-        /// Executes a select query on the table "core.custom_field_data_types" to return a all instances of the "CustomFieldDataType" class. 
+        /// Executes a select query on the table "core.custom_field_data_types" to return all instances of the "CustomFieldDataType" class. 
         /// </summary>
         /// <returns>Returns a non-live, non-mapped instances of "CustomFieldDataType" class.</returns>
         /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
@@ -102,7 +102,7 @@ namespace MixERP.Net.Schemas.Core.Data
         }
 
         /// <summary>
-        /// Executes a select query on the table "core.custom_field_data_types" to return a all instances of the "CustomFieldDataType" class to export. 
+        /// Executes a select query on the table "core.custom_field_data_types" to return all instances of the "CustomFieldDataType" class to export. 
         /// </summary>
         /// <returns>Returns a non-live, non-mapped instances of "CustomFieldDataType" class.</returns>
         /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
@@ -158,6 +158,125 @@ namespace MixERP.Net.Schemas.Core.Data
 
             const string sql = "SELECT * FROM core.custom_field_data_types WHERE data_type=@0;";
             return Factory.Get<MixERP.Net.Entities.Core.CustomFieldDataType>(this._Catalog, sql, dataType).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Gets the first record of the table "core.custom_field_data_types". 
+        /// </summary>
+        /// <returns>Returns a non-live, non-mapped instance of "CustomFieldDataType" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.Core.CustomFieldDataType GetFirst()
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the first record of entity \"CustomFieldDataType\" was denied to the user with Login ID {_LoginId}", this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM core.custom_field_data_types ORDER BY data_type LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.Core.CustomFieldDataType>(this._Catalog, sql).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Gets the previous record of the table "core.custom_field_data_types" sorted by dataType.
+        /// </summary>
+        /// <param name="dataType">The column "data_type" parameter used to find the next record.</param>
+        /// <returns>Returns a non-live, non-mapped instance of "CustomFieldDataType" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.Core.CustomFieldDataType GetPrevious(string dataType)
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the previous entity of \"CustomFieldDataType\" by \"DataType\" with value {DataType} was denied to the user with Login ID {_LoginId}", dataType, this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM core.custom_field_data_types WHERE data_type < @0 ORDER BY data_type DESC LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.Core.CustomFieldDataType>(this._Catalog, sql, dataType).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Gets the next record of the table "core.custom_field_data_types" sorted by dataType.
+        /// </summary>
+        /// <param name="dataType">The column "data_type" parameter used to find the next record.</param>
+        /// <returns>Returns a non-live, non-mapped instance of "CustomFieldDataType" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.Core.CustomFieldDataType GetNext(string dataType)
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the next entity of \"CustomFieldDataType\" by \"DataType\" with value {DataType} was denied to the user with Login ID {_LoginId}", dataType, this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM core.custom_field_data_types WHERE data_type > @0 ORDER BY data_type LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.Core.CustomFieldDataType>(this._Catalog, sql, dataType).FirstOrDefault();
+        }
+
+
+        /// <summary>
+        /// Gets the last record of the table "core.custom_field_data_types". 
+        /// </summary>
+        /// <returns>Returns a non-live, non-mapped instance of "CustomFieldDataType" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.Core.CustomFieldDataType GetLast()
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the last record of entity \"CustomFieldDataType\" was denied to the user with Login ID {_LoginId}", this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM core.custom_field_data_types ORDER BY data_type DESC LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.Core.CustomFieldDataType>(this._Catalog, sql).FirstOrDefault();
         }
 
         /// <summary>
@@ -557,7 +676,7 @@ namespace MixERP.Net.Schemas.Core.Data
             return Factory.Get<MixERP.Net.Entities.Core.CustomFieldDataType>(this._Catalog, sql, offset);
         }
 
-        private List<EntityParser.Filter> GetFilters(string catalog, string filterName)
+        public List<EntityParser.Filter> GetFilters(string catalog, string filterName)
         {
             const string sql = "SELECT * FROM core.filters WHERE object_name='core.custom_field_data_types' AND lower(filter_name)=lower(@0);";
             return Factory.Get<EntityParser.Filter>(catalog, sql, filterName).ToList();

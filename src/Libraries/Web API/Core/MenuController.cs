@@ -12,6 +12,7 @@ using MixERP.Net.Framework;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using PetaPoco;
+using MixERP.Net.Schemas.Core.Data;
 
 namespace MixERP.Net.Api.Core
 {
@@ -22,9 +23,9 @@ namespace MixERP.Net.Api.Core
     public class MenuController : ApiController
     {
         /// <summary>
-        ///     The Menu data context.
+        ///     The Menu repository.
         /// </summary>
-        private readonly MixERP.Net.Schemas.Core.Data.Menu MenuContext;
+        private readonly IMenuRepository MenuRepository;
 
         public MenuController()
         {
@@ -33,12 +34,22 @@ namespace MixERP.Net.Api.Core
             this._OfficeId = AppUsers.GetCurrent().View.OfficeId.ToInt();
             this._Catalog = AppUsers.GetCurrentUserDB();
 
-            this.MenuContext = new MixERP.Net.Schemas.Core.Data.Menu
+            this.MenuRepository = new MixERP.Net.Schemas.Core.Data.Menu
             {
                 _Catalog = this._Catalog,
                 _LoginId = this._LoginId,
                 _UserId = this._UserId
             };
+        }
+
+        public MenuController(IMenuRepository repository, string catalog, LoginView view)
+        {
+            this._LoginId = view.LoginId.ToLong();
+            this._UserId = view.UserId.ToInt();
+            this._OfficeId = view.OfficeId.ToInt();
+            this._Catalog = catalog;
+
+            this.MenuRepository = repository;
         }
 
         public long _LoginId { get; }
@@ -55,6 +66,11 @@ namespace MixERP.Net.Api.Core
         [Route("~/api/core/menu/meta")]
         public EntityView GetEntityView()
         {
+            if (this._LoginId == 0)
+            {
+                return new EntityView();
+            }
+
             return new EntityView
             {
                 PrimaryKey = "menu_id",
@@ -85,7 +101,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.MenuContext.Count();
+                return this.MenuRepository.Count();
             }
             catch (UnauthorizedException)
             {
@@ -116,7 +132,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.MenuContext.GetAll();
+                return this.MenuRepository.GetAll();
             }
             catch (UnauthorizedException)
             {
@@ -147,7 +163,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.MenuContext.Export();
+                return this.MenuRepository.Export();
             }
             catch (UnauthorizedException)
             {
@@ -179,7 +195,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.MenuContext.Get(menuId);
+                return this.MenuRepository.Get(menuId);
             }
             catch (UnauthorizedException)
             {
@@ -206,7 +222,133 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.MenuContext.Get(menuIds);
+                return this.MenuRepository.Get(menuIds);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the first instance of menu.
+        /// </summary>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("first")]
+        [Route("~/api/core/menu/first")]
+        public MixERP.Net.Entities.Core.Menu GetFirst()
+        {
+            try
+            {
+                return this.MenuRepository.GetFirst();
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the previous instance of menu.
+        /// </summary>
+        /// <param name="menuId">Enter MenuId to search for.</param>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("previous/{menuId}")]
+        [Route("~/api/core/menu/previous/{menuId}")]
+        public MixERP.Net.Entities.Core.Menu GetPrevious(int menuId)
+        {
+            try
+            {
+                return this.MenuRepository.GetPrevious(menuId);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the next instance of menu.
+        /// </summary>
+        /// <param name="menuId">Enter MenuId to search for.</param>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("next/{menuId}")]
+        [Route("~/api/core/menu/next/{menuId}")]
+        public MixERP.Net.Entities.Core.Menu GetNext(int menuId)
+        {
+            try
+            {
+                return this.MenuRepository.GetNext(menuId);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the last instance of menu.
+        /// </summary>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("last")]
+        [Route("~/api/core/menu/last")]
+        public MixERP.Net.Entities.Core.Menu GetLast()
+        {
+            try
+            {
+                return this.MenuRepository.GetLast();
             }
             catch (UnauthorizedException)
             {
@@ -237,7 +379,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.MenuContext.GetPaginatedResult();
+                return this.MenuRepository.GetPaginatedResult();
             }
             catch (UnauthorizedException)
             {
@@ -269,7 +411,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.MenuContext.GetPaginatedResult(pageNumber);
+                return this.MenuRepository.GetPaginatedResult(pageNumber);
             }
             catch (UnauthorizedException)
             {
@@ -302,7 +444,7 @@ namespace MixERP.Net.Api.Core
             try
             {
                 List<EntityParser.Filter> f = filters.ToObject<List<EntityParser.Filter>>(JsonHelper.GetJsonSerializer());
-                return this.MenuContext.CountWhere(f);
+                return this.MenuRepository.CountWhere(f);
             }
             catch (UnauthorizedException)
             {
@@ -336,7 +478,7 @@ namespace MixERP.Net.Api.Core
             try
             {
                 List<EntityParser.Filter> f = filters.ToObject<List<EntityParser.Filter>>(JsonHelper.GetJsonSerializer());
-                return this.MenuContext.GetWhere(pageNumber, f);
+                return this.MenuRepository.GetWhere(pageNumber, f);
             }
             catch (UnauthorizedException)
             {
@@ -368,7 +510,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.MenuContext.CountFiltered(filterName);
+                return this.MenuRepository.CountFiltered(filterName);
             }
             catch (UnauthorizedException)
             {
@@ -401,7 +543,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.MenuContext.GetFiltered(pageNumber, filterName);
+                return this.MenuRepository.GetFiltered(pageNumber, filterName);
             }
             catch (UnauthorizedException)
             {
@@ -432,7 +574,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.MenuContext.GetDisplayFields();
+                return this.MenuRepository.GetDisplayFields();
             }
             catch (UnauthorizedException)
             {
@@ -463,7 +605,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.MenuContext.GetCustomFields(null);
+                return this.MenuRepository.GetCustomFields(null);
             }
             catch (UnauthorizedException)
             {
@@ -494,7 +636,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.MenuContext.GetCustomFields(resourceId);
+                return this.MenuRepository.GetCustomFields(resourceId);
             }
             catch (UnauthorizedException)
             {
@@ -533,7 +675,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                return this.MenuContext.AddOrEdit(menu, customFields);
+                return this.MenuRepository.AddOrEdit(menu, customFields);
             }
             catch (UnauthorizedException)
             {
@@ -569,7 +711,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                this.MenuContext.Add(menu);
+                this.MenuRepository.Add(menu);
             }
             catch (UnauthorizedException)
             {
@@ -606,7 +748,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                this.MenuContext.Update(menu, menuId);
+                this.MenuRepository.Update(menu, menuId);
             }
             catch (UnauthorizedException)
             {
@@ -651,7 +793,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                return this.MenuContext.BulkImport(menuCollection);
+                return this.MenuRepository.BulkImport(menuCollection);
             }
             catch (UnauthorizedException)
             {
@@ -682,7 +824,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                this.MenuContext.Delete(menuId);
+                this.MenuRepository.Delete(menuId);
             }
             catch (UnauthorizedException)
             {

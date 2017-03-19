@@ -12,6 +12,7 @@ using MixERP.Net.Framework;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using PetaPoco;
+using MixERP.Net.Schemas.Core.Data;
 
 namespace MixERP.Net.Api.Core
 {
@@ -22,9 +23,9 @@ namespace MixERP.Net.Api.Core
     public class MenuLocaleController : ApiController
     {
         /// <summary>
-        ///     The MenuLocale data context.
+        ///     The MenuLocale repository.
         /// </summary>
-        private readonly MixERP.Net.Schemas.Core.Data.MenuLocale MenuLocaleContext;
+        private readonly IMenuLocaleRepository MenuLocaleRepository;
 
         public MenuLocaleController()
         {
@@ -33,12 +34,22 @@ namespace MixERP.Net.Api.Core
             this._OfficeId = AppUsers.GetCurrent().View.OfficeId.ToInt();
             this._Catalog = AppUsers.GetCurrentUserDB();
 
-            this.MenuLocaleContext = new MixERP.Net.Schemas.Core.Data.MenuLocale
+            this.MenuLocaleRepository = new MixERP.Net.Schemas.Core.Data.MenuLocale
             {
                 _Catalog = this._Catalog,
                 _LoginId = this._LoginId,
                 _UserId = this._UserId
             };
+        }
+
+        public MenuLocaleController(IMenuLocaleRepository repository, string catalog, LoginView view)
+        {
+            this._LoginId = view.LoginId.ToLong();
+            this._UserId = view.UserId.ToInt();
+            this._OfficeId = view.OfficeId.ToInt();
+            this._Catalog = catalog;
+
+            this.MenuLocaleRepository = repository;
         }
 
         public long _LoginId { get; }
@@ -55,6 +66,11 @@ namespace MixERP.Net.Api.Core
         [Route("~/api/core/menu-locale/meta")]
         public EntityView GetEntityView()
         {
+            if (this._LoginId == 0)
+            {
+                return new EntityView();
+            }
+
             return new EntityView
             {
                 PrimaryKey = "menu_locale_id",
@@ -79,7 +95,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.MenuLocaleContext.Count();
+                return this.MenuLocaleRepository.Count();
             }
             catch (UnauthorizedException)
             {
@@ -110,7 +126,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.MenuLocaleContext.GetAll();
+                return this.MenuLocaleRepository.GetAll();
             }
             catch (UnauthorizedException)
             {
@@ -141,7 +157,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.MenuLocaleContext.Export();
+                return this.MenuLocaleRepository.Export();
             }
             catch (UnauthorizedException)
             {
@@ -173,7 +189,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.MenuLocaleContext.Get(menuLocaleId);
+                return this.MenuLocaleRepository.Get(menuLocaleId);
             }
             catch (UnauthorizedException)
             {
@@ -200,7 +216,133 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.MenuLocaleContext.Get(menuLocaleIds);
+                return this.MenuLocaleRepository.Get(menuLocaleIds);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the first instance of menu locale.
+        /// </summary>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("first")]
+        [Route("~/api/core/menu-locale/first")]
+        public MixERP.Net.Entities.Core.MenuLocale GetFirst()
+        {
+            try
+            {
+                return this.MenuLocaleRepository.GetFirst();
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the previous instance of menu locale.
+        /// </summary>
+        /// <param name="menuLocaleId">Enter MenuLocaleId to search for.</param>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("previous/{menuLocaleId}")]
+        [Route("~/api/core/menu-locale/previous/{menuLocaleId}")]
+        public MixERP.Net.Entities.Core.MenuLocale GetPrevious(int menuLocaleId)
+        {
+            try
+            {
+                return this.MenuLocaleRepository.GetPrevious(menuLocaleId);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the next instance of menu locale.
+        /// </summary>
+        /// <param name="menuLocaleId">Enter MenuLocaleId to search for.</param>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("next/{menuLocaleId}")]
+        [Route("~/api/core/menu-locale/next/{menuLocaleId}")]
+        public MixERP.Net.Entities.Core.MenuLocale GetNext(int menuLocaleId)
+        {
+            try
+            {
+                return this.MenuLocaleRepository.GetNext(menuLocaleId);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the last instance of menu locale.
+        /// </summary>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("last")]
+        [Route("~/api/core/menu-locale/last")]
+        public MixERP.Net.Entities.Core.MenuLocale GetLast()
+        {
+            try
+            {
+                return this.MenuLocaleRepository.GetLast();
             }
             catch (UnauthorizedException)
             {
@@ -231,7 +373,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.MenuLocaleContext.GetPaginatedResult();
+                return this.MenuLocaleRepository.GetPaginatedResult();
             }
             catch (UnauthorizedException)
             {
@@ -263,7 +405,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.MenuLocaleContext.GetPaginatedResult(pageNumber);
+                return this.MenuLocaleRepository.GetPaginatedResult(pageNumber);
             }
             catch (UnauthorizedException)
             {
@@ -296,7 +438,7 @@ namespace MixERP.Net.Api.Core
             try
             {
                 List<EntityParser.Filter> f = filters.ToObject<List<EntityParser.Filter>>(JsonHelper.GetJsonSerializer());
-                return this.MenuLocaleContext.CountWhere(f);
+                return this.MenuLocaleRepository.CountWhere(f);
             }
             catch (UnauthorizedException)
             {
@@ -330,7 +472,7 @@ namespace MixERP.Net.Api.Core
             try
             {
                 List<EntityParser.Filter> f = filters.ToObject<List<EntityParser.Filter>>(JsonHelper.GetJsonSerializer());
-                return this.MenuLocaleContext.GetWhere(pageNumber, f);
+                return this.MenuLocaleRepository.GetWhere(pageNumber, f);
             }
             catch (UnauthorizedException)
             {
@@ -362,7 +504,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.MenuLocaleContext.CountFiltered(filterName);
+                return this.MenuLocaleRepository.CountFiltered(filterName);
             }
             catch (UnauthorizedException)
             {
@@ -395,7 +537,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.MenuLocaleContext.GetFiltered(pageNumber, filterName);
+                return this.MenuLocaleRepository.GetFiltered(pageNumber, filterName);
             }
             catch (UnauthorizedException)
             {
@@ -426,7 +568,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.MenuLocaleContext.GetDisplayFields();
+                return this.MenuLocaleRepository.GetDisplayFields();
             }
             catch (UnauthorizedException)
             {
@@ -457,7 +599,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.MenuLocaleContext.GetCustomFields(null);
+                return this.MenuLocaleRepository.GetCustomFields(null);
             }
             catch (UnauthorizedException)
             {
@@ -488,7 +630,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.MenuLocaleContext.GetCustomFields(resourceId);
+                return this.MenuLocaleRepository.GetCustomFields(resourceId);
             }
             catch (UnauthorizedException)
             {
@@ -527,7 +669,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                return this.MenuLocaleContext.AddOrEdit(menuLocale, customFields);
+                return this.MenuLocaleRepository.AddOrEdit(menuLocale, customFields);
             }
             catch (UnauthorizedException)
             {
@@ -563,7 +705,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                this.MenuLocaleContext.Add(menuLocale);
+                this.MenuLocaleRepository.Add(menuLocale);
             }
             catch (UnauthorizedException)
             {
@@ -600,7 +742,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                this.MenuLocaleContext.Update(menuLocale, menuLocaleId);
+                this.MenuLocaleRepository.Update(menuLocale, menuLocaleId);
             }
             catch (UnauthorizedException)
             {
@@ -645,7 +787,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                return this.MenuLocaleContext.BulkImport(menuLocaleCollection);
+                return this.MenuLocaleRepository.BulkImport(menuLocaleCollection);
             }
             catch (UnauthorizedException)
             {
@@ -676,7 +818,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                this.MenuLocaleContext.Delete(menuLocaleId);
+                this.MenuLocaleRepository.Delete(menuLocaleId);
             }
             catch (UnauthorizedException)
             {

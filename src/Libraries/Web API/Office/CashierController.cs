@@ -12,6 +12,7 @@ using MixERP.Net.Framework;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using PetaPoco;
+using MixERP.Net.Schemas.Office.Data;
 
 namespace MixERP.Net.Api.Office
 {
@@ -22,9 +23,9 @@ namespace MixERP.Net.Api.Office
     public class CashierController : ApiController
     {
         /// <summary>
-        ///     The Cashier data context.
+        ///     The Cashier repository.
         /// </summary>
-        private readonly MixERP.Net.Schemas.Office.Data.Cashier CashierContext;
+        private readonly ICashierRepository CashierRepository;
 
         public CashierController()
         {
@@ -33,12 +34,22 @@ namespace MixERP.Net.Api.Office
             this._OfficeId = AppUsers.GetCurrent().View.OfficeId.ToInt();
             this._Catalog = AppUsers.GetCurrentUserDB();
 
-            this.CashierContext = new MixERP.Net.Schemas.Office.Data.Cashier
+            this.CashierRepository = new MixERP.Net.Schemas.Office.Data.Cashier
             {
                 _Catalog = this._Catalog,
                 _LoginId = this._LoginId,
                 _UserId = this._UserId
             };
+        }
+
+        public CashierController(ICashierRepository repository, string catalog, LoginView view)
+        {
+            this._LoginId = view.LoginId.ToLong();
+            this._UserId = view.UserId.ToInt();
+            this._OfficeId = view.OfficeId.ToInt();
+            this._Catalog = catalog;
+
+            this.CashierRepository = repository;
         }
 
         public long _LoginId { get; }
@@ -55,6 +66,11 @@ namespace MixERP.Net.Api.Office
         [Route("~/api/office/cashier/meta")]
         public EntityView GetEntityView()
         {
+            if (this._LoginId == 0)
+            {
+                return new EntityView();
+            }
+
             return new EntityView
             {
                 PrimaryKey = "cashier_id",
@@ -81,7 +97,7 @@ namespace MixERP.Net.Api.Office
         {
             try
             {
-                return this.CashierContext.Count();
+                return this.CashierRepository.Count();
             }
             catch (UnauthorizedException)
             {
@@ -112,7 +128,7 @@ namespace MixERP.Net.Api.Office
         {
             try
             {
-                return this.CashierContext.GetAll();
+                return this.CashierRepository.GetAll();
             }
             catch (UnauthorizedException)
             {
@@ -143,7 +159,7 @@ namespace MixERP.Net.Api.Office
         {
             try
             {
-                return this.CashierContext.Export();
+                return this.CashierRepository.Export();
             }
             catch (UnauthorizedException)
             {
@@ -175,7 +191,7 @@ namespace MixERP.Net.Api.Office
         {
             try
             {
-                return this.CashierContext.Get(cashierId);
+                return this.CashierRepository.Get(cashierId);
             }
             catch (UnauthorizedException)
             {
@@ -202,7 +218,133 @@ namespace MixERP.Net.Api.Office
         {
             try
             {
-                return this.CashierContext.Get(cashierIds);
+                return this.CashierRepository.Get(cashierIds);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the first instance of cashier.
+        /// </summary>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("first")]
+        [Route("~/api/office/cashier/first")]
+        public MixERP.Net.Entities.Office.Cashier GetFirst()
+        {
+            try
+            {
+                return this.CashierRepository.GetFirst();
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the previous instance of cashier.
+        /// </summary>
+        /// <param name="cashierId">Enter CashierId to search for.</param>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("previous/{cashierId}")]
+        [Route("~/api/office/cashier/previous/{cashierId}")]
+        public MixERP.Net.Entities.Office.Cashier GetPrevious(long cashierId)
+        {
+            try
+            {
+                return this.CashierRepository.GetPrevious(cashierId);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the next instance of cashier.
+        /// </summary>
+        /// <param name="cashierId">Enter CashierId to search for.</param>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("next/{cashierId}")]
+        [Route("~/api/office/cashier/next/{cashierId}")]
+        public MixERP.Net.Entities.Office.Cashier GetNext(long cashierId)
+        {
+            try
+            {
+                return this.CashierRepository.GetNext(cashierId);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the last instance of cashier.
+        /// </summary>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("last")]
+        [Route("~/api/office/cashier/last")]
+        public MixERP.Net.Entities.Office.Cashier GetLast()
+        {
+            try
+            {
+                return this.CashierRepository.GetLast();
             }
             catch (UnauthorizedException)
             {
@@ -233,7 +375,7 @@ namespace MixERP.Net.Api.Office
         {
             try
             {
-                return this.CashierContext.GetPaginatedResult();
+                return this.CashierRepository.GetPaginatedResult();
             }
             catch (UnauthorizedException)
             {
@@ -265,7 +407,7 @@ namespace MixERP.Net.Api.Office
         {
             try
             {
-                return this.CashierContext.GetPaginatedResult(pageNumber);
+                return this.CashierRepository.GetPaginatedResult(pageNumber);
             }
             catch (UnauthorizedException)
             {
@@ -298,7 +440,7 @@ namespace MixERP.Net.Api.Office
             try
             {
                 List<EntityParser.Filter> f = filters.ToObject<List<EntityParser.Filter>>(JsonHelper.GetJsonSerializer());
-                return this.CashierContext.CountWhere(f);
+                return this.CashierRepository.CountWhere(f);
             }
             catch (UnauthorizedException)
             {
@@ -332,7 +474,7 @@ namespace MixERP.Net.Api.Office
             try
             {
                 List<EntityParser.Filter> f = filters.ToObject<List<EntityParser.Filter>>(JsonHelper.GetJsonSerializer());
-                return this.CashierContext.GetWhere(pageNumber, f);
+                return this.CashierRepository.GetWhere(pageNumber, f);
             }
             catch (UnauthorizedException)
             {
@@ -364,7 +506,7 @@ namespace MixERP.Net.Api.Office
         {
             try
             {
-                return this.CashierContext.CountFiltered(filterName);
+                return this.CashierRepository.CountFiltered(filterName);
             }
             catch (UnauthorizedException)
             {
@@ -397,7 +539,7 @@ namespace MixERP.Net.Api.Office
         {
             try
             {
-                return this.CashierContext.GetFiltered(pageNumber, filterName);
+                return this.CashierRepository.GetFiltered(pageNumber, filterName);
             }
             catch (UnauthorizedException)
             {
@@ -428,7 +570,7 @@ namespace MixERP.Net.Api.Office
         {
             try
             {
-                return this.CashierContext.GetDisplayFields();
+                return this.CashierRepository.GetDisplayFields();
             }
             catch (UnauthorizedException)
             {
@@ -459,7 +601,7 @@ namespace MixERP.Net.Api.Office
         {
             try
             {
-                return this.CashierContext.GetCustomFields(null);
+                return this.CashierRepository.GetCustomFields(null);
             }
             catch (UnauthorizedException)
             {
@@ -490,7 +632,7 @@ namespace MixERP.Net.Api.Office
         {
             try
             {
-                return this.CashierContext.GetCustomFields(resourceId);
+                return this.CashierRepository.GetCustomFields(resourceId);
             }
             catch (UnauthorizedException)
             {
@@ -529,7 +671,7 @@ namespace MixERP.Net.Api.Office
 
             try
             {
-                return this.CashierContext.AddOrEdit(cashier, customFields);
+                return this.CashierRepository.AddOrEdit(cashier, customFields);
             }
             catch (UnauthorizedException)
             {
@@ -565,7 +707,7 @@ namespace MixERP.Net.Api.Office
 
             try
             {
-                this.CashierContext.Add(cashier);
+                this.CashierRepository.Add(cashier);
             }
             catch (UnauthorizedException)
             {
@@ -602,7 +744,7 @@ namespace MixERP.Net.Api.Office
 
             try
             {
-                this.CashierContext.Update(cashier, cashierId);
+                this.CashierRepository.Update(cashier, cashierId);
             }
             catch (UnauthorizedException)
             {
@@ -647,7 +789,7 @@ namespace MixERP.Net.Api.Office
 
             try
             {
-                return this.CashierContext.BulkImport(cashierCollection);
+                return this.CashierRepository.BulkImport(cashierCollection);
             }
             catch (UnauthorizedException)
             {
@@ -678,7 +820,7 @@ namespace MixERP.Net.Api.Office
         {
             try
             {
-                this.CashierContext.Delete(cashierId);
+                this.CashierRepository.Delete(cashierId);
             }
             catch (UnauthorizedException)
             {

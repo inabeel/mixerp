@@ -12,6 +12,7 @@ using MixERP.Net.Framework;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using PetaPoco;
+using MixERP.Net.Schemas.Core.Data;
 
 namespace MixERP.Net.Api.Core
 {
@@ -22,9 +23,9 @@ namespace MixERP.Net.Api.Core
     public class TaxBaseAmountTypeController : ApiController
     {
         /// <summary>
-        ///     The TaxBaseAmountType data context.
+        ///     The TaxBaseAmountType repository.
         /// </summary>
-        private readonly MixERP.Net.Schemas.Core.Data.TaxBaseAmountType TaxBaseAmountTypeContext;
+        private readonly ITaxBaseAmountTypeRepository TaxBaseAmountTypeRepository;
 
         public TaxBaseAmountTypeController()
         {
@@ -33,12 +34,22 @@ namespace MixERP.Net.Api.Core
             this._OfficeId = AppUsers.GetCurrent().View.OfficeId.ToInt();
             this._Catalog = AppUsers.GetCurrentUserDB();
 
-            this.TaxBaseAmountTypeContext = new MixERP.Net.Schemas.Core.Data.TaxBaseAmountType
+            this.TaxBaseAmountTypeRepository = new MixERP.Net.Schemas.Core.Data.TaxBaseAmountType
             {
                 _Catalog = this._Catalog,
                 _LoginId = this._LoginId,
                 _UserId = this._UserId
             };
+        }
+
+        public TaxBaseAmountTypeController(ITaxBaseAmountTypeRepository repository, string catalog, LoginView view)
+        {
+            this._LoginId = view.LoginId.ToLong();
+            this._UserId = view.UserId.ToInt();
+            this._OfficeId = view.OfficeId.ToInt();
+            this._Catalog = catalog;
+
+            this.TaxBaseAmountTypeRepository = repository;
         }
 
         public long _LoginId { get; }
@@ -55,6 +66,11 @@ namespace MixERP.Net.Api.Core
         [Route("~/api/core/tax-base-amount-type/meta")]
         public EntityView GetEntityView()
         {
+            if (this._LoginId == 0)
+            {
+                return new EntityView();
+            }
+
             return new EntityView
             {
                 PrimaryKey = "tax_base_amount_type_code",
@@ -77,7 +93,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.TaxBaseAmountTypeContext.Count();
+                return this.TaxBaseAmountTypeRepository.Count();
             }
             catch (UnauthorizedException)
             {
@@ -108,7 +124,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.TaxBaseAmountTypeContext.GetAll();
+                return this.TaxBaseAmountTypeRepository.GetAll();
             }
             catch (UnauthorizedException)
             {
@@ -139,7 +155,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.TaxBaseAmountTypeContext.Export();
+                return this.TaxBaseAmountTypeRepository.Export();
             }
             catch (UnauthorizedException)
             {
@@ -171,7 +187,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.TaxBaseAmountTypeContext.Get(taxBaseAmountTypeCode);
+                return this.TaxBaseAmountTypeRepository.Get(taxBaseAmountTypeCode);
             }
             catch (UnauthorizedException)
             {
@@ -198,7 +214,133 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.TaxBaseAmountTypeContext.Get(taxBaseAmountTypeCodes);
+                return this.TaxBaseAmountTypeRepository.Get(taxBaseAmountTypeCodes);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the first instance of tax base amount type.
+        /// </summary>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("first")]
+        [Route("~/api/core/tax-base-amount-type/first")]
+        public MixERP.Net.Entities.Core.TaxBaseAmountType GetFirst()
+        {
+            try
+            {
+                return this.TaxBaseAmountTypeRepository.GetFirst();
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the previous instance of tax base amount type.
+        /// </summary>
+        /// <param name="taxBaseAmountTypeCode">Enter TaxBaseAmountTypeCode to search for.</param>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("previous/{taxBaseAmountTypeCode}")]
+        [Route("~/api/core/tax-base-amount-type/previous/{taxBaseAmountTypeCode}")]
+        public MixERP.Net.Entities.Core.TaxBaseAmountType GetPrevious(string taxBaseAmountTypeCode)
+        {
+            try
+            {
+                return this.TaxBaseAmountTypeRepository.GetPrevious(taxBaseAmountTypeCode);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the next instance of tax base amount type.
+        /// </summary>
+        /// <param name="taxBaseAmountTypeCode">Enter TaxBaseAmountTypeCode to search for.</param>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("next/{taxBaseAmountTypeCode}")]
+        [Route("~/api/core/tax-base-amount-type/next/{taxBaseAmountTypeCode}")]
+        public MixERP.Net.Entities.Core.TaxBaseAmountType GetNext(string taxBaseAmountTypeCode)
+        {
+            try
+            {
+                return this.TaxBaseAmountTypeRepository.GetNext(taxBaseAmountTypeCode);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the last instance of tax base amount type.
+        /// </summary>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("last")]
+        [Route("~/api/core/tax-base-amount-type/last")]
+        public MixERP.Net.Entities.Core.TaxBaseAmountType GetLast()
+        {
+            try
+            {
+                return this.TaxBaseAmountTypeRepository.GetLast();
             }
             catch (UnauthorizedException)
             {
@@ -229,7 +371,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.TaxBaseAmountTypeContext.GetPaginatedResult();
+                return this.TaxBaseAmountTypeRepository.GetPaginatedResult();
             }
             catch (UnauthorizedException)
             {
@@ -261,7 +403,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.TaxBaseAmountTypeContext.GetPaginatedResult(pageNumber);
+                return this.TaxBaseAmountTypeRepository.GetPaginatedResult(pageNumber);
             }
             catch (UnauthorizedException)
             {
@@ -294,7 +436,7 @@ namespace MixERP.Net.Api.Core
             try
             {
                 List<EntityParser.Filter> f = filters.ToObject<List<EntityParser.Filter>>(JsonHelper.GetJsonSerializer());
-                return this.TaxBaseAmountTypeContext.CountWhere(f);
+                return this.TaxBaseAmountTypeRepository.CountWhere(f);
             }
             catch (UnauthorizedException)
             {
@@ -328,7 +470,7 @@ namespace MixERP.Net.Api.Core
             try
             {
                 List<EntityParser.Filter> f = filters.ToObject<List<EntityParser.Filter>>(JsonHelper.GetJsonSerializer());
-                return this.TaxBaseAmountTypeContext.GetWhere(pageNumber, f);
+                return this.TaxBaseAmountTypeRepository.GetWhere(pageNumber, f);
             }
             catch (UnauthorizedException)
             {
@@ -360,7 +502,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.TaxBaseAmountTypeContext.CountFiltered(filterName);
+                return this.TaxBaseAmountTypeRepository.CountFiltered(filterName);
             }
             catch (UnauthorizedException)
             {
@@ -393,7 +535,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.TaxBaseAmountTypeContext.GetFiltered(pageNumber, filterName);
+                return this.TaxBaseAmountTypeRepository.GetFiltered(pageNumber, filterName);
             }
             catch (UnauthorizedException)
             {
@@ -424,7 +566,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.TaxBaseAmountTypeContext.GetDisplayFields();
+                return this.TaxBaseAmountTypeRepository.GetDisplayFields();
             }
             catch (UnauthorizedException)
             {
@@ -455,7 +597,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.TaxBaseAmountTypeContext.GetCustomFields(null);
+                return this.TaxBaseAmountTypeRepository.GetCustomFields(null);
             }
             catch (UnauthorizedException)
             {
@@ -486,7 +628,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.TaxBaseAmountTypeContext.GetCustomFields(resourceId);
+                return this.TaxBaseAmountTypeRepository.GetCustomFields(resourceId);
             }
             catch (UnauthorizedException)
             {
@@ -525,7 +667,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                return this.TaxBaseAmountTypeContext.AddOrEdit(taxBaseAmountType, customFields);
+                return this.TaxBaseAmountTypeRepository.AddOrEdit(taxBaseAmountType, customFields);
             }
             catch (UnauthorizedException)
             {
@@ -561,7 +703,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                this.TaxBaseAmountTypeContext.Add(taxBaseAmountType);
+                this.TaxBaseAmountTypeRepository.Add(taxBaseAmountType);
             }
             catch (UnauthorizedException)
             {
@@ -598,7 +740,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                this.TaxBaseAmountTypeContext.Update(taxBaseAmountType, taxBaseAmountTypeCode);
+                this.TaxBaseAmountTypeRepository.Update(taxBaseAmountType, taxBaseAmountTypeCode);
             }
             catch (UnauthorizedException)
             {
@@ -643,7 +785,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                return this.TaxBaseAmountTypeContext.BulkImport(taxBaseAmountTypeCollection);
+                return this.TaxBaseAmountTypeRepository.BulkImport(taxBaseAmountTypeCollection);
             }
             catch (UnauthorizedException)
             {
@@ -674,7 +816,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                this.TaxBaseAmountTypeContext.Delete(taxBaseAmountTypeCode);
+                this.TaxBaseAmountTypeRepository.Delete(taxBaseAmountTypeCode);
             }
             catch (UnauthorizedException)
             {

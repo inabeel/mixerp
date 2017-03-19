@@ -12,6 +12,7 @@ using MixERP.Net.Framework;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using PetaPoco;
+using MixERP.Net.Schemas.Policy.Data;
 
 namespace MixERP.Net.Api.Policy
 {
@@ -22,9 +23,9 @@ namespace MixERP.Net.Api.Policy
     public class VoucherVerificationPolicyController : ApiController
     {
         /// <summary>
-        ///     The VoucherVerificationPolicy data context.
+        ///     The VoucherVerificationPolicy repository.
         /// </summary>
-        private readonly MixERP.Net.Schemas.Policy.Data.VoucherVerificationPolicy VoucherVerificationPolicyContext;
+        private readonly IVoucherVerificationPolicyRepository VoucherVerificationPolicyRepository;
 
         public VoucherVerificationPolicyController()
         {
@@ -33,12 +34,22 @@ namespace MixERP.Net.Api.Policy
             this._OfficeId = AppUsers.GetCurrent().View.OfficeId.ToInt();
             this._Catalog = AppUsers.GetCurrentUserDB();
 
-            this.VoucherVerificationPolicyContext = new MixERP.Net.Schemas.Policy.Data.VoucherVerificationPolicy
+            this.VoucherVerificationPolicyRepository = new MixERP.Net.Schemas.Policy.Data.VoucherVerificationPolicy
             {
                 _Catalog = this._Catalog,
                 _LoginId = this._LoginId,
                 _UserId = this._UserId
             };
+        }
+
+        public VoucherVerificationPolicyController(IVoucherVerificationPolicyRepository repository, string catalog, LoginView view)
+        {
+            this._LoginId = view.LoginId.ToLong();
+            this._UserId = view.UserId.ToInt();
+            this._OfficeId = view.OfficeId.ToInt();
+            this._Catalog = catalog;
+
+            this.VoucherVerificationPolicyRepository = repository;
         }
 
         public long _LoginId { get; }
@@ -55,6 +66,11 @@ namespace MixERP.Net.Api.Policy
         [Route("~/api/policy/voucher-verification-policy/meta")]
         public EntityView GetEntityView()
         {
+            if (this._LoginId == 0)
+            {
+                return new EntityView();
+            }
+
             return new EntityView
             {
                 PrimaryKey = "policy_id",
@@ -91,7 +107,7 @@ namespace MixERP.Net.Api.Policy
         {
             try
             {
-                return this.VoucherVerificationPolicyContext.Count();
+                return this.VoucherVerificationPolicyRepository.Count();
             }
             catch (UnauthorizedException)
             {
@@ -122,7 +138,7 @@ namespace MixERP.Net.Api.Policy
         {
             try
             {
-                return this.VoucherVerificationPolicyContext.GetAll();
+                return this.VoucherVerificationPolicyRepository.GetAll();
             }
             catch (UnauthorizedException)
             {
@@ -153,7 +169,7 @@ namespace MixERP.Net.Api.Policy
         {
             try
             {
-                return this.VoucherVerificationPolicyContext.Export();
+                return this.VoucherVerificationPolicyRepository.Export();
             }
             catch (UnauthorizedException)
             {
@@ -185,7 +201,7 @@ namespace MixERP.Net.Api.Policy
         {
             try
             {
-                return this.VoucherVerificationPolicyContext.Get(policyId);
+                return this.VoucherVerificationPolicyRepository.Get(policyId);
             }
             catch (UnauthorizedException)
             {
@@ -212,7 +228,133 @@ namespace MixERP.Net.Api.Policy
         {
             try
             {
-                return this.VoucherVerificationPolicyContext.Get(policyIds);
+                return this.VoucherVerificationPolicyRepository.Get(policyIds);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the first instance of voucher verification policy.
+        /// </summary>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("first")]
+        [Route("~/api/policy/voucher-verification-policy/first")]
+        public MixERP.Net.Entities.Policy.VoucherVerificationPolicy GetFirst()
+        {
+            try
+            {
+                return this.VoucherVerificationPolicyRepository.GetFirst();
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the previous instance of voucher verification policy.
+        /// </summary>
+        /// <param name="policyId">Enter PolicyId to search for.</param>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("previous/{policyId}")]
+        [Route("~/api/policy/voucher-verification-policy/previous/{policyId}")]
+        public MixERP.Net.Entities.Policy.VoucherVerificationPolicy GetPrevious(int policyId)
+        {
+            try
+            {
+                return this.VoucherVerificationPolicyRepository.GetPrevious(policyId);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the next instance of voucher verification policy.
+        /// </summary>
+        /// <param name="policyId">Enter PolicyId to search for.</param>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("next/{policyId}")]
+        [Route("~/api/policy/voucher-verification-policy/next/{policyId}")]
+        public MixERP.Net.Entities.Policy.VoucherVerificationPolicy GetNext(int policyId)
+        {
+            try
+            {
+                return this.VoucherVerificationPolicyRepository.GetNext(policyId);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the last instance of voucher verification policy.
+        /// </summary>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("last")]
+        [Route("~/api/policy/voucher-verification-policy/last")]
+        public MixERP.Net.Entities.Policy.VoucherVerificationPolicy GetLast()
+        {
+            try
+            {
+                return this.VoucherVerificationPolicyRepository.GetLast();
             }
             catch (UnauthorizedException)
             {
@@ -243,7 +385,7 @@ namespace MixERP.Net.Api.Policy
         {
             try
             {
-                return this.VoucherVerificationPolicyContext.GetPaginatedResult();
+                return this.VoucherVerificationPolicyRepository.GetPaginatedResult();
             }
             catch (UnauthorizedException)
             {
@@ -275,7 +417,7 @@ namespace MixERP.Net.Api.Policy
         {
             try
             {
-                return this.VoucherVerificationPolicyContext.GetPaginatedResult(pageNumber);
+                return this.VoucherVerificationPolicyRepository.GetPaginatedResult(pageNumber);
             }
             catch (UnauthorizedException)
             {
@@ -308,7 +450,7 @@ namespace MixERP.Net.Api.Policy
             try
             {
                 List<EntityParser.Filter> f = filters.ToObject<List<EntityParser.Filter>>(JsonHelper.GetJsonSerializer());
-                return this.VoucherVerificationPolicyContext.CountWhere(f);
+                return this.VoucherVerificationPolicyRepository.CountWhere(f);
             }
             catch (UnauthorizedException)
             {
@@ -342,7 +484,7 @@ namespace MixERP.Net.Api.Policy
             try
             {
                 List<EntityParser.Filter> f = filters.ToObject<List<EntityParser.Filter>>(JsonHelper.GetJsonSerializer());
-                return this.VoucherVerificationPolicyContext.GetWhere(pageNumber, f);
+                return this.VoucherVerificationPolicyRepository.GetWhere(pageNumber, f);
             }
             catch (UnauthorizedException)
             {
@@ -374,7 +516,7 @@ namespace MixERP.Net.Api.Policy
         {
             try
             {
-                return this.VoucherVerificationPolicyContext.CountFiltered(filterName);
+                return this.VoucherVerificationPolicyRepository.CountFiltered(filterName);
             }
             catch (UnauthorizedException)
             {
@@ -407,7 +549,7 @@ namespace MixERP.Net.Api.Policy
         {
             try
             {
-                return this.VoucherVerificationPolicyContext.GetFiltered(pageNumber, filterName);
+                return this.VoucherVerificationPolicyRepository.GetFiltered(pageNumber, filterName);
             }
             catch (UnauthorizedException)
             {
@@ -438,7 +580,7 @@ namespace MixERP.Net.Api.Policy
         {
             try
             {
-                return this.VoucherVerificationPolicyContext.GetDisplayFields();
+                return this.VoucherVerificationPolicyRepository.GetDisplayFields();
             }
             catch (UnauthorizedException)
             {
@@ -469,7 +611,7 @@ namespace MixERP.Net.Api.Policy
         {
             try
             {
-                return this.VoucherVerificationPolicyContext.GetCustomFields(null);
+                return this.VoucherVerificationPolicyRepository.GetCustomFields(null);
             }
             catch (UnauthorizedException)
             {
@@ -500,7 +642,7 @@ namespace MixERP.Net.Api.Policy
         {
             try
             {
-                return this.VoucherVerificationPolicyContext.GetCustomFields(resourceId);
+                return this.VoucherVerificationPolicyRepository.GetCustomFields(resourceId);
             }
             catch (UnauthorizedException)
             {
@@ -539,7 +681,7 @@ namespace MixERP.Net.Api.Policy
 
             try
             {
-                return this.VoucherVerificationPolicyContext.AddOrEdit(voucherVerificationPolicy, customFields);
+                return this.VoucherVerificationPolicyRepository.AddOrEdit(voucherVerificationPolicy, customFields);
             }
             catch (UnauthorizedException)
             {
@@ -575,7 +717,7 @@ namespace MixERP.Net.Api.Policy
 
             try
             {
-                this.VoucherVerificationPolicyContext.Add(voucherVerificationPolicy);
+                this.VoucherVerificationPolicyRepository.Add(voucherVerificationPolicy);
             }
             catch (UnauthorizedException)
             {
@@ -612,7 +754,7 @@ namespace MixERP.Net.Api.Policy
 
             try
             {
-                this.VoucherVerificationPolicyContext.Update(voucherVerificationPolicy, policyId);
+                this.VoucherVerificationPolicyRepository.Update(voucherVerificationPolicy, policyId);
             }
             catch (UnauthorizedException)
             {
@@ -657,7 +799,7 @@ namespace MixERP.Net.Api.Policy
 
             try
             {
-                return this.VoucherVerificationPolicyContext.BulkImport(voucherVerificationPolicyCollection);
+                return this.VoucherVerificationPolicyRepository.BulkImport(voucherVerificationPolicyCollection);
             }
             catch (UnauthorizedException)
             {
@@ -688,7 +830,7 @@ namespace MixERP.Net.Api.Policy
         {
             try
             {
-                this.VoucherVerificationPolicyContext.Delete(policyId);
+                this.VoucherVerificationPolicyRepository.Delete(policyId);
             }
             catch (UnauthorizedException)
             {

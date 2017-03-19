@@ -12,6 +12,7 @@ using MixERP.Net.Framework;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using PetaPoco;
+using MixERP.Net.Schemas.Core.Data;
 
 namespace MixERP.Net.Api.Core
 {
@@ -22,9 +23,9 @@ namespace MixERP.Net.Api.Core
     public class PaymentCardController : ApiController
     {
         /// <summary>
-        ///     The PaymentCard data context.
+        ///     The PaymentCard repository.
         /// </summary>
-        private readonly MixERP.Net.Schemas.Core.Data.PaymentCard PaymentCardContext;
+        private readonly IPaymentCardRepository PaymentCardRepository;
 
         public PaymentCardController()
         {
@@ -33,12 +34,22 @@ namespace MixERP.Net.Api.Core
             this._OfficeId = AppUsers.GetCurrent().View.OfficeId.ToInt();
             this._Catalog = AppUsers.GetCurrentUserDB();
 
-            this.PaymentCardContext = new MixERP.Net.Schemas.Core.Data.PaymentCard
+            this.PaymentCardRepository = new MixERP.Net.Schemas.Core.Data.PaymentCard
             {
                 _Catalog = this._Catalog,
                 _LoginId = this._LoginId,
                 _UserId = this._UserId
             };
+        }
+
+        public PaymentCardController(IPaymentCardRepository repository, string catalog, LoginView view)
+        {
+            this._LoginId = view.LoginId.ToLong();
+            this._UserId = view.UserId.ToInt();
+            this._OfficeId = view.OfficeId.ToInt();
+            this._Catalog = catalog;
+
+            this.PaymentCardRepository = repository;
         }
 
         public long _LoginId { get; }
@@ -55,6 +66,11 @@ namespace MixERP.Net.Api.Core
         [Route("~/api/core/payment-card/meta")]
         public EntityView GetEntityView()
         {
+            if (this._LoginId == 0)
+            {
+                return new EntityView();
+            }
+
             return new EntityView
             {
                 PrimaryKey = "payment_card_id",
@@ -81,7 +97,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.PaymentCardContext.Count();
+                return this.PaymentCardRepository.Count();
             }
             catch (UnauthorizedException)
             {
@@ -112,7 +128,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.PaymentCardContext.GetAll();
+                return this.PaymentCardRepository.GetAll();
             }
             catch (UnauthorizedException)
             {
@@ -143,7 +159,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.PaymentCardContext.Export();
+                return this.PaymentCardRepository.Export();
             }
             catch (UnauthorizedException)
             {
@@ -175,7 +191,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.PaymentCardContext.Get(paymentCardId);
+                return this.PaymentCardRepository.Get(paymentCardId);
             }
             catch (UnauthorizedException)
             {
@@ -202,7 +218,133 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.PaymentCardContext.Get(paymentCardIds);
+                return this.PaymentCardRepository.Get(paymentCardIds);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the first instance of payment card.
+        /// </summary>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("first")]
+        [Route("~/api/core/payment-card/first")]
+        public MixERP.Net.Entities.Core.PaymentCard GetFirst()
+        {
+            try
+            {
+                return this.PaymentCardRepository.GetFirst();
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the previous instance of payment card.
+        /// </summary>
+        /// <param name="paymentCardId">Enter PaymentCardId to search for.</param>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("previous/{paymentCardId}")]
+        [Route("~/api/core/payment-card/previous/{paymentCardId}")]
+        public MixERP.Net.Entities.Core.PaymentCard GetPrevious(int paymentCardId)
+        {
+            try
+            {
+                return this.PaymentCardRepository.GetPrevious(paymentCardId);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the next instance of payment card.
+        /// </summary>
+        /// <param name="paymentCardId">Enter PaymentCardId to search for.</param>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("next/{paymentCardId}")]
+        [Route("~/api/core/payment-card/next/{paymentCardId}")]
+        public MixERP.Net.Entities.Core.PaymentCard GetNext(int paymentCardId)
+        {
+            try
+            {
+                return this.PaymentCardRepository.GetNext(paymentCardId);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the last instance of payment card.
+        /// </summary>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("last")]
+        [Route("~/api/core/payment-card/last")]
+        public MixERP.Net.Entities.Core.PaymentCard GetLast()
+        {
+            try
+            {
+                return this.PaymentCardRepository.GetLast();
             }
             catch (UnauthorizedException)
             {
@@ -233,7 +375,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.PaymentCardContext.GetPaginatedResult();
+                return this.PaymentCardRepository.GetPaginatedResult();
             }
             catch (UnauthorizedException)
             {
@@ -265,7 +407,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.PaymentCardContext.GetPaginatedResult(pageNumber);
+                return this.PaymentCardRepository.GetPaginatedResult(pageNumber);
             }
             catch (UnauthorizedException)
             {
@@ -298,7 +440,7 @@ namespace MixERP.Net.Api.Core
             try
             {
                 List<EntityParser.Filter> f = filters.ToObject<List<EntityParser.Filter>>(JsonHelper.GetJsonSerializer());
-                return this.PaymentCardContext.CountWhere(f);
+                return this.PaymentCardRepository.CountWhere(f);
             }
             catch (UnauthorizedException)
             {
@@ -332,7 +474,7 @@ namespace MixERP.Net.Api.Core
             try
             {
                 List<EntityParser.Filter> f = filters.ToObject<List<EntityParser.Filter>>(JsonHelper.GetJsonSerializer());
-                return this.PaymentCardContext.GetWhere(pageNumber, f);
+                return this.PaymentCardRepository.GetWhere(pageNumber, f);
             }
             catch (UnauthorizedException)
             {
@@ -364,7 +506,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.PaymentCardContext.CountFiltered(filterName);
+                return this.PaymentCardRepository.CountFiltered(filterName);
             }
             catch (UnauthorizedException)
             {
@@ -397,7 +539,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.PaymentCardContext.GetFiltered(pageNumber, filterName);
+                return this.PaymentCardRepository.GetFiltered(pageNumber, filterName);
             }
             catch (UnauthorizedException)
             {
@@ -428,7 +570,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.PaymentCardContext.GetDisplayFields();
+                return this.PaymentCardRepository.GetDisplayFields();
             }
             catch (UnauthorizedException)
             {
@@ -459,7 +601,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.PaymentCardContext.GetCustomFields(null);
+                return this.PaymentCardRepository.GetCustomFields(null);
             }
             catch (UnauthorizedException)
             {
@@ -490,7 +632,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.PaymentCardContext.GetCustomFields(resourceId);
+                return this.PaymentCardRepository.GetCustomFields(resourceId);
             }
             catch (UnauthorizedException)
             {
@@ -529,7 +671,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                return this.PaymentCardContext.AddOrEdit(paymentCard, customFields);
+                return this.PaymentCardRepository.AddOrEdit(paymentCard, customFields);
             }
             catch (UnauthorizedException)
             {
@@ -565,7 +707,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                this.PaymentCardContext.Add(paymentCard);
+                this.PaymentCardRepository.Add(paymentCard);
             }
             catch (UnauthorizedException)
             {
@@ -602,7 +744,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                this.PaymentCardContext.Update(paymentCard, paymentCardId);
+                this.PaymentCardRepository.Update(paymentCard, paymentCardId);
             }
             catch (UnauthorizedException)
             {
@@ -647,7 +789,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                return this.PaymentCardContext.BulkImport(paymentCardCollection);
+                return this.PaymentCardRepository.BulkImport(paymentCardCollection);
             }
             catch (UnauthorizedException)
             {
@@ -678,7 +820,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                this.PaymentCardContext.Delete(paymentCardId);
+                this.PaymentCardRepository.Delete(paymentCardId);
             }
             catch (UnauthorizedException)
             {

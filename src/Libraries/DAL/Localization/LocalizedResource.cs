@@ -16,7 +16,7 @@ namespace MixERP.Net.Schemas.Localization.Data
     /// <summary>
     /// Provides simplified data access features to perform SCRUD operation on the database table "localization.localized_resources".
     /// </summary>
-    public class LocalizedResource : DbAccess
+    public class LocalizedResource : DbAccess, ILocalizedResourceRepository
     {
         /// <summary>
         /// The schema of this table. Returns literal "localization".
@@ -73,7 +73,7 @@ namespace MixERP.Net.Schemas.Localization.Data
         }
 
         /// <summary>
-        /// Executes a select query on the table "localization.localized_resources" to return a all instances of the "LocalizedResource" class. 
+        /// Executes a select query on the table "localization.localized_resources" to return all instances of the "LocalizedResource" class. 
         /// </summary>
         /// <returns>Returns a non-live, non-mapped instances of "LocalizedResource" class.</returns>
         /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
@@ -102,7 +102,7 @@ namespace MixERP.Net.Schemas.Localization.Data
         }
 
         /// <summary>
-        /// Executes a select query on the table "localization.localized_resources" to return a all instances of the "LocalizedResource" class to export. 
+        /// Executes a select query on the table "localization.localized_resources" to return all instances of the "LocalizedResource" class to export. 
         /// </summary>
         /// <returns>Returns a non-live, non-mapped instances of "LocalizedResource" class.</returns>
         /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
@@ -158,6 +158,125 @@ namespace MixERP.Net.Schemas.Localization.Data
 
             const string sql = "SELECT * FROM localization.localized_resources WHERE localized_resource_id=@0;";
             return Factory.Get<MixERP.Net.Entities.Localization.LocalizedResource>(this._Catalog, sql, localizedResourceId).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Gets the first record of the table "localization.localized_resources". 
+        /// </summary>
+        /// <returns>Returns a non-live, non-mapped instance of "LocalizedResource" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.Localization.LocalizedResource GetFirst()
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the first record of entity \"LocalizedResource\" was denied to the user with Login ID {_LoginId}", this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM localization.localized_resources ORDER BY localized_resource_id LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.Localization.LocalizedResource>(this._Catalog, sql).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Gets the previous record of the table "localization.localized_resources" sorted by localizedResourceId.
+        /// </summary>
+        /// <param name="localizedResourceId">The column "localized_resource_id" parameter used to find the next record.</param>
+        /// <returns>Returns a non-live, non-mapped instance of "LocalizedResource" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.Localization.LocalizedResource GetPrevious(long localizedResourceId)
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the previous entity of \"LocalizedResource\" by \"LocalizedResourceId\" with value {LocalizedResourceId} was denied to the user with Login ID {_LoginId}", localizedResourceId, this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM localization.localized_resources WHERE localized_resource_id < @0 ORDER BY localized_resource_id DESC LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.Localization.LocalizedResource>(this._Catalog, sql, localizedResourceId).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Gets the next record of the table "localization.localized_resources" sorted by localizedResourceId.
+        /// </summary>
+        /// <param name="localizedResourceId">The column "localized_resource_id" parameter used to find the next record.</param>
+        /// <returns>Returns a non-live, non-mapped instance of "LocalizedResource" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.Localization.LocalizedResource GetNext(long localizedResourceId)
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the next entity of \"LocalizedResource\" by \"LocalizedResourceId\" with value {LocalizedResourceId} was denied to the user with Login ID {_LoginId}", localizedResourceId, this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM localization.localized_resources WHERE localized_resource_id > @0 ORDER BY localized_resource_id LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.Localization.LocalizedResource>(this._Catalog, sql, localizedResourceId).FirstOrDefault();
+        }
+
+
+        /// <summary>
+        /// Gets the last record of the table "localization.localized_resources". 
+        /// </summary>
+        /// <returns>Returns a non-live, non-mapped instance of "LocalizedResource" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.Localization.LocalizedResource GetLast()
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the last record of entity \"LocalizedResource\" was denied to the user with Login ID {_LoginId}", this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM localization.localized_resources ORDER BY localized_resource_id DESC LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.Localization.LocalizedResource>(this._Catalog, sql).FirstOrDefault();
         }
 
         /// <summary>
@@ -557,7 +676,7 @@ namespace MixERP.Net.Schemas.Localization.Data
             return Factory.Get<MixERP.Net.Entities.Localization.LocalizedResource>(this._Catalog, sql, offset);
         }
 
-        private List<EntityParser.Filter> GetFilters(string catalog, string filterName)
+        public List<EntityParser.Filter> GetFilters(string catalog, string filterName)
         {
             const string sql = "SELECT * FROM core.filters WHERE object_name='localization.localized_resources' AND lower(filter_name)=lower(@0);";
             return Factory.Get<EntityParser.Filter>(catalog, sql, filterName).ToList();

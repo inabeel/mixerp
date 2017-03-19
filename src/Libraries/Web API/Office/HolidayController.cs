@@ -12,6 +12,7 @@ using MixERP.Net.Framework;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using PetaPoco;
+using MixERP.Net.Schemas.Office.Data;
 
 namespace MixERP.Net.Api.Office
 {
@@ -22,9 +23,9 @@ namespace MixERP.Net.Api.Office
     public class HolidayController : ApiController
     {
         /// <summary>
-        ///     The Holiday data context.
+        ///     The Holiday repository.
         /// </summary>
-        private readonly MixERP.Net.Schemas.Office.Data.Holiday HolidayContext;
+        private readonly IHolidayRepository HolidayRepository;
 
         public HolidayController()
         {
@@ -33,12 +34,22 @@ namespace MixERP.Net.Api.Office
             this._OfficeId = AppUsers.GetCurrent().View.OfficeId.ToInt();
             this._Catalog = AppUsers.GetCurrentUserDB();
 
-            this.HolidayContext = new MixERP.Net.Schemas.Office.Data.Holiday
+            this.HolidayRepository = new MixERP.Net.Schemas.Office.Data.Holiday
             {
                 _Catalog = this._Catalog,
                 _LoginId = this._LoginId,
                 _UserId = this._UserId
             };
+        }
+
+        public HolidayController(IHolidayRepository repository, string catalog, LoginView view)
+        {
+            this._LoginId = view.LoginId.ToLong();
+            this._UserId = view.UserId.ToInt();
+            this._OfficeId = view.OfficeId.ToInt();
+            this._Catalog = catalog;
+
+            this.HolidayRepository = repository;
         }
 
         public long _LoginId { get; }
@@ -55,6 +66,11 @@ namespace MixERP.Net.Api.Office
         [Route("~/api/office/holiday/meta")]
         public EntityView GetEntityView()
         {
+            if (this._LoginId == 0)
+            {
+                return new EntityView();
+            }
+
             return new EntityView
             {
                 PrimaryKey = "holiday_id",
@@ -83,7 +99,7 @@ namespace MixERP.Net.Api.Office
         {
             try
             {
-                return this.HolidayContext.Count();
+                return this.HolidayRepository.Count();
             }
             catch (UnauthorizedException)
             {
@@ -114,7 +130,7 @@ namespace MixERP.Net.Api.Office
         {
             try
             {
-                return this.HolidayContext.GetAll();
+                return this.HolidayRepository.GetAll();
             }
             catch (UnauthorizedException)
             {
@@ -145,7 +161,7 @@ namespace MixERP.Net.Api.Office
         {
             try
             {
-                return this.HolidayContext.Export();
+                return this.HolidayRepository.Export();
             }
             catch (UnauthorizedException)
             {
@@ -177,7 +193,7 @@ namespace MixERP.Net.Api.Office
         {
             try
             {
-                return this.HolidayContext.Get(holidayId);
+                return this.HolidayRepository.Get(holidayId);
             }
             catch (UnauthorizedException)
             {
@@ -204,7 +220,133 @@ namespace MixERP.Net.Api.Office
         {
             try
             {
-                return this.HolidayContext.Get(holidayIds);
+                return this.HolidayRepository.Get(holidayIds);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the first instance of holiday.
+        /// </summary>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("first")]
+        [Route("~/api/office/holiday/first")]
+        public MixERP.Net.Entities.Office.Holiday GetFirst()
+        {
+            try
+            {
+                return this.HolidayRepository.GetFirst();
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the previous instance of holiday.
+        /// </summary>
+        /// <param name="holidayId">Enter HolidayId to search for.</param>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("previous/{holidayId}")]
+        [Route("~/api/office/holiday/previous/{holidayId}")]
+        public MixERP.Net.Entities.Office.Holiday GetPrevious(int holidayId)
+        {
+            try
+            {
+                return this.HolidayRepository.GetPrevious(holidayId);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the next instance of holiday.
+        /// </summary>
+        /// <param name="holidayId">Enter HolidayId to search for.</param>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("next/{holidayId}")]
+        [Route("~/api/office/holiday/next/{holidayId}")]
+        public MixERP.Net.Entities.Office.Holiday GetNext(int holidayId)
+        {
+            try
+            {
+                return this.HolidayRepository.GetNext(holidayId);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the last instance of holiday.
+        /// </summary>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("last")]
+        [Route("~/api/office/holiday/last")]
+        public MixERP.Net.Entities.Office.Holiday GetLast()
+        {
+            try
+            {
+                return this.HolidayRepository.GetLast();
             }
             catch (UnauthorizedException)
             {
@@ -235,7 +377,7 @@ namespace MixERP.Net.Api.Office
         {
             try
             {
-                return this.HolidayContext.GetPaginatedResult();
+                return this.HolidayRepository.GetPaginatedResult();
             }
             catch (UnauthorizedException)
             {
@@ -267,7 +409,7 @@ namespace MixERP.Net.Api.Office
         {
             try
             {
-                return this.HolidayContext.GetPaginatedResult(pageNumber);
+                return this.HolidayRepository.GetPaginatedResult(pageNumber);
             }
             catch (UnauthorizedException)
             {
@@ -300,7 +442,7 @@ namespace MixERP.Net.Api.Office
             try
             {
                 List<EntityParser.Filter> f = filters.ToObject<List<EntityParser.Filter>>(JsonHelper.GetJsonSerializer());
-                return this.HolidayContext.CountWhere(f);
+                return this.HolidayRepository.CountWhere(f);
             }
             catch (UnauthorizedException)
             {
@@ -334,7 +476,7 @@ namespace MixERP.Net.Api.Office
             try
             {
                 List<EntityParser.Filter> f = filters.ToObject<List<EntityParser.Filter>>(JsonHelper.GetJsonSerializer());
-                return this.HolidayContext.GetWhere(pageNumber, f);
+                return this.HolidayRepository.GetWhere(pageNumber, f);
             }
             catch (UnauthorizedException)
             {
@@ -366,7 +508,7 @@ namespace MixERP.Net.Api.Office
         {
             try
             {
-                return this.HolidayContext.CountFiltered(filterName);
+                return this.HolidayRepository.CountFiltered(filterName);
             }
             catch (UnauthorizedException)
             {
@@ -399,7 +541,7 @@ namespace MixERP.Net.Api.Office
         {
             try
             {
-                return this.HolidayContext.GetFiltered(pageNumber, filterName);
+                return this.HolidayRepository.GetFiltered(pageNumber, filterName);
             }
             catch (UnauthorizedException)
             {
@@ -430,7 +572,7 @@ namespace MixERP.Net.Api.Office
         {
             try
             {
-                return this.HolidayContext.GetDisplayFields();
+                return this.HolidayRepository.GetDisplayFields();
             }
             catch (UnauthorizedException)
             {
@@ -461,7 +603,7 @@ namespace MixERP.Net.Api.Office
         {
             try
             {
-                return this.HolidayContext.GetCustomFields(null);
+                return this.HolidayRepository.GetCustomFields(null);
             }
             catch (UnauthorizedException)
             {
@@ -492,7 +634,7 @@ namespace MixERP.Net.Api.Office
         {
             try
             {
-                return this.HolidayContext.GetCustomFields(resourceId);
+                return this.HolidayRepository.GetCustomFields(resourceId);
             }
             catch (UnauthorizedException)
             {
@@ -531,7 +673,7 @@ namespace MixERP.Net.Api.Office
 
             try
             {
-                return this.HolidayContext.AddOrEdit(holiday, customFields);
+                return this.HolidayRepository.AddOrEdit(holiday, customFields);
             }
             catch (UnauthorizedException)
             {
@@ -567,7 +709,7 @@ namespace MixERP.Net.Api.Office
 
             try
             {
-                this.HolidayContext.Add(holiday);
+                this.HolidayRepository.Add(holiday);
             }
             catch (UnauthorizedException)
             {
@@ -604,7 +746,7 @@ namespace MixERP.Net.Api.Office
 
             try
             {
-                this.HolidayContext.Update(holiday, holidayId);
+                this.HolidayRepository.Update(holiday, holidayId);
             }
             catch (UnauthorizedException)
             {
@@ -649,7 +791,7 @@ namespace MixERP.Net.Api.Office
 
             try
             {
-                return this.HolidayContext.BulkImport(holidayCollection);
+                return this.HolidayRepository.BulkImport(holidayCollection);
             }
             catch (UnauthorizedException)
             {
@@ -680,7 +822,7 @@ namespace MixERP.Net.Api.Office
         {
             try
             {
-                this.HolidayContext.Delete(holidayId);
+                this.HolidayRepository.Delete(holidayId);
             }
             catch (UnauthorizedException)
             {

@@ -12,6 +12,7 @@ using MixERP.Net.Framework;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using PetaPoco;
+using MixERP.Net.Schemas.Core.Data;
 
 namespace MixERP.Net.Api.Core
 {
@@ -22,9 +23,9 @@ namespace MixERP.Net.Api.Core
     public class CustomFieldFormController : ApiController
     {
         /// <summary>
-        ///     The CustomFieldForm data context.
+        ///     The CustomFieldForm repository.
         /// </summary>
-        private readonly MixERP.Net.Schemas.Core.Data.CustomFieldForm CustomFieldFormContext;
+        private readonly ICustomFieldFormRepository CustomFieldFormRepository;
 
         public CustomFieldFormController()
         {
@@ -33,12 +34,22 @@ namespace MixERP.Net.Api.Core
             this._OfficeId = AppUsers.GetCurrent().View.OfficeId.ToInt();
             this._Catalog = AppUsers.GetCurrentUserDB();
 
-            this.CustomFieldFormContext = new MixERP.Net.Schemas.Core.Data.CustomFieldForm
+            this.CustomFieldFormRepository = new MixERP.Net.Schemas.Core.Data.CustomFieldForm
             {
                 _Catalog = this._Catalog,
                 _LoginId = this._LoginId,
                 _UserId = this._UserId
             };
+        }
+
+        public CustomFieldFormController(ICustomFieldFormRepository repository, string catalog, LoginView view)
+        {
+            this._LoginId = view.LoginId.ToLong();
+            this._UserId = view.UserId.ToInt();
+            this._OfficeId = view.OfficeId.ToInt();
+            this._Catalog = catalog;
+
+            this.CustomFieldFormRepository = repository;
         }
 
         public long _LoginId { get; }
@@ -55,6 +66,11 @@ namespace MixERP.Net.Api.Core
         [Route("~/api/core/custom-field-form/meta")]
         public EntityView GetEntityView()
         {
+            if (this._LoginId == 0)
+            {
+                return new EntityView();
+            }
+
             return new EntityView
             {
                 PrimaryKey = "form_name",
@@ -78,7 +94,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.CustomFieldFormContext.Count();
+                return this.CustomFieldFormRepository.Count();
             }
             catch (UnauthorizedException)
             {
@@ -109,7 +125,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.CustomFieldFormContext.GetAll();
+                return this.CustomFieldFormRepository.GetAll();
             }
             catch (UnauthorizedException)
             {
@@ -140,7 +156,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.CustomFieldFormContext.Export();
+                return this.CustomFieldFormRepository.Export();
             }
             catch (UnauthorizedException)
             {
@@ -172,7 +188,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.CustomFieldFormContext.Get(formName);
+                return this.CustomFieldFormRepository.Get(formName);
             }
             catch (UnauthorizedException)
             {
@@ -199,7 +215,133 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.CustomFieldFormContext.Get(formNames);
+                return this.CustomFieldFormRepository.Get(formNames);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the first instance of custom field form.
+        /// </summary>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("first")]
+        [Route("~/api/core/custom-field-form/first")]
+        public MixERP.Net.Entities.Core.CustomFieldForm GetFirst()
+        {
+            try
+            {
+                return this.CustomFieldFormRepository.GetFirst();
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the previous instance of custom field form.
+        /// </summary>
+        /// <param name="formName">Enter FormName to search for.</param>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("previous/{formName}")]
+        [Route("~/api/core/custom-field-form/previous/{formName}")]
+        public MixERP.Net.Entities.Core.CustomFieldForm GetPrevious(string formName)
+        {
+            try
+            {
+                return this.CustomFieldFormRepository.GetPrevious(formName);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the next instance of custom field form.
+        /// </summary>
+        /// <param name="formName">Enter FormName to search for.</param>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("next/{formName}")]
+        [Route("~/api/core/custom-field-form/next/{formName}")]
+        public MixERP.Net.Entities.Core.CustomFieldForm GetNext(string formName)
+        {
+            try
+            {
+                return this.CustomFieldFormRepository.GetNext(formName);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the last instance of custom field form.
+        /// </summary>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("last")]
+        [Route("~/api/core/custom-field-form/last")]
+        public MixERP.Net.Entities.Core.CustomFieldForm GetLast()
+        {
+            try
+            {
+                return this.CustomFieldFormRepository.GetLast();
             }
             catch (UnauthorizedException)
             {
@@ -230,7 +372,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.CustomFieldFormContext.GetPaginatedResult();
+                return this.CustomFieldFormRepository.GetPaginatedResult();
             }
             catch (UnauthorizedException)
             {
@@ -262,7 +404,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.CustomFieldFormContext.GetPaginatedResult(pageNumber);
+                return this.CustomFieldFormRepository.GetPaginatedResult(pageNumber);
             }
             catch (UnauthorizedException)
             {
@@ -295,7 +437,7 @@ namespace MixERP.Net.Api.Core
             try
             {
                 List<EntityParser.Filter> f = filters.ToObject<List<EntityParser.Filter>>(JsonHelper.GetJsonSerializer());
-                return this.CustomFieldFormContext.CountWhere(f);
+                return this.CustomFieldFormRepository.CountWhere(f);
             }
             catch (UnauthorizedException)
             {
@@ -329,7 +471,7 @@ namespace MixERP.Net.Api.Core
             try
             {
                 List<EntityParser.Filter> f = filters.ToObject<List<EntityParser.Filter>>(JsonHelper.GetJsonSerializer());
-                return this.CustomFieldFormContext.GetWhere(pageNumber, f);
+                return this.CustomFieldFormRepository.GetWhere(pageNumber, f);
             }
             catch (UnauthorizedException)
             {
@@ -361,7 +503,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.CustomFieldFormContext.CountFiltered(filterName);
+                return this.CustomFieldFormRepository.CountFiltered(filterName);
             }
             catch (UnauthorizedException)
             {
@@ -394,7 +536,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.CustomFieldFormContext.GetFiltered(pageNumber, filterName);
+                return this.CustomFieldFormRepository.GetFiltered(pageNumber, filterName);
             }
             catch (UnauthorizedException)
             {
@@ -425,7 +567,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.CustomFieldFormContext.GetDisplayFields();
+                return this.CustomFieldFormRepository.GetDisplayFields();
             }
             catch (UnauthorizedException)
             {
@@ -456,7 +598,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.CustomFieldFormContext.GetCustomFields(null);
+                return this.CustomFieldFormRepository.GetCustomFields(null);
             }
             catch (UnauthorizedException)
             {
@@ -487,7 +629,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.CustomFieldFormContext.GetCustomFields(resourceId);
+                return this.CustomFieldFormRepository.GetCustomFields(resourceId);
             }
             catch (UnauthorizedException)
             {
@@ -526,7 +668,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                return this.CustomFieldFormContext.AddOrEdit(customFieldForm, customFields);
+                return this.CustomFieldFormRepository.AddOrEdit(customFieldForm, customFields);
             }
             catch (UnauthorizedException)
             {
@@ -562,7 +704,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                this.CustomFieldFormContext.Add(customFieldForm);
+                this.CustomFieldFormRepository.Add(customFieldForm);
             }
             catch (UnauthorizedException)
             {
@@ -599,7 +741,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                this.CustomFieldFormContext.Update(customFieldForm, formName);
+                this.CustomFieldFormRepository.Update(customFieldForm, formName);
             }
             catch (UnauthorizedException)
             {
@@ -644,7 +786,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                return this.CustomFieldFormContext.BulkImport(customFieldFormCollection);
+                return this.CustomFieldFormRepository.BulkImport(customFieldFormCollection);
             }
             catch (UnauthorizedException)
             {
@@ -675,7 +817,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                this.CustomFieldFormContext.Delete(formName);
+                this.CustomFieldFormRepository.Delete(formName);
             }
             catch (UnauthorizedException)
             {

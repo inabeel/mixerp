@@ -12,6 +12,7 @@ using MixERP.Net.Framework;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using PetaPoco;
+using MixERP.Net.Schemas.Core.Data;
 
 namespace MixERP.Net.Api.Core
 {
@@ -22,9 +23,9 @@ namespace MixERP.Net.Api.Core
     public class ShippingAddressController : ApiController
     {
         /// <summary>
-        ///     The ShippingAddress data context.
+        ///     The ShippingAddress repository.
         /// </summary>
-        private readonly MixERP.Net.Schemas.Core.Data.ShippingAddress ShippingAddressContext;
+        private readonly IShippingAddressRepository ShippingAddressRepository;
 
         public ShippingAddressController()
         {
@@ -33,12 +34,22 @@ namespace MixERP.Net.Api.Core
             this._OfficeId = AppUsers.GetCurrent().View.OfficeId.ToInt();
             this._Catalog = AppUsers.GetCurrentUserDB();
 
-            this.ShippingAddressContext = new MixERP.Net.Schemas.Core.Data.ShippingAddress
+            this.ShippingAddressRepository = new MixERP.Net.Schemas.Core.Data.ShippingAddress
             {
                 _Catalog = this._Catalog,
                 _LoginId = this._LoginId,
                 _UserId = this._UserId
             };
+        }
+
+        public ShippingAddressController(IShippingAddressRepository repository, string catalog, LoginView view)
+        {
+            this._LoginId = view.LoginId.ToLong();
+            this._UserId = view.UserId.ToInt();
+            this._OfficeId = view.OfficeId.ToInt();
+            this._Catalog = catalog;
+
+            this.ShippingAddressRepository = repository;
         }
 
         public long _LoginId { get; }
@@ -55,6 +66,11 @@ namespace MixERP.Net.Api.Core
         [Route("~/api/core/shipping-address/meta")]
         public EntityView GetEntityView()
         {
+            if (this._LoginId == 0)
+            {
+                return new EntityView();
+            }
+
             return new EntityView
             {
                 PrimaryKey = "shipping_address_id",
@@ -87,7 +103,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.ShippingAddressContext.Count();
+                return this.ShippingAddressRepository.Count();
             }
             catch (UnauthorizedException)
             {
@@ -118,7 +134,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.ShippingAddressContext.GetAll();
+                return this.ShippingAddressRepository.GetAll();
             }
             catch (UnauthorizedException)
             {
@@ -149,7 +165,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.ShippingAddressContext.Export();
+                return this.ShippingAddressRepository.Export();
             }
             catch (UnauthorizedException)
             {
@@ -181,7 +197,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.ShippingAddressContext.Get(shippingAddressId);
+                return this.ShippingAddressRepository.Get(shippingAddressId);
             }
             catch (UnauthorizedException)
             {
@@ -208,7 +224,133 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.ShippingAddressContext.Get(shippingAddressIds);
+                return this.ShippingAddressRepository.Get(shippingAddressIds);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the first instance of shipping address.
+        /// </summary>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("first")]
+        [Route("~/api/core/shipping-address/first")]
+        public MixERP.Net.Entities.Core.ShippingAddress GetFirst()
+        {
+            try
+            {
+                return this.ShippingAddressRepository.GetFirst();
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the previous instance of shipping address.
+        /// </summary>
+        /// <param name="shippingAddressId">Enter ShippingAddressId to search for.</param>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("previous/{shippingAddressId}")]
+        [Route("~/api/core/shipping-address/previous/{shippingAddressId}")]
+        public MixERP.Net.Entities.Core.ShippingAddress GetPrevious(long shippingAddressId)
+        {
+            try
+            {
+                return this.ShippingAddressRepository.GetPrevious(shippingAddressId);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the next instance of shipping address.
+        /// </summary>
+        /// <param name="shippingAddressId">Enter ShippingAddressId to search for.</param>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("next/{shippingAddressId}")]
+        [Route("~/api/core/shipping-address/next/{shippingAddressId}")]
+        public MixERP.Net.Entities.Core.ShippingAddress GetNext(long shippingAddressId)
+        {
+            try
+            {
+                return this.ShippingAddressRepository.GetNext(shippingAddressId);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the last instance of shipping address.
+        /// </summary>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("last")]
+        [Route("~/api/core/shipping-address/last")]
+        public MixERP.Net.Entities.Core.ShippingAddress GetLast()
+        {
+            try
+            {
+                return this.ShippingAddressRepository.GetLast();
             }
             catch (UnauthorizedException)
             {
@@ -239,7 +381,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.ShippingAddressContext.GetPaginatedResult();
+                return this.ShippingAddressRepository.GetPaginatedResult();
             }
             catch (UnauthorizedException)
             {
@@ -271,7 +413,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.ShippingAddressContext.GetPaginatedResult(pageNumber);
+                return this.ShippingAddressRepository.GetPaginatedResult(pageNumber);
             }
             catch (UnauthorizedException)
             {
@@ -304,7 +446,7 @@ namespace MixERP.Net.Api.Core
             try
             {
                 List<EntityParser.Filter> f = filters.ToObject<List<EntityParser.Filter>>(JsonHelper.GetJsonSerializer());
-                return this.ShippingAddressContext.CountWhere(f);
+                return this.ShippingAddressRepository.CountWhere(f);
             }
             catch (UnauthorizedException)
             {
@@ -338,7 +480,7 @@ namespace MixERP.Net.Api.Core
             try
             {
                 List<EntityParser.Filter> f = filters.ToObject<List<EntityParser.Filter>>(JsonHelper.GetJsonSerializer());
-                return this.ShippingAddressContext.GetWhere(pageNumber, f);
+                return this.ShippingAddressRepository.GetWhere(pageNumber, f);
             }
             catch (UnauthorizedException)
             {
@@ -370,7 +512,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.ShippingAddressContext.CountFiltered(filterName);
+                return this.ShippingAddressRepository.CountFiltered(filterName);
             }
             catch (UnauthorizedException)
             {
@@ -403,7 +545,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.ShippingAddressContext.GetFiltered(pageNumber, filterName);
+                return this.ShippingAddressRepository.GetFiltered(pageNumber, filterName);
             }
             catch (UnauthorizedException)
             {
@@ -434,7 +576,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.ShippingAddressContext.GetDisplayFields();
+                return this.ShippingAddressRepository.GetDisplayFields();
             }
             catch (UnauthorizedException)
             {
@@ -465,7 +607,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.ShippingAddressContext.GetCustomFields(null);
+                return this.ShippingAddressRepository.GetCustomFields(null);
             }
             catch (UnauthorizedException)
             {
@@ -496,7 +638,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.ShippingAddressContext.GetCustomFields(resourceId);
+                return this.ShippingAddressRepository.GetCustomFields(resourceId);
             }
             catch (UnauthorizedException)
             {
@@ -535,7 +677,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                return this.ShippingAddressContext.AddOrEdit(shippingAddress, customFields);
+                return this.ShippingAddressRepository.AddOrEdit(shippingAddress, customFields);
             }
             catch (UnauthorizedException)
             {
@@ -571,7 +713,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                this.ShippingAddressContext.Add(shippingAddress);
+                this.ShippingAddressRepository.Add(shippingAddress);
             }
             catch (UnauthorizedException)
             {
@@ -608,7 +750,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                this.ShippingAddressContext.Update(shippingAddress, shippingAddressId);
+                this.ShippingAddressRepository.Update(shippingAddress, shippingAddressId);
             }
             catch (UnauthorizedException)
             {
@@ -653,7 +795,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                return this.ShippingAddressContext.BulkImport(shippingAddressCollection);
+                return this.ShippingAddressRepository.BulkImport(shippingAddressCollection);
             }
             catch (UnauthorizedException)
             {
@@ -684,7 +826,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                this.ShippingAddressContext.Delete(shippingAddressId);
+                this.ShippingAddressRepository.Delete(shippingAddressId);
             }
             catch (UnauthorizedException)
             {

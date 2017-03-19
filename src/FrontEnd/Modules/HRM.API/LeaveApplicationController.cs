@@ -12,6 +12,7 @@ using MixERP.Net.Framework;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using PetaPoco;
+using MixERP.Net.Core.Modules.HRM.Data;
 
 namespace MixERP.Net.Api.HRM
 {
@@ -22,9 +23,9 @@ namespace MixERP.Net.Api.HRM
     public class LeaveApplicationController : ApiController
     {
         /// <summary>
-        ///     The LeaveApplication data context.
+        ///     The LeaveApplication repository.
         /// </summary>
-        private readonly MixERP.Net.Core.Modules.HRM.Data.LeaveApplication LeaveApplicationContext;
+        private readonly ILeaveApplicationRepository LeaveApplicationRepository;
 
         public LeaveApplicationController()
         {
@@ -33,12 +34,22 @@ namespace MixERP.Net.Api.HRM
             this._OfficeId = AppUsers.GetCurrent().View.OfficeId.ToInt();
             this._Catalog = AppUsers.GetCurrentUserDB();
 
-            this.LeaveApplicationContext = new MixERP.Net.Core.Modules.HRM.Data.LeaveApplication
+            this.LeaveApplicationRepository = new MixERP.Net.Core.Modules.HRM.Data.LeaveApplication
             {
                 _Catalog = this._Catalog,
                 _LoginId = this._LoginId,
                 _UserId = this._UserId
             };
+        }
+
+        public LeaveApplicationController(ILeaveApplicationRepository repository, string catalog, LoginView view)
+        {
+            this._LoginId = view.LoginId.ToLong();
+            this._UserId = view.UserId.ToInt();
+            this._OfficeId = view.OfficeId.ToInt();
+            this._Catalog = catalog;
+
+            this.LeaveApplicationRepository = repository;
         }
 
         public long _LoginId { get; }
@@ -55,6 +66,11 @@ namespace MixERP.Net.Api.HRM
         [Route("~/api/hrm/leave-application/meta")]
         public EntityView GetEntityView()
         {
+            if (this._LoginId == 0)
+            {
+                return new EntityView();
+            }
+
             return new EntityView
             {
                 PrimaryKey = "leave_application_id",
@@ -89,7 +105,7 @@ namespace MixERP.Net.Api.HRM
         {
             try
             {
-                return this.LeaveApplicationContext.Count();
+                return this.LeaveApplicationRepository.Count();
             }
             catch (UnauthorizedException)
             {
@@ -120,7 +136,7 @@ namespace MixERP.Net.Api.HRM
         {
             try
             {
-                return this.LeaveApplicationContext.GetAll();
+                return this.LeaveApplicationRepository.GetAll();
             }
             catch (UnauthorizedException)
             {
@@ -151,7 +167,7 @@ namespace MixERP.Net.Api.HRM
         {
             try
             {
-                return this.LeaveApplicationContext.Export();
+                return this.LeaveApplicationRepository.Export();
             }
             catch (UnauthorizedException)
             {
@@ -183,7 +199,7 @@ namespace MixERP.Net.Api.HRM
         {
             try
             {
-                return this.LeaveApplicationContext.Get(leaveApplicationId);
+                return this.LeaveApplicationRepository.Get(leaveApplicationId);
             }
             catch (UnauthorizedException)
             {
@@ -210,7 +226,133 @@ namespace MixERP.Net.Api.HRM
         {
             try
             {
-                return this.LeaveApplicationContext.Get(leaveApplicationIds);
+                return this.LeaveApplicationRepository.Get(leaveApplicationIds);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the first instance of leave application.
+        /// </summary>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("first")]
+        [Route("~/api/hrm/leave-application/first")]
+        public MixERP.Net.Entities.HRM.LeaveApplication GetFirst()
+        {
+            try
+            {
+                return this.LeaveApplicationRepository.GetFirst();
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the previous instance of leave application.
+        /// </summary>
+        /// <param name="leaveApplicationId">Enter LeaveApplicationId to search for.</param>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("previous/{leaveApplicationId}")]
+        [Route("~/api/hrm/leave-application/previous/{leaveApplicationId}")]
+        public MixERP.Net.Entities.HRM.LeaveApplication GetPrevious(long leaveApplicationId)
+        {
+            try
+            {
+                return this.LeaveApplicationRepository.GetPrevious(leaveApplicationId);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the next instance of leave application.
+        /// </summary>
+        /// <param name="leaveApplicationId">Enter LeaveApplicationId to search for.</param>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("next/{leaveApplicationId}")]
+        [Route("~/api/hrm/leave-application/next/{leaveApplicationId}")]
+        public MixERP.Net.Entities.HRM.LeaveApplication GetNext(long leaveApplicationId)
+        {
+            try
+            {
+                return this.LeaveApplicationRepository.GetNext(leaveApplicationId);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the last instance of leave application.
+        /// </summary>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("last")]
+        [Route("~/api/hrm/leave-application/last")]
+        public MixERP.Net.Entities.HRM.LeaveApplication GetLast()
+        {
+            try
+            {
+                return this.LeaveApplicationRepository.GetLast();
             }
             catch (UnauthorizedException)
             {
@@ -241,7 +383,7 @@ namespace MixERP.Net.Api.HRM
         {
             try
             {
-                return this.LeaveApplicationContext.GetPaginatedResult();
+                return this.LeaveApplicationRepository.GetPaginatedResult();
             }
             catch (UnauthorizedException)
             {
@@ -273,7 +415,7 @@ namespace MixERP.Net.Api.HRM
         {
             try
             {
-                return this.LeaveApplicationContext.GetPaginatedResult(pageNumber);
+                return this.LeaveApplicationRepository.GetPaginatedResult(pageNumber);
             }
             catch (UnauthorizedException)
             {
@@ -306,7 +448,7 @@ namespace MixERP.Net.Api.HRM
             try
             {
                 List<EntityParser.Filter> f = filters.ToObject<List<EntityParser.Filter>>(JsonHelper.GetJsonSerializer());
-                return this.LeaveApplicationContext.CountWhere(f);
+                return this.LeaveApplicationRepository.CountWhere(f);
             }
             catch (UnauthorizedException)
             {
@@ -340,7 +482,7 @@ namespace MixERP.Net.Api.HRM
             try
             {
                 List<EntityParser.Filter> f = filters.ToObject<List<EntityParser.Filter>>(JsonHelper.GetJsonSerializer());
-                return this.LeaveApplicationContext.GetWhere(pageNumber, f);
+                return this.LeaveApplicationRepository.GetWhere(pageNumber, f);
             }
             catch (UnauthorizedException)
             {
@@ -372,7 +514,7 @@ namespace MixERP.Net.Api.HRM
         {
             try
             {
-                return this.LeaveApplicationContext.CountFiltered(filterName);
+                return this.LeaveApplicationRepository.CountFiltered(filterName);
             }
             catch (UnauthorizedException)
             {
@@ -405,7 +547,7 @@ namespace MixERP.Net.Api.HRM
         {
             try
             {
-                return this.LeaveApplicationContext.GetFiltered(pageNumber, filterName);
+                return this.LeaveApplicationRepository.GetFiltered(pageNumber, filterName);
             }
             catch (UnauthorizedException)
             {
@@ -436,7 +578,7 @@ namespace MixERP.Net.Api.HRM
         {
             try
             {
-                return this.LeaveApplicationContext.GetDisplayFields();
+                return this.LeaveApplicationRepository.GetDisplayFields();
             }
             catch (UnauthorizedException)
             {
@@ -467,7 +609,7 @@ namespace MixERP.Net.Api.HRM
         {
             try
             {
-                return this.LeaveApplicationContext.GetCustomFields(null);
+                return this.LeaveApplicationRepository.GetCustomFields(null);
             }
             catch (UnauthorizedException)
             {
@@ -498,7 +640,7 @@ namespace MixERP.Net.Api.HRM
         {
             try
             {
-                return this.LeaveApplicationContext.GetCustomFields(resourceId);
+                return this.LeaveApplicationRepository.GetCustomFields(resourceId);
             }
             catch (UnauthorizedException)
             {
@@ -537,7 +679,7 @@ namespace MixERP.Net.Api.HRM
 
             try
             {
-                return this.LeaveApplicationContext.AddOrEdit(leaveApplication, customFields);
+                return this.LeaveApplicationRepository.AddOrEdit(leaveApplication, customFields);
             }
             catch (UnauthorizedException)
             {
@@ -573,7 +715,7 @@ namespace MixERP.Net.Api.HRM
 
             try
             {
-                this.LeaveApplicationContext.Add(leaveApplication);
+                this.LeaveApplicationRepository.Add(leaveApplication);
             }
             catch (UnauthorizedException)
             {
@@ -610,7 +752,7 @@ namespace MixERP.Net.Api.HRM
 
             try
             {
-                this.LeaveApplicationContext.Update(leaveApplication, leaveApplicationId);
+                this.LeaveApplicationRepository.Update(leaveApplication, leaveApplicationId);
             }
             catch (UnauthorizedException)
             {
@@ -655,7 +797,7 @@ namespace MixERP.Net.Api.HRM
 
             try
             {
-                return this.LeaveApplicationContext.BulkImport(leaveApplicationCollection);
+                return this.LeaveApplicationRepository.BulkImport(leaveApplicationCollection);
             }
             catch (UnauthorizedException)
             {
@@ -686,7 +828,7 @@ namespace MixERP.Net.Api.HRM
         {
             try
             {
-                this.LeaveApplicationContext.Delete(leaveApplicationId);
+                this.LeaveApplicationRepository.Delete(leaveApplicationId);
             }
             catch (UnauthorizedException)
             {
@@ -719,7 +861,7 @@ namespace MixERP.Net.Api.HRM
         {
             try
             {
-                this.LeaveApplicationContext.Verify(leaveApplicationId, verificationStatusId, reason);
+                this.LeaveApplicationRepository.Verify(leaveApplicationId, verificationStatusId, reason);
             }
             catch (UnauthorizedException)
             {

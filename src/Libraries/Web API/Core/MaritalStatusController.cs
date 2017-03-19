@@ -12,6 +12,7 @@ using MixERP.Net.Framework;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using PetaPoco;
+using MixERP.Net.Schemas.Core.Data;
 
 namespace MixERP.Net.Api.Core
 {
@@ -22,9 +23,9 @@ namespace MixERP.Net.Api.Core
     public class MaritalStatusController : ApiController
     {
         /// <summary>
-        ///     The MaritalStatus data context.
+        ///     The MaritalStatus repository.
         /// </summary>
-        private readonly MixERP.Net.Schemas.Core.Data.MaritalStatus MaritalStatusContext;
+        private readonly IMaritalStatusRepository MaritalStatusRepository;
 
         public MaritalStatusController()
         {
@@ -33,12 +34,22 @@ namespace MixERP.Net.Api.Core
             this._OfficeId = AppUsers.GetCurrent().View.OfficeId.ToInt();
             this._Catalog = AppUsers.GetCurrentUserDB();
 
-            this.MaritalStatusContext = new MixERP.Net.Schemas.Core.Data.MaritalStatus
+            this.MaritalStatusRepository = new MixERP.Net.Schemas.Core.Data.MaritalStatus
             {
                 _Catalog = this._Catalog,
                 _LoginId = this._LoginId,
                 _UserId = this._UserId
             };
+        }
+
+        public MaritalStatusController(IMaritalStatusRepository repository, string catalog, LoginView view)
+        {
+            this._LoginId = view.LoginId.ToLong();
+            this._UserId = view.UserId.ToInt();
+            this._OfficeId = view.OfficeId.ToInt();
+            this._Catalog = catalog;
+
+            this.MaritalStatusRepository = repository;
         }
 
         public long _LoginId { get; }
@@ -55,6 +66,11 @@ namespace MixERP.Net.Api.Core
         [Route("~/api/core/marital-status/meta")]
         public EntityView GetEntityView()
         {
+            if (this._LoginId == 0)
+            {
+                return new EntityView();
+            }
+
             return new EntityView
             {
                 PrimaryKey = "marital_status_id",
@@ -81,7 +97,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.MaritalStatusContext.Count();
+                return this.MaritalStatusRepository.Count();
             }
             catch (UnauthorizedException)
             {
@@ -112,7 +128,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.MaritalStatusContext.GetAll();
+                return this.MaritalStatusRepository.GetAll();
             }
             catch (UnauthorizedException)
             {
@@ -143,7 +159,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.MaritalStatusContext.Export();
+                return this.MaritalStatusRepository.Export();
             }
             catch (UnauthorizedException)
             {
@@ -175,7 +191,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.MaritalStatusContext.Get(maritalStatusId);
+                return this.MaritalStatusRepository.Get(maritalStatusId);
             }
             catch (UnauthorizedException)
             {
@@ -202,7 +218,133 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.MaritalStatusContext.Get(maritalStatusIds);
+                return this.MaritalStatusRepository.Get(maritalStatusIds);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the first instance of marital status.
+        /// </summary>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("first")]
+        [Route("~/api/core/marital-status/first")]
+        public MixERP.Net.Entities.Core.MaritalStatus GetFirst()
+        {
+            try
+            {
+                return this.MaritalStatusRepository.GetFirst();
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the previous instance of marital status.
+        /// </summary>
+        /// <param name="maritalStatusId">Enter MaritalStatusId to search for.</param>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("previous/{maritalStatusId}")]
+        [Route("~/api/core/marital-status/previous/{maritalStatusId}")]
+        public MixERP.Net.Entities.Core.MaritalStatus GetPrevious(int maritalStatusId)
+        {
+            try
+            {
+                return this.MaritalStatusRepository.GetPrevious(maritalStatusId);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the next instance of marital status.
+        /// </summary>
+        /// <param name="maritalStatusId">Enter MaritalStatusId to search for.</param>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("next/{maritalStatusId}")]
+        [Route("~/api/core/marital-status/next/{maritalStatusId}")]
+        public MixERP.Net.Entities.Core.MaritalStatus GetNext(int maritalStatusId)
+        {
+            try
+            {
+                return this.MaritalStatusRepository.GetNext(maritalStatusId);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the last instance of marital status.
+        /// </summary>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("last")]
+        [Route("~/api/core/marital-status/last")]
+        public MixERP.Net.Entities.Core.MaritalStatus GetLast()
+        {
+            try
+            {
+                return this.MaritalStatusRepository.GetLast();
             }
             catch (UnauthorizedException)
             {
@@ -233,7 +375,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.MaritalStatusContext.GetPaginatedResult();
+                return this.MaritalStatusRepository.GetPaginatedResult();
             }
             catch (UnauthorizedException)
             {
@@ -265,7 +407,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.MaritalStatusContext.GetPaginatedResult(pageNumber);
+                return this.MaritalStatusRepository.GetPaginatedResult(pageNumber);
             }
             catch (UnauthorizedException)
             {
@@ -298,7 +440,7 @@ namespace MixERP.Net.Api.Core
             try
             {
                 List<EntityParser.Filter> f = filters.ToObject<List<EntityParser.Filter>>(JsonHelper.GetJsonSerializer());
-                return this.MaritalStatusContext.CountWhere(f);
+                return this.MaritalStatusRepository.CountWhere(f);
             }
             catch (UnauthorizedException)
             {
@@ -332,7 +474,7 @@ namespace MixERP.Net.Api.Core
             try
             {
                 List<EntityParser.Filter> f = filters.ToObject<List<EntityParser.Filter>>(JsonHelper.GetJsonSerializer());
-                return this.MaritalStatusContext.GetWhere(pageNumber, f);
+                return this.MaritalStatusRepository.GetWhere(pageNumber, f);
             }
             catch (UnauthorizedException)
             {
@@ -364,7 +506,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.MaritalStatusContext.CountFiltered(filterName);
+                return this.MaritalStatusRepository.CountFiltered(filterName);
             }
             catch (UnauthorizedException)
             {
@@ -397,7 +539,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.MaritalStatusContext.GetFiltered(pageNumber, filterName);
+                return this.MaritalStatusRepository.GetFiltered(pageNumber, filterName);
             }
             catch (UnauthorizedException)
             {
@@ -428,7 +570,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.MaritalStatusContext.GetDisplayFields();
+                return this.MaritalStatusRepository.GetDisplayFields();
             }
             catch (UnauthorizedException)
             {
@@ -459,7 +601,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.MaritalStatusContext.GetCustomFields(null);
+                return this.MaritalStatusRepository.GetCustomFields(null);
             }
             catch (UnauthorizedException)
             {
@@ -490,7 +632,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.MaritalStatusContext.GetCustomFields(resourceId);
+                return this.MaritalStatusRepository.GetCustomFields(resourceId);
             }
             catch (UnauthorizedException)
             {
@@ -529,7 +671,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                return this.MaritalStatusContext.AddOrEdit(maritalStatus, customFields);
+                return this.MaritalStatusRepository.AddOrEdit(maritalStatus, customFields);
             }
             catch (UnauthorizedException)
             {
@@ -565,7 +707,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                this.MaritalStatusContext.Add(maritalStatus);
+                this.MaritalStatusRepository.Add(maritalStatus);
             }
             catch (UnauthorizedException)
             {
@@ -602,7 +744,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                this.MaritalStatusContext.Update(maritalStatus, maritalStatusId);
+                this.MaritalStatusRepository.Update(maritalStatus, maritalStatusId);
             }
             catch (UnauthorizedException)
             {
@@ -647,7 +789,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                return this.MaritalStatusContext.BulkImport(maritalStatusCollection);
+                return this.MaritalStatusRepository.BulkImport(maritalStatusCollection);
             }
             catch (UnauthorizedException)
             {
@@ -678,7 +820,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                this.MaritalStatusContext.Delete(maritalStatusId);
+                this.MaritalStatusRepository.Delete(maritalStatusId);
             }
             catch (UnauthorizedException)
             {

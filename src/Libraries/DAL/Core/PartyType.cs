@@ -16,7 +16,7 @@ namespace MixERP.Net.Schemas.Core.Data
     /// <summary>
     /// Provides simplified data access features to perform SCRUD operation on the database table "core.party_types".
     /// </summary>
-    public class PartyType : DbAccess
+    public class PartyType : DbAccess, IPartyTypeRepository
     {
         /// <summary>
         /// The schema of this table. Returns literal "core".
@@ -73,7 +73,7 @@ namespace MixERP.Net.Schemas.Core.Data
         }
 
         /// <summary>
-        /// Executes a select query on the table "core.party_types" to return a all instances of the "PartyType" class. 
+        /// Executes a select query on the table "core.party_types" to return all instances of the "PartyType" class. 
         /// </summary>
         /// <returns>Returns a non-live, non-mapped instances of "PartyType" class.</returns>
         /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
@@ -102,7 +102,7 @@ namespace MixERP.Net.Schemas.Core.Data
         }
 
         /// <summary>
-        /// Executes a select query on the table "core.party_types" to return a all instances of the "PartyType" class to export. 
+        /// Executes a select query on the table "core.party_types" to return all instances of the "PartyType" class to export. 
         /// </summary>
         /// <returns>Returns a non-live, non-mapped instances of "PartyType" class.</returns>
         /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
@@ -158,6 +158,125 @@ namespace MixERP.Net.Schemas.Core.Data
 
             const string sql = "SELECT * FROM core.party_types WHERE party_type_id=@0;";
             return Factory.Get<MixERP.Net.Entities.Core.PartyType>(this._Catalog, sql, partyTypeId).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Gets the first record of the table "core.party_types". 
+        /// </summary>
+        /// <returns>Returns a non-live, non-mapped instance of "PartyType" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.Core.PartyType GetFirst()
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the first record of entity \"PartyType\" was denied to the user with Login ID {_LoginId}", this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM core.party_types ORDER BY party_type_id LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.Core.PartyType>(this._Catalog, sql).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Gets the previous record of the table "core.party_types" sorted by partyTypeId.
+        /// </summary>
+        /// <param name="partyTypeId">The column "party_type_id" parameter used to find the next record.</param>
+        /// <returns>Returns a non-live, non-mapped instance of "PartyType" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.Core.PartyType GetPrevious(int partyTypeId)
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the previous entity of \"PartyType\" by \"PartyTypeId\" with value {PartyTypeId} was denied to the user with Login ID {_LoginId}", partyTypeId, this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM core.party_types WHERE party_type_id < @0 ORDER BY party_type_id DESC LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.Core.PartyType>(this._Catalog, sql, partyTypeId).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Gets the next record of the table "core.party_types" sorted by partyTypeId.
+        /// </summary>
+        /// <param name="partyTypeId">The column "party_type_id" parameter used to find the next record.</param>
+        /// <returns>Returns a non-live, non-mapped instance of "PartyType" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.Core.PartyType GetNext(int partyTypeId)
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the next entity of \"PartyType\" by \"PartyTypeId\" with value {PartyTypeId} was denied to the user with Login ID {_LoginId}", partyTypeId, this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM core.party_types WHERE party_type_id > @0 ORDER BY party_type_id LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.Core.PartyType>(this._Catalog, sql, partyTypeId).FirstOrDefault();
+        }
+
+
+        /// <summary>
+        /// Gets the last record of the table "core.party_types". 
+        /// </summary>
+        /// <returns>Returns a non-live, non-mapped instance of "PartyType" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.Core.PartyType GetLast()
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the last record of entity \"PartyType\" was denied to the user with Login ID {_LoginId}", this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM core.party_types ORDER BY party_type_id DESC LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.Core.PartyType>(this._Catalog, sql).FirstOrDefault();
         }
 
         /// <summary>
@@ -559,7 +678,7 @@ namespace MixERP.Net.Schemas.Core.Data
             return Factory.Get<MixERP.Net.Entities.Core.PartyType>(this._Catalog, sql, offset);
         }
 
-        private List<EntityParser.Filter> GetFilters(string catalog, string filterName)
+        public List<EntityParser.Filter> GetFilters(string catalog, string filterName)
         {
             const string sql = "SELECT * FROM core.filters WHERE object_name='core.party_types' AND lower(filter_name)=lower(@0);";
             return Factory.Get<EntityParser.Filter>(catalog, sql, filterName).ToList();

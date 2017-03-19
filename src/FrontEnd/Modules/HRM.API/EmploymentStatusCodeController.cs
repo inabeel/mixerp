@@ -12,6 +12,7 @@ using MixERP.Net.Framework;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using PetaPoco;
+using MixERP.Net.Core.Modules.HRM.Data;
 
 namespace MixERP.Net.Api.HRM
 {
@@ -22,9 +23,9 @@ namespace MixERP.Net.Api.HRM
     public class EmploymentStatusCodeController : ApiController
     {
         /// <summary>
-        ///     The EmploymentStatusCode data context.
+        ///     The EmploymentStatusCode repository.
         /// </summary>
-        private readonly MixERP.Net.Core.Modules.HRM.Data.EmploymentStatusCode EmploymentStatusCodeContext;
+        private readonly IEmploymentStatusCodeRepository EmploymentStatusCodeRepository;
 
         public EmploymentStatusCodeController()
         {
@@ -33,12 +34,22 @@ namespace MixERP.Net.Api.HRM
             this._OfficeId = AppUsers.GetCurrent().View.OfficeId.ToInt();
             this._Catalog = AppUsers.GetCurrentUserDB();
 
-            this.EmploymentStatusCodeContext = new MixERP.Net.Core.Modules.HRM.Data.EmploymentStatusCode
+            this.EmploymentStatusCodeRepository = new MixERP.Net.Core.Modules.HRM.Data.EmploymentStatusCode
             {
                 _Catalog = this._Catalog,
                 _LoginId = this._LoginId,
                 _UserId = this._UserId
             };
+        }
+
+        public EmploymentStatusCodeController(IEmploymentStatusCodeRepository repository, string catalog, LoginView view)
+        {
+            this._LoginId = view.LoginId.ToLong();
+            this._UserId = view.UserId.ToInt();
+            this._OfficeId = view.OfficeId.ToInt();
+            this._Catalog = catalog;
+
+            this.EmploymentStatusCodeRepository = repository;
         }
 
         public long _LoginId { get; }
@@ -55,6 +66,11 @@ namespace MixERP.Net.Api.HRM
         [Route("~/api/hrm/employment-status-code/meta")]
         public EntityView GetEntityView()
         {
+            if (this._LoginId == 0)
+            {
+                return new EntityView();
+            }
+
             return new EntityView
             {
                 PrimaryKey = "employment_status_code_id",
@@ -80,7 +96,7 @@ namespace MixERP.Net.Api.HRM
         {
             try
             {
-                return this.EmploymentStatusCodeContext.Count();
+                return this.EmploymentStatusCodeRepository.Count();
             }
             catch (UnauthorizedException)
             {
@@ -111,7 +127,7 @@ namespace MixERP.Net.Api.HRM
         {
             try
             {
-                return this.EmploymentStatusCodeContext.GetAll();
+                return this.EmploymentStatusCodeRepository.GetAll();
             }
             catch (UnauthorizedException)
             {
@@ -142,7 +158,7 @@ namespace MixERP.Net.Api.HRM
         {
             try
             {
-                return this.EmploymentStatusCodeContext.Export();
+                return this.EmploymentStatusCodeRepository.Export();
             }
             catch (UnauthorizedException)
             {
@@ -174,7 +190,7 @@ namespace MixERP.Net.Api.HRM
         {
             try
             {
-                return this.EmploymentStatusCodeContext.Get(employmentStatusCodeId);
+                return this.EmploymentStatusCodeRepository.Get(employmentStatusCodeId);
             }
             catch (UnauthorizedException)
             {
@@ -201,7 +217,133 @@ namespace MixERP.Net.Api.HRM
         {
             try
             {
-                return this.EmploymentStatusCodeContext.Get(employmentStatusCodeIds);
+                return this.EmploymentStatusCodeRepository.Get(employmentStatusCodeIds);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the first instance of employment status code.
+        /// </summary>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("first")]
+        [Route("~/api/hrm/employment-status-code/first")]
+        public MixERP.Net.Entities.HRM.EmploymentStatusCode GetFirst()
+        {
+            try
+            {
+                return this.EmploymentStatusCodeRepository.GetFirst();
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the previous instance of employment status code.
+        /// </summary>
+        /// <param name="employmentStatusCodeId">Enter EmploymentStatusCodeId to search for.</param>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("previous/{employmentStatusCodeId}")]
+        [Route("~/api/hrm/employment-status-code/previous/{employmentStatusCodeId}")]
+        public MixERP.Net.Entities.HRM.EmploymentStatusCode GetPrevious(int employmentStatusCodeId)
+        {
+            try
+            {
+                return this.EmploymentStatusCodeRepository.GetPrevious(employmentStatusCodeId);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the next instance of employment status code.
+        /// </summary>
+        /// <param name="employmentStatusCodeId">Enter EmploymentStatusCodeId to search for.</param>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("next/{employmentStatusCodeId}")]
+        [Route("~/api/hrm/employment-status-code/next/{employmentStatusCodeId}")]
+        public MixERP.Net.Entities.HRM.EmploymentStatusCode GetNext(int employmentStatusCodeId)
+        {
+            try
+            {
+                return this.EmploymentStatusCodeRepository.GetNext(employmentStatusCodeId);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the last instance of employment status code.
+        /// </summary>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("last")]
+        [Route("~/api/hrm/employment-status-code/last")]
+        public MixERP.Net.Entities.HRM.EmploymentStatusCode GetLast()
+        {
+            try
+            {
+                return this.EmploymentStatusCodeRepository.GetLast();
             }
             catch (UnauthorizedException)
             {
@@ -232,7 +374,7 @@ namespace MixERP.Net.Api.HRM
         {
             try
             {
-                return this.EmploymentStatusCodeContext.GetPaginatedResult();
+                return this.EmploymentStatusCodeRepository.GetPaginatedResult();
             }
             catch (UnauthorizedException)
             {
@@ -264,7 +406,7 @@ namespace MixERP.Net.Api.HRM
         {
             try
             {
-                return this.EmploymentStatusCodeContext.GetPaginatedResult(pageNumber);
+                return this.EmploymentStatusCodeRepository.GetPaginatedResult(pageNumber);
             }
             catch (UnauthorizedException)
             {
@@ -297,7 +439,7 @@ namespace MixERP.Net.Api.HRM
             try
             {
                 List<EntityParser.Filter> f = filters.ToObject<List<EntityParser.Filter>>(JsonHelper.GetJsonSerializer());
-                return this.EmploymentStatusCodeContext.CountWhere(f);
+                return this.EmploymentStatusCodeRepository.CountWhere(f);
             }
             catch (UnauthorizedException)
             {
@@ -331,7 +473,7 @@ namespace MixERP.Net.Api.HRM
             try
             {
                 List<EntityParser.Filter> f = filters.ToObject<List<EntityParser.Filter>>(JsonHelper.GetJsonSerializer());
-                return this.EmploymentStatusCodeContext.GetWhere(pageNumber, f);
+                return this.EmploymentStatusCodeRepository.GetWhere(pageNumber, f);
             }
             catch (UnauthorizedException)
             {
@@ -363,7 +505,7 @@ namespace MixERP.Net.Api.HRM
         {
             try
             {
-                return this.EmploymentStatusCodeContext.CountFiltered(filterName);
+                return this.EmploymentStatusCodeRepository.CountFiltered(filterName);
             }
             catch (UnauthorizedException)
             {
@@ -396,7 +538,7 @@ namespace MixERP.Net.Api.HRM
         {
             try
             {
-                return this.EmploymentStatusCodeContext.GetFiltered(pageNumber, filterName);
+                return this.EmploymentStatusCodeRepository.GetFiltered(pageNumber, filterName);
             }
             catch (UnauthorizedException)
             {
@@ -427,7 +569,7 @@ namespace MixERP.Net.Api.HRM
         {
             try
             {
-                return this.EmploymentStatusCodeContext.GetDisplayFields();
+                return this.EmploymentStatusCodeRepository.GetDisplayFields();
             }
             catch (UnauthorizedException)
             {
@@ -458,7 +600,7 @@ namespace MixERP.Net.Api.HRM
         {
             try
             {
-                return this.EmploymentStatusCodeContext.GetCustomFields(null);
+                return this.EmploymentStatusCodeRepository.GetCustomFields(null);
             }
             catch (UnauthorizedException)
             {
@@ -489,7 +631,7 @@ namespace MixERP.Net.Api.HRM
         {
             try
             {
-                return this.EmploymentStatusCodeContext.GetCustomFields(resourceId);
+                return this.EmploymentStatusCodeRepository.GetCustomFields(resourceId);
             }
             catch (UnauthorizedException)
             {
@@ -528,7 +670,7 @@ namespace MixERP.Net.Api.HRM
 
             try
             {
-                return this.EmploymentStatusCodeContext.AddOrEdit(employmentStatusCode, customFields);
+                return this.EmploymentStatusCodeRepository.AddOrEdit(employmentStatusCode, customFields);
             }
             catch (UnauthorizedException)
             {
@@ -564,7 +706,7 @@ namespace MixERP.Net.Api.HRM
 
             try
             {
-                this.EmploymentStatusCodeContext.Add(employmentStatusCode);
+                this.EmploymentStatusCodeRepository.Add(employmentStatusCode);
             }
             catch (UnauthorizedException)
             {
@@ -601,7 +743,7 @@ namespace MixERP.Net.Api.HRM
 
             try
             {
-                this.EmploymentStatusCodeContext.Update(employmentStatusCode, employmentStatusCodeId);
+                this.EmploymentStatusCodeRepository.Update(employmentStatusCode, employmentStatusCodeId);
             }
             catch (UnauthorizedException)
             {
@@ -646,7 +788,7 @@ namespace MixERP.Net.Api.HRM
 
             try
             {
-                return this.EmploymentStatusCodeContext.BulkImport(employmentStatusCodeCollection);
+                return this.EmploymentStatusCodeRepository.BulkImport(employmentStatusCodeCollection);
             }
             catch (UnauthorizedException)
             {
@@ -677,7 +819,7 @@ namespace MixERP.Net.Api.HRM
         {
             try
             {
-                this.EmploymentStatusCodeContext.Delete(employmentStatusCodeId);
+                this.EmploymentStatusCodeRepository.Delete(employmentStatusCodeId);
             }
             catch (UnauthorizedException)
             {

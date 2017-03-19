@@ -12,6 +12,7 @@ using MixERP.Net.Framework;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using PetaPoco;
+using MixERP.Net.Schemas.Config.Data;
 
 namespace MixERP.Net.Api.Config
 {
@@ -22,9 +23,9 @@ namespace MixERP.Net.Api.Config
     public class SwitchController : ApiController
     {
         /// <summary>
-        ///     The Switch data context.
+        ///     The Switch repository.
         /// </summary>
-        private readonly MixERP.Net.Schemas.Config.Data.Switch SwitchContext;
+        private readonly ISwitchRepository SwitchRepository;
 
         public SwitchController()
         {
@@ -33,12 +34,22 @@ namespace MixERP.Net.Api.Config
             this._OfficeId = AppUsers.GetCurrent().View.OfficeId.ToInt();
             this._Catalog = AppUsers.GetCurrentUserDB();
 
-            this.SwitchContext = new MixERP.Net.Schemas.Config.Data.Switch
+            this.SwitchRepository = new MixERP.Net.Schemas.Config.Data.Switch
             {
                 _Catalog = this._Catalog,
                 _LoginId = this._LoginId,
                 _UserId = this._UserId
             };
+        }
+
+        public SwitchController(ISwitchRepository repository, string catalog, LoginView view)
+        {
+            this._LoginId = view.LoginId.ToLong();
+            this._UserId = view.UserId.ToInt();
+            this._OfficeId = view.OfficeId.ToInt();
+            this._Catalog = catalog;
+
+            this.SwitchRepository = repository;
         }
 
         public long _LoginId { get; }
@@ -55,6 +66,11 @@ namespace MixERP.Net.Api.Config
         [Route("~/api/config/switch/meta")]
         public EntityView GetEntityView()
         {
+            if (this._LoginId == 0)
+            {
+                return new EntityView();
+            }
+
             return new EntityView
             {
                 PrimaryKey = "key",
@@ -79,7 +95,7 @@ namespace MixERP.Net.Api.Config
         {
             try
             {
-                return this.SwitchContext.Count();
+                return this.SwitchRepository.Count();
             }
             catch (UnauthorizedException)
             {
@@ -110,7 +126,7 @@ namespace MixERP.Net.Api.Config
         {
             try
             {
-                return this.SwitchContext.GetAll();
+                return this.SwitchRepository.GetAll();
             }
             catch (UnauthorizedException)
             {
@@ -141,7 +157,7 @@ namespace MixERP.Net.Api.Config
         {
             try
             {
-                return this.SwitchContext.Export();
+                return this.SwitchRepository.Export();
             }
             catch (UnauthorizedException)
             {
@@ -173,7 +189,7 @@ namespace MixERP.Net.Api.Config
         {
             try
             {
-                return this.SwitchContext.Get(key);
+                return this.SwitchRepository.Get(key);
             }
             catch (UnauthorizedException)
             {
@@ -200,7 +216,133 @@ namespace MixERP.Net.Api.Config
         {
             try
             {
-                return this.SwitchContext.Get(keys);
+                return this.SwitchRepository.Get(keys);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the first instance of switch.
+        /// </summary>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("first")]
+        [Route("~/api/config/switch/first")]
+        public MixERP.Net.Entities.Config.Switch GetFirst()
+        {
+            try
+            {
+                return this.SwitchRepository.GetFirst();
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the previous instance of switch.
+        /// </summary>
+        /// <param name="key">Enter Key to search for.</param>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("previous/{key}")]
+        [Route("~/api/config/switch/previous/{key}")]
+        public MixERP.Net.Entities.Config.Switch GetPrevious(string key)
+        {
+            try
+            {
+                return this.SwitchRepository.GetPrevious(key);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the next instance of switch.
+        /// </summary>
+        /// <param name="key">Enter Key to search for.</param>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("next/{key}")]
+        [Route("~/api/config/switch/next/{key}")]
+        public MixERP.Net.Entities.Config.Switch GetNext(string key)
+        {
+            try
+            {
+                return this.SwitchRepository.GetNext(key);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the last instance of switch.
+        /// </summary>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("last")]
+        [Route("~/api/config/switch/last")]
+        public MixERP.Net.Entities.Config.Switch GetLast()
+        {
+            try
+            {
+                return this.SwitchRepository.GetLast();
             }
             catch (UnauthorizedException)
             {
@@ -231,7 +373,7 @@ namespace MixERP.Net.Api.Config
         {
             try
             {
-                return this.SwitchContext.GetPaginatedResult();
+                return this.SwitchRepository.GetPaginatedResult();
             }
             catch (UnauthorizedException)
             {
@@ -263,7 +405,7 @@ namespace MixERP.Net.Api.Config
         {
             try
             {
-                return this.SwitchContext.GetPaginatedResult(pageNumber);
+                return this.SwitchRepository.GetPaginatedResult(pageNumber);
             }
             catch (UnauthorizedException)
             {
@@ -296,7 +438,7 @@ namespace MixERP.Net.Api.Config
             try
             {
                 List<EntityParser.Filter> f = filters.ToObject<List<EntityParser.Filter>>(JsonHelper.GetJsonSerializer());
-                return this.SwitchContext.CountWhere(f);
+                return this.SwitchRepository.CountWhere(f);
             }
             catch (UnauthorizedException)
             {
@@ -330,7 +472,7 @@ namespace MixERP.Net.Api.Config
             try
             {
                 List<EntityParser.Filter> f = filters.ToObject<List<EntityParser.Filter>>(JsonHelper.GetJsonSerializer());
-                return this.SwitchContext.GetWhere(pageNumber, f);
+                return this.SwitchRepository.GetWhere(pageNumber, f);
             }
             catch (UnauthorizedException)
             {
@@ -362,7 +504,7 @@ namespace MixERP.Net.Api.Config
         {
             try
             {
-                return this.SwitchContext.CountFiltered(filterName);
+                return this.SwitchRepository.CountFiltered(filterName);
             }
             catch (UnauthorizedException)
             {
@@ -395,7 +537,7 @@ namespace MixERP.Net.Api.Config
         {
             try
             {
-                return this.SwitchContext.GetFiltered(pageNumber, filterName);
+                return this.SwitchRepository.GetFiltered(pageNumber, filterName);
             }
             catch (UnauthorizedException)
             {
@@ -426,7 +568,7 @@ namespace MixERP.Net.Api.Config
         {
             try
             {
-                return this.SwitchContext.GetDisplayFields();
+                return this.SwitchRepository.GetDisplayFields();
             }
             catch (UnauthorizedException)
             {
@@ -457,7 +599,7 @@ namespace MixERP.Net.Api.Config
         {
             try
             {
-                return this.SwitchContext.GetCustomFields(null);
+                return this.SwitchRepository.GetCustomFields(null);
             }
             catch (UnauthorizedException)
             {
@@ -488,7 +630,7 @@ namespace MixERP.Net.Api.Config
         {
             try
             {
-                return this.SwitchContext.GetCustomFields(resourceId);
+                return this.SwitchRepository.GetCustomFields(resourceId);
             }
             catch (UnauthorizedException)
             {
@@ -527,7 +669,7 @@ namespace MixERP.Net.Api.Config
 
             try
             {
-                return this.SwitchContext.AddOrEdit(switchParameter, customFields);
+                return this.SwitchRepository.AddOrEdit(switchParameter, customFields);
             }
             catch (UnauthorizedException)
             {
@@ -563,7 +705,7 @@ namespace MixERP.Net.Api.Config
 
             try
             {
-                this.SwitchContext.Add(switchParameter);
+                this.SwitchRepository.Add(switchParameter);
             }
             catch (UnauthorizedException)
             {
@@ -600,7 +742,7 @@ namespace MixERP.Net.Api.Config
 
             try
             {
-                this.SwitchContext.Update(switchParameter, key);
+                this.SwitchRepository.Update(switchParameter, key);
             }
             catch (UnauthorizedException)
             {
@@ -645,7 +787,7 @@ namespace MixERP.Net.Api.Config
 
             try
             {
-                return this.SwitchContext.BulkImport(switchParameterCollection);
+                return this.SwitchRepository.BulkImport(switchParameterCollection);
             }
             catch (UnauthorizedException)
             {
@@ -676,7 +818,7 @@ namespace MixERP.Net.Api.Config
         {
             try
             {
-                this.SwitchContext.Delete(key);
+                this.SwitchRepository.Delete(key);
             }
             catch (UnauthorizedException)
             {

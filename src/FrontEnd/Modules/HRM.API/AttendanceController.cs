@@ -12,6 +12,7 @@ using MixERP.Net.Framework;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using PetaPoco;
+using MixERP.Net.Core.Modules.HRM.Data;
 
 namespace MixERP.Net.Api.HRM
 {
@@ -22,9 +23,9 @@ namespace MixERP.Net.Api.HRM
     public class AttendanceController : ApiController
     {
         /// <summary>
-        ///     The Attendance data context.
+        ///     The Attendance repository.
         /// </summary>
-        private readonly MixERP.Net.Core.Modules.HRM.Data.Attendance AttendanceContext;
+        private readonly IAttendanceRepository AttendanceRepository;
 
         public AttendanceController()
         {
@@ -33,12 +34,22 @@ namespace MixERP.Net.Api.HRM
             this._OfficeId = AppUsers.GetCurrent().View.OfficeId.ToInt();
             this._Catalog = AppUsers.GetCurrentUserDB();
 
-            this.AttendanceContext = new MixERP.Net.Core.Modules.HRM.Data.Attendance
+            this.AttendanceRepository = new MixERP.Net.Core.Modules.HRM.Data.Attendance
             {
                 _Catalog = this._Catalog,
                 _LoginId = this._LoginId,
                 _UserId = this._UserId
             };
+        }
+
+        public AttendanceController(IAttendanceRepository repository, string catalog, LoginView view)
+        {
+            this._LoginId = view.LoginId.ToLong();
+            this._UserId = view.UserId.ToInt();
+            this._OfficeId = view.OfficeId.ToInt();
+            this._Catalog = catalog;
+
+            this.AttendanceRepository = repository;
         }
 
         public long _LoginId { get; }
@@ -55,6 +66,11 @@ namespace MixERP.Net.Api.HRM
         [Route("~/api/hrm/attendance/meta")]
         public EntityView GetEntityView()
         {
+            if (this._LoginId == 0)
+            {
+                return new EntityView();
+            }
+
             return new EntityView
             {
                 PrimaryKey = "attendance_id",
@@ -87,7 +103,7 @@ namespace MixERP.Net.Api.HRM
         {
             try
             {
-                return this.AttendanceContext.Count();
+                return this.AttendanceRepository.Count();
             }
             catch (UnauthorizedException)
             {
@@ -118,7 +134,7 @@ namespace MixERP.Net.Api.HRM
         {
             try
             {
-                return this.AttendanceContext.GetAll();
+                return this.AttendanceRepository.GetAll();
             }
             catch (UnauthorizedException)
             {
@@ -149,7 +165,7 @@ namespace MixERP.Net.Api.HRM
         {
             try
             {
-                return this.AttendanceContext.Export();
+                return this.AttendanceRepository.Export();
             }
             catch (UnauthorizedException)
             {
@@ -181,7 +197,7 @@ namespace MixERP.Net.Api.HRM
         {
             try
             {
-                return this.AttendanceContext.Get(attendanceId);
+                return this.AttendanceRepository.Get(attendanceId);
             }
             catch (UnauthorizedException)
             {
@@ -208,7 +224,133 @@ namespace MixERP.Net.Api.HRM
         {
             try
             {
-                return this.AttendanceContext.Get(attendanceIds);
+                return this.AttendanceRepository.Get(attendanceIds);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the first instance of attendance.
+        /// </summary>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("first")]
+        [Route("~/api/hrm/attendance/first")]
+        public MixERP.Net.Entities.HRM.Attendance GetFirst()
+        {
+            try
+            {
+                return this.AttendanceRepository.GetFirst();
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the previous instance of attendance.
+        /// </summary>
+        /// <param name="attendanceId">Enter AttendanceId to search for.</param>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("previous/{attendanceId}")]
+        [Route("~/api/hrm/attendance/previous/{attendanceId}")]
+        public MixERP.Net.Entities.HRM.Attendance GetPrevious(long attendanceId)
+        {
+            try
+            {
+                return this.AttendanceRepository.GetPrevious(attendanceId);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the next instance of attendance.
+        /// </summary>
+        /// <param name="attendanceId">Enter AttendanceId to search for.</param>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("next/{attendanceId}")]
+        [Route("~/api/hrm/attendance/next/{attendanceId}")]
+        public MixERP.Net.Entities.HRM.Attendance GetNext(long attendanceId)
+        {
+            try
+            {
+                return this.AttendanceRepository.GetNext(attendanceId);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the last instance of attendance.
+        /// </summary>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("last")]
+        [Route("~/api/hrm/attendance/last")]
+        public MixERP.Net.Entities.HRM.Attendance GetLast()
+        {
+            try
+            {
+                return this.AttendanceRepository.GetLast();
             }
             catch (UnauthorizedException)
             {
@@ -239,7 +381,7 @@ namespace MixERP.Net.Api.HRM
         {
             try
             {
-                return this.AttendanceContext.GetPaginatedResult();
+                return this.AttendanceRepository.GetPaginatedResult();
             }
             catch (UnauthorizedException)
             {
@@ -271,7 +413,7 @@ namespace MixERP.Net.Api.HRM
         {
             try
             {
-                return this.AttendanceContext.GetPaginatedResult(pageNumber);
+                return this.AttendanceRepository.GetPaginatedResult(pageNumber);
             }
             catch (UnauthorizedException)
             {
@@ -304,7 +446,7 @@ namespace MixERP.Net.Api.HRM
             try
             {
                 List<EntityParser.Filter> f = filters.ToObject<List<EntityParser.Filter>>(JsonHelper.GetJsonSerializer());
-                return this.AttendanceContext.CountWhere(f);
+                return this.AttendanceRepository.CountWhere(f);
             }
             catch (UnauthorizedException)
             {
@@ -338,7 +480,7 @@ namespace MixERP.Net.Api.HRM
             try
             {
                 List<EntityParser.Filter> f = filters.ToObject<List<EntityParser.Filter>>(JsonHelper.GetJsonSerializer());
-                return this.AttendanceContext.GetWhere(pageNumber, f);
+                return this.AttendanceRepository.GetWhere(pageNumber, f);
             }
             catch (UnauthorizedException)
             {
@@ -370,7 +512,7 @@ namespace MixERP.Net.Api.HRM
         {
             try
             {
-                return this.AttendanceContext.CountFiltered(filterName);
+                return this.AttendanceRepository.CountFiltered(filterName);
             }
             catch (UnauthorizedException)
             {
@@ -403,7 +545,7 @@ namespace MixERP.Net.Api.HRM
         {
             try
             {
-                return this.AttendanceContext.GetFiltered(pageNumber, filterName);
+                return this.AttendanceRepository.GetFiltered(pageNumber, filterName);
             }
             catch (UnauthorizedException)
             {
@@ -434,7 +576,7 @@ namespace MixERP.Net.Api.HRM
         {
             try
             {
-                return this.AttendanceContext.GetDisplayFields();
+                return this.AttendanceRepository.GetDisplayFields();
             }
             catch (UnauthorizedException)
             {
@@ -465,7 +607,7 @@ namespace MixERP.Net.Api.HRM
         {
             try
             {
-                return this.AttendanceContext.GetCustomFields(null);
+                return this.AttendanceRepository.GetCustomFields(null);
             }
             catch (UnauthorizedException)
             {
@@ -496,7 +638,7 @@ namespace MixERP.Net.Api.HRM
         {
             try
             {
-                return this.AttendanceContext.GetCustomFields(resourceId);
+                return this.AttendanceRepository.GetCustomFields(resourceId);
             }
             catch (UnauthorizedException)
             {
@@ -535,7 +677,7 @@ namespace MixERP.Net.Api.HRM
 
             try
             {
-                return this.AttendanceContext.AddOrEdit(attendance, customFields);
+                return this.AttendanceRepository.AddOrEdit(attendance, customFields);
             }
             catch (UnauthorizedException)
             {
@@ -571,7 +713,7 @@ namespace MixERP.Net.Api.HRM
 
             try
             {
-                this.AttendanceContext.Add(attendance);
+                this.AttendanceRepository.Add(attendance);
             }
             catch (UnauthorizedException)
             {
@@ -608,7 +750,7 @@ namespace MixERP.Net.Api.HRM
 
             try
             {
-                this.AttendanceContext.Update(attendance, attendanceId);
+                this.AttendanceRepository.Update(attendance, attendanceId);
             }
             catch (UnauthorizedException)
             {
@@ -653,7 +795,7 @@ namespace MixERP.Net.Api.HRM
 
             try
             {
-                return this.AttendanceContext.BulkImport(attendanceCollection);
+                return this.AttendanceRepository.BulkImport(attendanceCollection);
             }
             catch (UnauthorizedException)
             {
@@ -684,7 +826,7 @@ namespace MixERP.Net.Api.HRM
         {
             try
             {
-                this.AttendanceContext.Delete(attendanceId);
+                this.AttendanceRepository.Delete(attendanceId);
             }
             catch (UnauthorizedException)
             {

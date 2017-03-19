@@ -12,6 +12,7 @@ using MixERP.Net.Framework;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using PetaPoco;
+using MixERP.Net.Schemas.Core.Data;
 
 namespace MixERP.Net.Api.Core
 {
@@ -22,9 +23,9 @@ namespace MixERP.Net.Api.Core
     public class SalesTeamController : ApiController
     {
         /// <summary>
-        ///     The SalesTeam data context.
+        ///     The SalesTeam repository.
         /// </summary>
-        private readonly MixERP.Net.Schemas.Core.Data.SalesTeam SalesTeamContext;
+        private readonly ISalesTeamRepository SalesTeamRepository;
 
         public SalesTeamController()
         {
@@ -33,12 +34,22 @@ namespace MixERP.Net.Api.Core
             this._OfficeId = AppUsers.GetCurrent().View.OfficeId.ToInt();
             this._Catalog = AppUsers.GetCurrentUserDB();
 
-            this.SalesTeamContext = new MixERP.Net.Schemas.Core.Data.SalesTeam
+            this.SalesTeamRepository = new MixERP.Net.Schemas.Core.Data.SalesTeam
             {
                 _Catalog = this._Catalog,
                 _LoginId = this._LoginId,
                 _UserId = this._UserId
             };
+        }
+
+        public SalesTeamController(ISalesTeamRepository repository, string catalog, LoginView view)
+        {
+            this._LoginId = view.LoginId.ToLong();
+            this._UserId = view.UserId.ToInt();
+            this._OfficeId = view.OfficeId.ToInt();
+            this._Catalog = catalog;
+
+            this.SalesTeamRepository = repository;
         }
 
         public long _LoginId { get; }
@@ -55,6 +66,11 @@ namespace MixERP.Net.Api.Core
         [Route("~/api/core/sales-team/meta")]
         public EntityView GetEntityView()
         {
+            if (this._LoginId == 0)
+            {
+                return new EntityView();
+            }
+
             return new EntityView
             {
                 PrimaryKey = "sales_team_id",
@@ -80,7 +96,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.SalesTeamContext.Count();
+                return this.SalesTeamRepository.Count();
             }
             catch (UnauthorizedException)
             {
@@ -111,7 +127,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.SalesTeamContext.GetAll();
+                return this.SalesTeamRepository.GetAll();
             }
             catch (UnauthorizedException)
             {
@@ -142,7 +158,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.SalesTeamContext.Export();
+                return this.SalesTeamRepository.Export();
             }
             catch (UnauthorizedException)
             {
@@ -174,7 +190,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.SalesTeamContext.Get(salesTeamId);
+                return this.SalesTeamRepository.Get(salesTeamId);
             }
             catch (UnauthorizedException)
             {
@@ -201,7 +217,133 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.SalesTeamContext.Get(salesTeamIds);
+                return this.SalesTeamRepository.Get(salesTeamIds);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the first instance of sales team.
+        /// </summary>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("first")]
+        [Route("~/api/core/sales-team/first")]
+        public MixERP.Net.Entities.Core.SalesTeam GetFirst()
+        {
+            try
+            {
+                return this.SalesTeamRepository.GetFirst();
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the previous instance of sales team.
+        /// </summary>
+        /// <param name="salesTeamId">Enter SalesTeamId to search for.</param>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("previous/{salesTeamId}")]
+        [Route("~/api/core/sales-team/previous/{salesTeamId}")]
+        public MixERP.Net.Entities.Core.SalesTeam GetPrevious(int salesTeamId)
+        {
+            try
+            {
+                return this.SalesTeamRepository.GetPrevious(salesTeamId);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the next instance of sales team.
+        /// </summary>
+        /// <param name="salesTeamId">Enter SalesTeamId to search for.</param>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("next/{salesTeamId}")]
+        [Route("~/api/core/sales-team/next/{salesTeamId}")]
+        public MixERP.Net.Entities.Core.SalesTeam GetNext(int salesTeamId)
+        {
+            try
+            {
+                return this.SalesTeamRepository.GetNext(salesTeamId);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the last instance of sales team.
+        /// </summary>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("last")]
+        [Route("~/api/core/sales-team/last")]
+        public MixERP.Net.Entities.Core.SalesTeam GetLast()
+        {
+            try
+            {
+                return this.SalesTeamRepository.GetLast();
             }
             catch (UnauthorizedException)
             {
@@ -232,7 +374,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.SalesTeamContext.GetPaginatedResult();
+                return this.SalesTeamRepository.GetPaginatedResult();
             }
             catch (UnauthorizedException)
             {
@@ -264,7 +406,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.SalesTeamContext.GetPaginatedResult(pageNumber);
+                return this.SalesTeamRepository.GetPaginatedResult(pageNumber);
             }
             catch (UnauthorizedException)
             {
@@ -297,7 +439,7 @@ namespace MixERP.Net.Api.Core
             try
             {
                 List<EntityParser.Filter> f = filters.ToObject<List<EntityParser.Filter>>(JsonHelper.GetJsonSerializer());
-                return this.SalesTeamContext.CountWhere(f);
+                return this.SalesTeamRepository.CountWhere(f);
             }
             catch (UnauthorizedException)
             {
@@ -331,7 +473,7 @@ namespace MixERP.Net.Api.Core
             try
             {
                 List<EntityParser.Filter> f = filters.ToObject<List<EntityParser.Filter>>(JsonHelper.GetJsonSerializer());
-                return this.SalesTeamContext.GetWhere(pageNumber, f);
+                return this.SalesTeamRepository.GetWhere(pageNumber, f);
             }
             catch (UnauthorizedException)
             {
@@ -363,7 +505,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.SalesTeamContext.CountFiltered(filterName);
+                return this.SalesTeamRepository.CountFiltered(filterName);
             }
             catch (UnauthorizedException)
             {
@@ -396,7 +538,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.SalesTeamContext.GetFiltered(pageNumber, filterName);
+                return this.SalesTeamRepository.GetFiltered(pageNumber, filterName);
             }
             catch (UnauthorizedException)
             {
@@ -427,7 +569,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.SalesTeamContext.GetDisplayFields();
+                return this.SalesTeamRepository.GetDisplayFields();
             }
             catch (UnauthorizedException)
             {
@@ -458,7 +600,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.SalesTeamContext.GetCustomFields(null);
+                return this.SalesTeamRepository.GetCustomFields(null);
             }
             catch (UnauthorizedException)
             {
@@ -489,7 +631,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.SalesTeamContext.GetCustomFields(resourceId);
+                return this.SalesTeamRepository.GetCustomFields(resourceId);
             }
             catch (UnauthorizedException)
             {
@@ -528,7 +670,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                return this.SalesTeamContext.AddOrEdit(salesTeam, customFields);
+                return this.SalesTeamRepository.AddOrEdit(salesTeam, customFields);
             }
             catch (UnauthorizedException)
             {
@@ -564,7 +706,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                this.SalesTeamContext.Add(salesTeam);
+                this.SalesTeamRepository.Add(salesTeam);
             }
             catch (UnauthorizedException)
             {
@@ -601,7 +743,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                this.SalesTeamContext.Update(salesTeam, salesTeamId);
+                this.SalesTeamRepository.Update(salesTeam, salesTeamId);
             }
             catch (UnauthorizedException)
             {
@@ -646,7 +788,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                return this.SalesTeamContext.BulkImport(salesTeamCollection);
+                return this.SalesTeamRepository.BulkImport(salesTeamCollection);
             }
             catch (UnauthorizedException)
             {
@@ -677,7 +819,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                this.SalesTeamContext.Delete(salesTeamId);
+                this.SalesTeamRepository.Delete(salesTeamId);
             }
             catch (UnauthorizedException)
             {

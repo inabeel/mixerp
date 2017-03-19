@@ -16,7 +16,7 @@ namespace MixERP.Net.Core.Modules.HRM.Data
     /// <summary>
     /// Provides simplified data access features to perform SCRUD operation on the database table "hrm.leave_benefits".
     /// </summary>
-    public class LeaveBenefit : DbAccess
+    public class LeaveBenefit : DbAccess, ILeaveBenefitRepository
     {
         /// <summary>
         /// The schema of this table. Returns literal "hrm".
@@ -73,7 +73,7 @@ namespace MixERP.Net.Core.Modules.HRM.Data
         }
 
         /// <summary>
-        /// Executes a select query on the table "hrm.leave_benefits" to return a all instances of the "LeaveBenefit" class. 
+        /// Executes a select query on the table "hrm.leave_benefits" to return all instances of the "LeaveBenefit" class. 
         /// </summary>
         /// <returns>Returns a non-live, non-mapped instances of "LeaveBenefit" class.</returns>
         /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
@@ -102,7 +102,7 @@ namespace MixERP.Net.Core.Modules.HRM.Data
         }
 
         /// <summary>
-        /// Executes a select query on the table "hrm.leave_benefits" to return a all instances of the "LeaveBenefit" class to export. 
+        /// Executes a select query on the table "hrm.leave_benefits" to return all instances of the "LeaveBenefit" class to export. 
         /// </summary>
         /// <returns>Returns a non-live, non-mapped instances of "LeaveBenefit" class.</returns>
         /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
@@ -158,6 +158,125 @@ namespace MixERP.Net.Core.Modules.HRM.Data
 
             const string sql = "SELECT * FROM hrm.leave_benefits WHERE leave_benefit_id=@0;";
             return Factory.Get<MixERP.Net.Entities.HRM.LeaveBenefit>(this._Catalog, sql, leaveBenefitId).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Gets the first record of the table "hrm.leave_benefits". 
+        /// </summary>
+        /// <returns>Returns a non-live, non-mapped instance of "LeaveBenefit" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.HRM.LeaveBenefit GetFirst()
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the first record of entity \"LeaveBenefit\" was denied to the user with Login ID {_LoginId}", this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM hrm.leave_benefits ORDER BY leave_benefit_id LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.HRM.LeaveBenefit>(this._Catalog, sql).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Gets the previous record of the table "hrm.leave_benefits" sorted by leaveBenefitId.
+        /// </summary>
+        /// <param name="leaveBenefitId">The column "leave_benefit_id" parameter used to find the next record.</param>
+        /// <returns>Returns a non-live, non-mapped instance of "LeaveBenefit" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.HRM.LeaveBenefit GetPrevious(int leaveBenefitId)
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the previous entity of \"LeaveBenefit\" by \"LeaveBenefitId\" with value {LeaveBenefitId} was denied to the user with Login ID {_LoginId}", leaveBenefitId, this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM hrm.leave_benefits WHERE leave_benefit_id < @0 ORDER BY leave_benefit_id DESC LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.HRM.LeaveBenefit>(this._Catalog, sql, leaveBenefitId).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Gets the next record of the table "hrm.leave_benefits" sorted by leaveBenefitId.
+        /// </summary>
+        /// <param name="leaveBenefitId">The column "leave_benefit_id" parameter used to find the next record.</param>
+        /// <returns>Returns a non-live, non-mapped instance of "LeaveBenefit" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.HRM.LeaveBenefit GetNext(int leaveBenefitId)
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the next entity of \"LeaveBenefit\" by \"LeaveBenefitId\" with value {LeaveBenefitId} was denied to the user with Login ID {_LoginId}", leaveBenefitId, this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM hrm.leave_benefits WHERE leave_benefit_id > @0 ORDER BY leave_benefit_id LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.HRM.LeaveBenefit>(this._Catalog, sql, leaveBenefitId).FirstOrDefault();
+        }
+
+
+        /// <summary>
+        /// Gets the last record of the table "hrm.leave_benefits". 
+        /// </summary>
+        /// <returns>Returns a non-live, non-mapped instance of "LeaveBenefit" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.HRM.LeaveBenefit GetLast()
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the last record of entity \"LeaveBenefit\" was denied to the user with Login ID {_LoginId}", this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM hrm.leave_benefits ORDER BY leave_benefit_id DESC LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.HRM.LeaveBenefit>(this._Catalog, sql).FirstOrDefault();
         }
 
         /// <summary>
@@ -559,7 +678,7 @@ namespace MixERP.Net.Core.Modules.HRM.Data
             return Factory.Get<MixERP.Net.Entities.HRM.LeaveBenefit>(this._Catalog, sql, offset);
         }
 
-        private List<EntityParser.Filter> GetFilters(string catalog, string filterName)
+        public List<EntityParser.Filter> GetFilters(string catalog, string filterName)
         {
             const string sql = "SELECT * FROM core.filters WHERE object_name='hrm.leave_benefits' AND lower(filter_name)=lower(@0);";
             return Factory.Get<EntityParser.Filter>(catalog, sql, filterName).ToList();

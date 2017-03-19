@@ -41,6 +41,7 @@ namespace MixERP.Net.FrontEnd
             this.CreateControls(this.Placeholder1);
             this.CreateDimmer(this.Placeholder1);
             this.AddJavascript();
+            CustomInclude.IncludeCustomJavascript(this.Page);
         }
 
         protected void Page_Load(object sender, EventArgs e)
@@ -133,11 +134,7 @@ namespace MixERP.Net.FrontEnd
 
         private void AddJavascript()
         {
-            string challenge = Guid.NewGuid().ToString().Replace("-", "");
-            this.Session["Challenge"] = challenge;
-
-            string script = JSUtility.GetVar("challenge", challenge);
-            script += JSUtility.GetVar("shortDateFormat", CultureManager.GetShortDateFormat());
+            string script = JSUtility.GetVar("shortDateFormat", CultureManager.GetShortDateFormat());
             script += JSUtility.GetVar("thousandSeparator", CultureManager.GetThousandSeparator());
             script += JSUtility.GetVar("decimalSeparator", CultureManager.GetDecimalSeparator());
             script += JSUtility.GetVar("currencyDecimalPlaces", CultureManager.GetCurrencyDecimalPlaces());

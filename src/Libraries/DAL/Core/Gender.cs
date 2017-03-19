@@ -16,7 +16,7 @@ namespace MixERP.Net.Schemas.Core.Data
     /// <summary>
     /// Provides simplified data access features to perform SCRUD operation on the database table "core.genders".
     /// </summary>
-    public class Gender : DbAccess
+    public class Gender : DbAccess, IGenderRepository
     {
         /// <summary>
         /// The schema of this table. Returns literal "core".
@@ -73,7 +73,7 @@ namespace MixERP.Net.Schemas.Core.Data
         }
 
         /// <summary>
-        /// Executes a select query on the table "core.genders" to return a all instances of the "Gender" class. 
+        /// Executes a select query on the table "core.genders" to return all instances of the "Gender" class. 
         /// </summary>
         /// <returns>Returns a non-live, non-mapped instances of "Gender" class.</returns>
         /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
@@ -102,7 +102,7 @@ namespace MixERP.Net.Schemas.Core.Data
         }
 
         /// <summary>
-        /// Executes a select query on the table "core.genders" to return a all instances of the "Gender" class to export. 
+        /// Executes a select query on the table "core.genders" to return all instances of the "Gender" class to export. 
         /// </summary>
         /// <returns>Returns a non-live, non-mapped instances of "Gender" class.</returns>
         /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
@@ -158,6 +158,125 @@ namespace MixERP.Net.Schemas.Core.Data
 
             const string sql = "SELECT * FROM core.genders WHERE gender_code=@0;";
             return Factory.Get<MixERP.Net.Entities.Core.Gender>(this._Catalog, sql, genderCode).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Gets the first record of the table "core.genders". 
+        /// </summary>
+        /// <returns>Returns a non-live, non-mapped instance of "Gender" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.Core.Gender GetFirst()
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the first record of entity \"Gender\" was denied to the user with Login ID {_LoginId}", this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM core.genders ORDER BY gender_code LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.Core.Gender>(this._Catalog, sql).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Gets the previous record of the table "core.genders" sorted by genderCode.
+        /// </summary>
+        /// <param name="genderCode">The column "gender_code" parameter used to find the next record.</param>
+        /// <returns>Returns a non-live, non-mapped instance of "Gender" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.Core.Gender GetPrevious(string genderCode)
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the previous entity of \"Gender\" by \"GenderCode\" with value {GenderCode} was denied to the user with Login ID {_LoginId}", genderCode, this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM core.genders WHERE gender_code < @0 ORDER BY gender_code DESC LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.Core.Gender>(this._Catalog, sql, genderCode).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Gets the next record of the table "core.genders" sorted by genderCode.
+        /// </summary>
+        /// <param name="genderCode">The column "gender_code" parameter used to find the next record.</param>
+        /// <returns>Returns a non-live, non-mapped instance of "Gender" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.Core.Gender GetNext(string genderCode)
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the next entity of \"Gender\" by \"GenderCode\" with value {GenderCode} was denied to the user with Login ID {_LoginId}", genderCode, this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM core.genders WHERE gender_code > @0 ORDER BY gender_code LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.Core.Gender>(this._Catalog, sql, genderCode).FirstOrDefault();
+        }
+
+
+        /// <summary>
+        /// Gets the last record of the table "core.genders". 
+        /// </summary>
+        /// <returns>Returns a non-live, non-mapped instance of "Gender" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.Core.Gender GetLast()
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the last record of entity \"Gender\" was denied to the user with Login ID {_LoginId}", this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM core.genders ORDER BY gender_code DESC LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.Core.Gender>(this._Catalog, sql).FirstOrDefault();
         }
 
         /// <summary>
@@ -300,8 +419,9 @@ namespace MixERP.Net.Schemas.Core.Data
             gender.audit_ts = System.DateTime.UtcNow;
 
             object primaryKeyValue = gender.gender_code;
+            var exists = this.Get(gender.gender_code);
 
-            if (!string.IsNullOrWhiteSpace(gender.gender_code))
+            if (exists != null)
             {
                 primaryKeyValue = gender.gender_code;
                 this.Update(gender, gender.gender_code);
@@ -361,7 +481,7 @@ namespace MixERP.Net.Schemas.Core.Data
                 }
             }
 
-            return Factory.Insert(this._Catalog, gender, "core.genders", "gender_code");
+            return Factory.Insert(this._Catalog, gender, "core.genders", "gender_code", false);
         }
 
         /// <summary>
@@ -559,7 +679,7 @@ namespace MixERP.Net.Schemas.Core.Data
             return Factory.Get<MixERP.Net.Entities.Core.Gender>(this._Catalog, sql, offset);
         }
 
-        private List<EntityParser.Filter> GetFilters(string catalog, string filterName)
+        public List<EntityParser.Filter> GetFilters(string catalog, string filterName)
         {
             const string sql = "SELECT * FROM core.filters WHERE object_name='core.genders' AND lower(filter_name)=lower(@0);";
             return Factory.Get<EntityParser.Filter>(catalog, sql, filterName).ToList();

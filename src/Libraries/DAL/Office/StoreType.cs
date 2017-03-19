@@ -16,7 +16,7 @@ namespace MixERP.Net.Schemas.Office.Data
     /// <summary>
     /// Provides simplified data access features to perform SCRUD operation on the database table "office.store_types".
     /// </summary>
-    public class StoreType : DbAccess
+    public class StoreType : DbAccess, IStoreTypeRepository
     {
         /// <summary>
         /// The schema of this table. Returns literal "office".
@@ -73,7 +73,7 @@ namespace MixERP.Net.Schemas.Office.Data
         }
 
         /// <summary>
-        /// Executes a select query on the table "office.store_types" to return a all instances of the "StoreType" class. 
+        /// Executes a select query on the table "office.store_types" to return all instances of the "StoreType" class. 
         /// </summary>
         /// <returns>Returns a non-live, non-mapped instances of "StoreType" class.</returns>
         /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
@@ -102,7 +102,7 @@ namespace MixERP.Net.Schemas.Office.Data
         }
 
         /// <summary>
-        /// Executes a select query on the table "office.store_types" to return a all instances of the "StoreType" class to export. 
+        /// Executes a select query on the table "office.store_types" to return all instances of the "StoreType" class to export. 
         /// </summary>
         /// <returns>Returns a non-live, non-mapped instances of "StoreType" class.</returns>
         /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
@@ -158,6 +158,125 @@ namespace MixERP.Net.Schemas.Office.Data
 
             const string sql = "SELECT * FROM office.store_types WHERE store_type_id=@0;";
             return Factory.Get<MixERP.Net.Entities.Office.StoreType>(this._Catalog, sql, storeTypeId).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Gets the first record of the table "office.store_types". 
+        /// </summary>
+        /// <returns>Returns a non-live, non-mapped instance of "StoreType" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.Office.StoreType GetFirst()
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the first record of entity \"StoreType\" was denied to the user with Login ID {_LoginId}", this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM office.store_types ORDER BY store_type_id LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.Office.StoreType>(this._Catalog, sql).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Gets the previous record of the table "office.store_types" sorted by storeTypeId.
+        /// </summary>
+        /// <param name="storeTypeId">The column "store_type_id" parameter used to find the next record.</param>
+        /// <returns>Returns a non-live, non-mapped instance of "StoreType" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.Office.StoreType GetPrevious(int storeTypeId)
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the previous entity of \"StoreType\" by \"StoreTypeId\" with value {StoreTypeId} was denied to the user with Login ID {_LoginId}", storeTypeId, this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM office.store_types WHERE store_type_id < @0 ORDER BY store_type_id DESC LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.Office.StoreType>(this._Catalog, sql, storeTypeId).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Gets the next record of the table "office.store_types" sorted by storeTypeId.
+        /// </summary>
+        /// <param name="storeTypeId">The column "store_type_id" parameter used to find the next record.</param>
+        /// <returns>Returns a non-live, non-mapped instance of "StoreType" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.Office.StoreType GetNext(int storeTypeId)
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the next entity of \"StoreType\" by \"StoreTypeId\" with value {StoreTypeId} was denied to the user with Login ID {_LoginId}", storeTypeId, this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM office.store_types WHERE store_type_id > @0 ORDER BY store_type_id LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.Office.StoreType>(this._Catalog, sql, storeTypeId).FirstOrDefault();
+        }
+
+
+        /// <summary>
+        /// Gets the last record of the table "office.store_types". 
+        /// </summary>
+        /// <returns>Returns a non-live, non-mapped instance of "StoreType" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.Office.StoreType GetLast()
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the last record of entity \"StoreType\" was denied to the user with Login ID {_LoginId}", this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM office.store_types ORDER BY store_type_id DESC LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.Office.StoreType>(this._Catalog, sql).FirstOrDefault();
         }
 
         /// <summary>
@@ -559,7 +678,7 @@ namespace MixERP.Net.Schemas.Office.Data
             return Factory.Get<MixERP.Net.Entities.Office.StoreType>(this._Catalog, sql, offset);
         }
 
-        private List<EntityParser.Filter> GetFilters(string catalog, string filterName)
+        public List<EntityParser.Filter> GetFilters(string catalog, string filterName)
         {
             const string sql = "SELECT * FROM core.filters WHERE object_name='office.store_types' AND lower(filter_name)=lower(@0);";
             return Factory.Get<EntityParser.Filter>(catalog, sql, filterName).ToList();

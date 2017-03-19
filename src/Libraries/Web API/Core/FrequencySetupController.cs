@@ -12,6 +12,7 @@ using MixERP.Net.Framework;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using PetaPoco;
+using MixERP.Net.Schemas.Core.Data;
 
 namespace MixERP.Net.Api.Core
 {
@@ -22,9 +23,9 @@ namespace MixERP.Net.Api.Core
     public class FrequencySetupController : ApiController
     {
         /// <summary>
-        ///     The FrequencySetup data context.
+        ///     The FrequencySetup repository.
         /// </summary>
-        private readonly MixERP.Net.Schemas.Core.Data.FrequencySetup FrequencySetupContext;
+        private readonly IFrequencySetupRepository FrequencySetupRepository;
 
         public FrequencySetupController()
         {
@@ -33,12 +34,22 @@ namespace MixERP.Net.Api.Core
             this._OfficeId = AppUsers.GetCurrent().View.OfficeId.ToInt();
             this._Catalog = AppUsers.GetCurrentUserDB();
 
-            this.FrequencySetupContext = new MixERP.Net.Schemas.Core.Data.FrequencySetup
+            this.FrequencySetupRepository = new MixERP.Net.Schemas.Core.Data.FrequencySetup
             {
                 _Catalog = this._Catalog,
                 _LoginId = this._LoginId,
                 _UserId = this._UserId
             };
+        }
+
+        public FrequencySetupController(IFrequencySetupRepository repository, string catalog, LoginView view)
+        {
+            this._LoginId = view.LoginId.ToLong();
+            this._UserId = view.UserId.ToInt();
+            this._OfficeId = view.OfficeId.ToInt();
+            this._Catalog = catalog;
+
+            this.FrequencySetupRepository = repository;
         }
 
         public long _LoginId { get; }
@@ -55,6 +66,11 @@ namespace MixERP.Net.Api.Core
         [Route("~/api/core/frequency-setup/meta")]
         public EntityView GetEntityView()
         {
+            if (this._LoginId == 0)
+            {
+                return new EntityView();
+            }
+
             return new EntityView
             {
                 PrimaryKey = "frequency_setup_id",
@@ -82,7 +98,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.FrequencySetupContext.Count();
+                return this.FrequencySetupRepository.Count();
             }
             catch (UnauthorizedException)
             {
@@ -113,7 +129,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.FrequencySetupContext.GetAll();
+                return this.FrequencySetupRepository.GetAll();
             }
             catch (UnauthorizedException)
             {
@@ -144,7 +160,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.FrequencySetupContext.Export();
+                return this.FrequencySetupRepository.Export();
             }
             catch (UnauthorizedException)
             {
@@ -176,7 +192,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.FrequencySetupContext.Get(frequencySetupId);
+                return this.FrequencySetupRepository.Get(frequencySetupId);
             }
             catch (UnauthorizedException)
             {
@@ -203,7 +219,133 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.FrequencySetupContext.Get(frequencySetupIds);
+                return this.FrequencySetupRepository.Get(frequencySetupIds);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the first instance of frequency setup.
+        /// </summary>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("first")]
+        [Route("~/api/core/frequency-setup/first")]
+        public MixERP.Net.Entities.Core.FrequencySetup GetFirst()
+        {
+            try
+            {
+                return this.FrequencySetupRepository.GetFirst();
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the previous instance of frequency setup.
+        /// </summary>
+        /// <param name="frequencySetupId">Enter FrequencySetupId to search for.</param>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("previous/{frequencySetupId}")]
+        [Route("~/api/core/frequency-setup/previous/{frequencySetupId}")]
+        public MixERP.Net.Entities.Core.FrequencySetup GetPrevious(int frequencySetupId)
+        {
+            try
+            {
+                return this.FrequencySetupRepository.GetPrevious(frequencySetupId);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the next instance of frequency setup.
+        /// </summary>
+        /// <param name="frequencySetupId">Enter FrequencySetupId to search for.</param>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("next/{frequencySetupId}")]
+        [Route("~/api/core/frequency-setup/next/{frequencySetupId}")]
+        public MixERP.Net.Entities.Core.FrequencySetup GetNext(int frequencySetupId)
+        {
+            try
+            {
+                return this.FrequencySetupRepository.GetNext(frequencySetupId);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the last instance of frequency setup.
+        /// </summary>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("last")]
+        [Route("~/api/core/frequency-setup/last")]
+        public MixERP.Net.Entities.Core.FrequencySetup GetLast()
+        {
+            try
+            {
+                return this.FrequencySetupRepository.GetLast();
             }
             catch (UnauthorizedException)
             {
@@ -234,7 +376,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.FrequencySetupContext.GetPaginatedResult();
+                return this.FrequencySetupRepository.GetPaginatedResult();
             }
             catch (UnauthorizedException)
             {
@@ -266,7 +408,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.FrequencySetupContext.GetPaginatedResult(pageNumber);
+                return this.FrequencySetupRepository.GetPaginatedResult(pageNumber);
             }
             catch (UnauthorizedException)
             {
@@ -299,7 +441,7 @@ namespace MixERP.Net.Api.Core
             try
             {
                 List<EntityParser.Filter> f = filters.ToObject<List<EntityParser.Filter>>(JsonHelper.GetJsonSerializer());
-                return this.FrequencySetupContext.CountWhere(f);
+                return this.FrequencySetupRepository.CountWhere(f);
             }
             catch (UnauthorizedException)
             {
@@ -333,7 +475,7 @@ namespace MixERP.Net.Api.Core
             try
             {
                 List<EntityParser.Filter> f = filters.ToObject<List<EntityParser.Filter>>(JsonHelper.GetJsonSerializer());
-                return this.FrequencySetupContext.GetWhere(pageNumber, f);
+                return this.FrequencySetupRepository.GetWhere(pageNumber, f);
             }
             catch (UnauthorizedException)
             {
@@ -365,7 +507,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.FrequencySetupContext.CountFiltered(filterName);
+                return this.FrequencySetupRepository.CountFiltered(filterName);
             }
             catch (UnauthorizedException)
             {
@@ -398,7 +540,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.FrequencySetupContext.GetFiltered(pageNumber, filterName);
+                return this.FrequencySetupRepository.GetFiltered(pageNumber, filterName);
             }
             catch (UnauthorizedException)
             {
@@ -429,7 +571,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.FrequencySetupContext.GetDisplayFields();
+                return this.FrequencySetupRepository.GetDisplayFields();
             }
             catch (UnauthorizedException)
             {
@@ -460,7 +602,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.FrequencySetupContext.GetCustomFields(null);
+                return this.FrequencySetupRepository.GetCustomFields(null);
             }
             catch (UnauthorizedException)
             {
@@ -491,7 +633,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.FrequencySetupContext.GetCustomFields(resourceId);
+                return this.FrequencySetupRepository.GetCustomFields(resourceId);
             }
             catch (UnauthorizedException)
             {
@@ -530,7 +672,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                return this.FrequencySetupContext.AddOrEdit(frequencySetup, customFields);
+                return this.FrequencySetupRepository.AddOrEdit(frequencySetup, customFields);
             }
             catch (UnauthorizedException)
             {
@@ -566,7 +708,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                this.FrequencySetupContext.Add(frequencySetup);
+                this.FrequencySetupRepository.Add(frequencySetup);
             }
             catch (UnauthorizedException)
             {
@@ -603,7 +745,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                this.FrequencySetupContext.Update(frequencySetup, frequencySetupId);
+                this.FrequencySetupRepository.Update(frequencySetup, frequencySetupId);
             }
             catch (UnauthorizedException)
             {
@@ -648,7 +790,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                return this.FrequencySetupContext.BulkImport(frequencySetupCollection);
+                return this.FrequencySetupRepository.BulkImport(frequencySetupCollection);
             }
             catch (UnauthorizedException)
             {
@@ -679,7 +821,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                this.FrequencySetupContext.Delete(frequencySetupId);
+                this.FrequencySetupRepository.Delete(frequencySetupId);
             }
             catch (UnauthorizedException)
             {

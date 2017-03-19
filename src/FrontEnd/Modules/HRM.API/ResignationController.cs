@@ -12,6 +12,7 @@ using MixERP.Net.Framework;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using PetaPoco;
+using MixERP.Net.Core.Modules.HRM.Data;
 
 namespace MixERP.Net.Api.HRM
 {
@@ -22,9 +23,9 @@ namespace MixERP.Net.Api.HRM
     public class ResignationController : ApiController
     {
         /// <summary>
-        ///     The Resignation data context.
+        ///     The Resignation repository.
         /// </summary>
-        private readonly MixERP.Net.Core.Modules.HRM.Data.Resignation ResignationContext;
+        private readonly IResignationRepository ResignationRepository;
 
         public ResignationController()
         {
@@ -33,12 +34,22 @@ namespace MixERP.Net.Api.HRM
             this._OfficeId = AppUsers.GetCurrent().View.OfficeId.ToInt();
             this._Catalog = AppUsers.GetCurrentUserDB();
 
-            this.ResignationContext = new MixERP.Net.Core.Modules.HRM.Data.Resignation
+            this.ResignationRepository = new MixERP.Net.Core.Modules.HRM.Data.Resignation
             {
                 _Catalog = this._Catalog,
                 _LoginId = this._LoginId,
                 _UserId = this._UserId
             };
+        }
+
+        public ResignationController(IResignationRepository repository, string catalog, LoginView view)
+        {
+            this._LoginId = view.LoginId.ToLong();
+            this._UserId = view.UserId.ToInt();
+            this._OfficeId = view.OfficeId.ToInt();
+            this._Catalog = catalog;
+
+            this.ResignationRepository = repository;
         }
 
         public long _LoginId { get; }
@@ -55,6 +66,11 @@ namespace MixERP.Net.Api.HRM
         [Route("~/api/hrm/resignation/meta")]
         public EntityView GetEntityView()
         {
+            if (this._LoginId == 0)
+            {
+                return new EntityView();
+            }
+
             return new EntityView
             {
                 PrimaryKey = "resignation_id",
@@ -89,7 +105,7 @@ namespace MixERP.Net.Api.HRM
         {
             try
             {
-                return this.ResignationContext.Count();
+                return this.ResignationRepository.Count();
             }
             catch (UnauthorizedException)
             {
@@ -120,7 +136,7 @@ namespace MixERP.Net.Api.HRM
         {
             try
             {
-                return this.ResignationContext.GetAll();
+                return this.ResignationRepository.GetAll();
             }
             catch (UnauthorizedException)
             {
@@ -151,7 +167,7 @@ namespace MixERP.Net.Api.HRM
         {
             try
             {
-                return this.ResignationContext.Export();
+                return this.ResignationRepository.Export();
             }
             catch (UnauthorizedException)
             {
@@ -183,7 +199,7 @@ namespace MixERP.Net.Api.HRM
         {
             try
             {
-                return this.ResignationContext.Get(resignationId);
+                return this.ResignationRepository.Get(resignationId);
             }
             catch (UnauthorizedException)
             {
@@ -210,7 +226,133 @@ namespace MixERP.Net.Api.HRM
         {
             try
             {
-                return this.ResignationContext.Get(resignationIds);
+                return this.ResignationRepository.Get(resignationIds);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the first instance of resignation.
+        /// </summary>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("first")]
+        [Route("~/api/hrm/resignation/first")]
+        public MixERP.Net.Entities.HRM.Resignation GetFirst()
+        {
+            try
+            {
+                return this.ResignationRepository.GetFirst();
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the previous instance of resignation.
+        /// </summary>
+        /// <param name="resignationId">Enter ResignationId to search for.</param>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("previous/{resignationId}")]
+        [Route("~/api/hrm/resignation/previous/{resignationId}")]
+        public MixERP.Net.Entities.HRM.Resignation GetPrevious(int resignationId)
+        {
+            try
+            {
+                return this.ResignationRepository.GetPrevious(resignationId);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the next instance of resignation.
+        /// </summary>
+        /// <param name="resignationId">Enter ResignationId to search for.</param>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("next/{resignationId}")]
+        [Route("~/api/hrm/resignation/next/{resignationId}")]
+        public MixERP.Net.Entities.HRM.Resignation GetNext(int resignationId)
+        {
+            try
+            {
+                return this.ResignationRepository.GetNext(resignationId);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the last instance of resignation.
+        /// </summary>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("last")]
+        [Route("~/api/hrm/resignation/last")]
+        public MixERP.Net.Entities.HRM.Resignation GetLast()
+        {
+            try
+            {
+                return this.ResignationRepository.GetLast();
             }
             catch (UnauthorizedException)
             {
@@ -241,7 +383,7 @@ namespace MixERP.Net.Api.HRM
         {
             try
             {
-                return this.ResignationContext.GetPaginatedResult();
+                return this.ResignationRepository.GetPaginatedResult();
             }
             catch (UnauthorizedException)
             {
@@ -273,7 +415,7 @@ namespace MixERP.Net.Api.HRM
         {
             try
             {
-                return this.ResignationContext.GetPaginatedResult(pageNumber);
+                return this.ResignationRepository.GetPaginatedResult(pageNumber);
             }
             catch (UnauthorizedException)
             {
@@ -306,7 +448,7 @@ namespace MixERP.Net.Api.HRM
             try
             {
                 List<EntityParser.Filter> f = filters.ToObject<List<EntityParser.Filter>>(JsonHelper.GetJsonSerializer());
-                return this.ResignationContext.CountWhere(f);
+                return this.ResignationRepository.CountWhere(f);
             }
             catch (UnauthorizedException)
             {
@@ -340,7 +482,7 @@ namespace MixERP.Net.Api.HRM
             try
             {
                 List<EntityParser.Filter> f = filters.ToObject<List<EntityParser.Filter>>(JsonHelper.GetJsonSerializer());
-                return this.ResignationContext.GetWhere(pageNumber, f);
+                return this.ResignationRepository.GetWhere(pageNumber, f);
             }
             catch (UnauthorizedException)
             {
@@ -372,7 +514,7 @@ namespace MixERP.Net.Api.HRM
         {
             try
             {
-                return this.ResignationContext.CountFiltered(filterName);
+                return this.ResignationRepository.CountFiltered(filterName);
             }
             catch (UnauthorizedException)
             {
@@ -405,7 +547,7 @@ namespace MixERP.Net.Api.HRM
         {
             try
             {
-                return this.ResignationContext.GetFiltered(pageNumber, filterName);
+                return this.ResignationRepository.GetFiltered(pageNumber, filterName);
             }
             catch (UnauthorizedException)
             {
@@ -436,7 +578,7 @@ namespace MixERP.Net.Api.HRM
         {
             try
             {
-                return this.ResignationContext.GetDisplayFields();
+                return this.ResignationRepository.GetDisplayFields();
             }
             catch (UnauthorizedException)
             {
@@ -467,7 +609,7 @@ namespace MixERP.Net.Api.HRM
         {
             try
             {
-                return this.ResignationContext.GetCustomFields(null);
+                return this.ResignationRepository.GetCustomFields(null);
             }
             catch (UnauthorizedException)
             {
@@ -498,7 +640,7 @@ namespace MixERP.Net.Api.HRM
         {
             try
             {
-                return this.ResignationContext.GetCustomFields(resourceId);
+                return this.ResignationRepository.GetCustomFields(resourceId);
             }
             catch (UnauthorizedException)
             {
@@ -537,7 +679,7 @@ namespace MixERP.Net.Api.HRM
 
             try
             {
-                return this.ResignationContext.AddOrEdit(resignation, customFields);
+                return this.ResignationRepository.AddOrEdit(resignation, customFields);
             }
             catch (UnauthorizedException)
             {
@@ -573,7 +715,7 @@ namespace MixERP.Net.Api.HRM
 
             try
             {
-                this.ResignationContext.Add(resignation);
+                this.ResignationRepository.Add(resignation);
             }
             catch (UnauthorizedException)
             {
@@ -610,7 +752,7 @@ namespace MixERP.Net.Api.HRM
 
             try
             {
-                this.ResignationContext.Update(resignation, resignationId);
+                this.ResignationRepository.Update(resignation, resignationId);
             }
             catch (UnauthorizedException)
             {
@@ -655,7 +797,7 @@ namespace MixERP.Net.Api.HRM
 
             try
             {
-                return this.ResignationContext.BulkImport(resignationCollection);
+                return this.ResignationRepository.BulkImport(resignationCollection);
             }
             catch (UnauthorizedException)
             {
@@ -686,7 +828,7 @@ namespace MixERP.Net.Api.HRM
         {
             try
             {
-                this.ResignationContext.Delete(resignationId);
+                this.ResignationRepository.Delete(resignationId);
             }
             catch (UnauthorizedException)
             {
@@ -719,7 +861,7 @@ namespace MixERP.Net.Api.HRM
         {
             try
             {
-                this.ResignationContext.Verify(resignationId, verificationStatusId, reason);
+                this.ResignationRepository.Verify(resignationId, verificationStatusId, reason);
             }
             catch (UnauthorizedException)
             {

@@ -16,7 +16,7 @@ namespace MixERP.Net.Schemas.Office.Data
     /// <summary>
     /// Provides simplified data access features to perform SCRUD operation on the database table "office.cost_centers".
     /// </summary>
-    public class CostCenter : DbAccess
+    public class CostCenter : DbAccess, ICostCenterRepository
     {
         /// <summary>
         /// The schema of this table. Returns literal "office".
@@ -73,7 +73,7 @@ namespace MixERP.Net.Schemas.Office.Data
         }
 
         /// <summary>
-        /// Executes a select query on the table "office.cost_centers" to return a all instances of the "CostCenter" class. 
+        /// Executes a select query on the table "office.cost_centers" to return all instances of the "CostCenter" class. 
         /// </summary>
         /// <returns>Returns a non-live, non-mapped instances of "CostCenter" class.</returns>
         /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
@@ -102,7 +102,7 @@ namespace MixERP.Net.Schemas.Office.Data
         }
 
         /// <summary>
-        /// Executes a select query on the table "office.cost_centers" to return a all instances of the "CostCenter" class to export. 
+        /// Executes a select query on the table "office.cost_centers" to return all instances of the "CostCenter" class to export. 
         /// </summary>
         /// <returns>Returns a non-live, non-mapped instances of "CostCenter" class.</returns>
         /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
@@ -158,6 +158,125 @@ namespace MixERP.Net.Schemas.Office.Data
 
             const string sql = "SELECT * FROM office.cost_centers WHERE cost_center_id=@0;";
             return Factory.Get<MixERP.Net.Entities.Office.CostCenter>(this._Catalog, sql, costCenterId).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Gets the first record of the table "office.cost_centers". 
+        /// </summary>
+        /// <returns>Returns a non-live, non-mapped instance of "CostCenter" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.Office.CostCenter GetFirst()
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the first record of entity \"CostCenter\" was denied to the user with Login ID {_LoginId}", this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM office.cost_centers ORDER BY cost_center_id LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.Office.CostCenter>(this._Catalog, sql).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Gets the previous record of the table "office.cost_centers" sorted by costCenterId.
+        /// </summary>
+        /// <param name="costCenterId">The column "cost_center_id" parameter used to find the next record.</param>
+        /// <returns>Returns a non-live, non-mapped instance of "CostCenter" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.Office.CostCenter GetPrevious(int costCenterId)
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the previous entity of \"CostCenter\" by \"CostCenterId\" with value {CostCenterId} was denied to the user with Login ID {_LoginId}", costCenterId, this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM office.cost_centers WHERE cost_center_id < @0 ORDER BY cost_center_id DESC LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.Office.CostCenter>(this._Catalog, sql, costCenterId).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Gets the next record of the table "office.cost_centers" sorted by costCenterId.
+        /// </summary>
+        /// <param name="costCenterId">The column "cost_center_id" parameter used to find the next record.</param>
+        /// <returns>Returns a non-live, non-mapped instance of "CostCenter" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.Office.CostCenter GetNext(int costCenterId)
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the next entity of \"CostCenter\" by \"CostCenterId\" with value {CostCenterId} was denied to the user with Login ID {_LoginId}", costCenterId, this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM office.cost_centers WHERE cost_center_id > @0 ORDER BY cost_center_id LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.Office.CostCenter>(this._Catalog, sql, costCenterId).FirstOrDefault();
+        }
+
+
+        /// <summary>
+        /// Gets the last record of the table "office.cost_centers". 
+        /// </summary>
+        /// <returns>Returns a non-live, non-mapped instance of "CostCenter" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.Office.CostCenter GetLast()
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the last record of entity \"CostCenter\" was denied to the user with Login ID {_LoginId}", this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM office.cost_centers ORDER BY cost_center_id DESC LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.Office.CostCenter>(this._Catalog, sql).FirstOrDefault();
         }
 
         /// <summary>
@@ -559,7 +678,7 @@ namespace MixERP.Net.Schemas.Office.Data
             return Factory.Get<MixERP.Net.Entities.Office.CostCenter>(this._Catalog, sql, offset);
         }
 
-        private List<EntityParser.Filter> GetFilters(string catalog, string filterName)
+        public List<EntityParser.Filter> GetFilters(string catalog, string filterName)
         {
             const string sql = "SELECT * FROM core.filters WHERE object_name='office.cost_centers' AND lower(filter_name)=lower(@0);";
             return Factory.Get<EntityParser.Filter>(catalog, sql, filterName).ToList();

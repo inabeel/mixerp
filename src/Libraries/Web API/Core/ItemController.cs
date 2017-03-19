@@ -12,6 +12,7 @@ using MixERP.Net.Framework;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using PetaPoco;
+using MixERP.Net.Schemas.Core.Data;
 
 namespace MixERP.Net.Api.Core
 {
@@ -22,9 +23,9 @@ namespace MixERP.Net.Api.Core
     public class ItemController : ApiController
     {
         /// <summary>
-        ///     The Item data context.
+        ///     The Item repository.
         /// </summary>
-        private readonly MixERP.Net.Schemas.Core.Data.Item ItemContext;
+        private readonly IItemRepository ItemRepository;
 
         public ItemController()
         {
@@ -33,12 +34,22 @@ namespace MixERP.Net.Api.Core
             this._OfficeId = AppUsers.GetCurrent().View.OfficeId.ToInt();
             this._Catalog = AppUsers.GetCurrentUserDB();
 
-            this.ItemContext = new MixERP.Net.Schemas.Core.Data.Item
+            this.ItemRepository = new MixERP.Net.Schemas.Core.Data.Item
             {
                 _Catalog = this._Catalog,
                 _LoginId = this._LoginId,
                 _UserId = this._UserId
             };
+        }
+
+        public ItemController(IItemRepository repository, string catalog, LoginView view)
+        {
+            this._LoginId = view.LoginId.ToLong();
+            this._UserId = view.UserId.ToInt();
+            this._OfficeId = view.OfficeId.ToInt();
+            this._Catalog = catalog;
+
+            this.ItemRepository = repository;
         }
 
         public long _LoginId { get; }
@@ -55,6 +66,11 @@ namespace MixERP.Net.Api.Core
         [Route("~/api/core/item/meta")]
         public EntityView GetEntityView()
         {
+            if (this._LoginId == 0)
+            {
+                return new EntityView();
+            }
+
             return new EntityView
             {
                 PrimaryKey = "item_id",
@@ -78,7 +94,7 @@ namespace MixERP.Net.Api.Core
                                         new EntityColumn { ColumnName = "unit_id",  PropertyName = "UnitId",  DataType = "int",  DbDataType = "int4",  IsNullable = false,  IsPrimaryKey = false,  IsSerial = false,  Value = "",  MaxLength = 0 },
                                         new EntityColumn { ColumnName = "hot_item",  PropertyName = "HotItem",  DataType = "bool",  DbDataType = "bool",  IsNullable = false,  IsPrimaryKey = false,  IsSerial = false,  Value = "",  MaxLength = 0 },
                                         new EntityColumn { ColumnName = "cost_price",  PropertyName = "CostPrice",  DataType = "decimal",  DbDataType = "money_strict2",  IsNullable = false,  IsPrimaryKey = false,  IsSerial = false,  Value = "",  MaxLength = 0 },
-                                        new EntityColumn { ColumnName = "selling_price",  PropertyName = "SellingPrice",  DataType = "decimal",  DbDataType = "money_strict",  IsNullable = false,  IsPrimaryKey = false,  IsSerial = false,  Value = "",  MaxLength = 0 },
+                                        new EntityColumn { ColumnName = "selling_price",  PropertyName = "SellingPrice",  DataType = "decimal",  DbDataType = "money_strict2",  IsNullable = false,  IsPrimaryKey = false,  IsSerial = false,  Value = "",  MaxLength = 0 },
                                         new EntityColumn { ColumnName = "selling_price_includes_tax",  PropertyName = "SellingPriceIncludesTax",  DataType = "bool",  DbDataType = "bool",  IsNullable = false,  IsPrimaryKey = false,  IsSerial = false,  Value = "",  MaxLength = 0 },
                                         new EntityColumn { ColumnName = "sales_tax_id",  PropertyName = "SalesTaxId",  DataType = "int",  DbDataType = "int4",  IsNullable = false,  IsPrimaryKey = false,  IsSerial = false,  Value = "",  MaxLength = 0 },
                                         new EntityColumn { ColumnName = "reorder_unit_id",  PropertyName = "ReorderUnitId",  DataType = "int",  DbDataType = "int4",  IsNullable = false,  IsPrimaryKey = false,  IsSerial = false,  Value = "",  MaxLength = 0 },
@@ -87,7 +103,10 @@ namespace MixERP.Net.Api.Core
                                         new EntityColumn { ColumnName = "maintain_stock",  PropertyName = "MaintainStock",  DataType = "bool",  DbDataType = "bool",  IsNullable = false,  IsPrimaryKey = false,  IsSerial = false,  Value = "",  MaxLength = 0 },
                                         new EntityColumn { ColumnName = "audit_user_id",  PropertyName = "AuditUserId",  DataType = "int",  DbDataType = "int4",  IsNullable = true,  IsPrimaryKey = false,  IsSerial = false,  Value = "",  MaxLength = 0 },
                                         new EntityColumn { ColumnName = "audit_ts",  PropertyName = "AuditTs",  DataType = "DateTime",  DbDataType = "timestamptz",  IsNullable = true,  IsPrimaryKey = false,  IsSerial = false,  Value = "",  MaxLength = 0 },
-                                        new EntityColumn { ColumnName = "photo",  PropertyName = "Photo",  DataType = "string",  DbDataType = "image",  IsNullable = true,  IsPrimaryKey = false,  IsSerial = false,  Value = "",  MaxLength = 0 }
+                                        new EntityColumn { ColumnName = "photo",  PropertyName = "Photo",  DataType = "string",  DbDataType = "image",  IsNullable = true,  IsPrimaryKey = false,  IsSerial = false,  Value = "",  MaxLength = 0 },
+                                        new EntityColumn { ColumnName = "is_variant_of",  PropertyName = "IsVariantOf",  DataType = "int",  DbDataType = "int4",  IsNullable = true,  IsPrimaryKey = false,  IsSerial = false,  Value = "",  MaxLength = 0 },
+                                        new EntityColumn { ColumnName = "allow_sales",  PropertyName = "AllowSales",  DataType = "bool",  DbDataType = "bool",  IsNullable = false,  IsPrimaryKey = false,  IsSerial = false,  Value = "",  MaxLength = 0 },
+                                        new EntityColumn { ColumnName = "allow_purchase",  PropertyName = "AllowPurchase",  DataType = "bool",  DbDataType = "bool",  IsNullable = false,  IsPrimaryKey = false,  IsSerial = false,  Value = "",  MaxLength = 0 }
                                 }
             };
         }
@@ -103,7 +122,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.ItemContext.Count();
+                return this.ItemRepository.Count();
             }
             catch (UnauthorizedException)
             {
@@ -134,7 +153,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.ItemContext.GetAll();
+                return this.ItemRepository.GetAll();
             }
             catch (UnauthorizedException)
             {
@@ -165,7 +184,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.ItemContext.Export();
+                return this.ItemRepository.Export();
             }
             catch (UnauthorizedException)
             {
@@ -197,7 +216,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.ItemContext.Get(itemId);
+                return this.ItemRepository.Get(itemId);
             }
             catch (UnauthorizedException)
             {
@@ -224,7 +243,133 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.ItemContext.Get(itemIds);
+                return this.ItemRepository.Get(itemIds);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the first instance of item.
+        /// </summary>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("first")]
+        [Route("~/api/core/item/first")]
+        public MixERP.Net.Entities.Core.Item GetFirst()
+        {
+            try
+            {
+                return this.ItemRepository.GetFirst();
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the previous instance of item.
+        /// </summary>
+        /// <param name="itemId">Enter ItemId to search for.</param>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("previous/{itemId}")]
+        [Route("~/api/core/item/previous/{itemId}")]
+        public MixERP.Net.Entities.Core.Item GetPrevious(int itemId)
+        {
+            try
+            {
+                return this.ItemRepository.GetPrevious(itemId);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the next instance of item.
+        /// </summary>
+        /// <param name="itemId">Enter ItemId to search for.</param>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("next/{itemId}")]
+        [Route("~/api/core/item/next/{itemId}")]
+        public MixERP.Net.Entities.Core.Item GetNext(int itemId)
+        {
+            try
+            {
+                return this.ItemRepository.GetNext(itemId);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the last instance of item.
+        /// </summary>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("last")]
+        [Route("~/api/core/item/last")]
+        public MixERP.Net.Entities.Core.Item GetLast()
+        {
+            try
+            {
+                return this.ItemRepository.GetLast();
             }
             catch (UnauthorizedException)
             {
@@ -255,7 +400,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.ItemContext.GetPaginatedResult();
+                return this.ItemRepository.GetPaginatedResult();
             }
             catch (UnauthorizedException)
             {
@@ -287,7 +432,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.ItemContext.GetPaginatedResult(pageNumber);
+                return this.ItemRepository.GetPaginatedResult(pageNumber);
             }
             catch (UnauthorizedException)
             {
@@ -320,7 +465,7 @@ namespace MixERP.Net.Api.Core
             try
             {
                 List<EntityParser.Filter> f = filters.ToObject<List<EntityParser.Filter>>(JsonHelper.GetJsonSerializer());
-                return this.ItemContext.CountWhere(f);
+                return this.ItemRepository.CountWhere(f);
             }
             catch (UnauthorizedException)
             {
@@ -354,7 +499,7 @@ namespace MixERP.Net.Api.Core
             try
             {
                 List<EntityParser.Filter> f = filters.ToObject<List<EntityParser.Filter>>(JsonHelper.GetJsonSerializer());
-                return this.ItemContext.GetWhere(pageNumber, f);
+                return this.ItemRepository.GetWhere(pageNumber, f);
             }
             catch (UnauthorizedException)
             {
@@ -386,7 +531,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.ItemContext.CountFiltered(filterName);
+                return this.ItemRepository.CountFiltered(filterName);
             }
             catch (UnauthorizedException)
             {
@@ -419,7 +564,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.ItemContext.GetFiltered(pageNumber, filterName);
+                return this.ItemRepository.GetFiltered(pageNumber, filterName);
             }
             catch (UnauthorizedException)
             {
@@ -450,7 +595,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.ItemContext.GetDisplayFields();
+                return this.ItemRepository.GetDisplayFields();
             }
             catch (UnauthorizedException)
             {
@@ -481,7 +626,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.ItemContext.GetCustomFields(null);
+                return this.ItemRepository.GetCustomFields(null);
             }
             catch (UnauthorizedException)
             {
@@ -512,7 +657,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.ItemContext.GetCustomFields(resourceId);
+                return this.ItemRepository.GetCustomFields(resourceId);
             }
             catch (UnauthorizedException)
             {
@@ -551,7 +696,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                return this.ItemContext.AddOrEdit(item, customFields);
+                return this.ItemRepository.AddOrEdit(item, customFields);
             }
             catch (UnauthorizedException)
             {
@@ -587,7 +732,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                this.ItemContext.Add(item);
+                this.ItemRepository.Add(item);
             }
             catch (UnauthorizedException)
             {
@@ -624,7 +769,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                this.ItemContext.Update(item, itemId);
+                this.ItemRepository.Update(item, itemId);
             }
             catch (UnauthorizedException)
             {
@@ -669,7 +814,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                return this.ItemContext.BulkImport(itemCollection);
+                return this.ItemRepository.BulkImport(itemCollection);
             }
             catch (UnauthorizedException)
             {
@@ -700,7 +845,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                this.ItemContext.Delete(itemId);
+                this.ItemRepository.Delete(itemId);
             }
             catch (UnauthorizedException)
             {

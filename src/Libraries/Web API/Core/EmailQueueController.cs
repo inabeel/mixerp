@@ -12,6 +12,7 @@ using MixERP.Net.Framework;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using PetaPoco;
+using MixERP.Net.Schemas.Core.Data;
 
 namespace MixERP.Net.Api.Core
 {
@@ -22,9 +23,9 @@ namespace MixERP.Net.Api.Core
     public class EmailQueueController : ApiController
     {
         /// <summary>
-        ///     The EmailQueue data context.
+        ///     The EmailQueue repository.
         /// </summary>
-        private readonly MixERP.Net.Schemas.Core.Data.EmailQueue EmailQueueContext;
+        private readonly IEmailQueueRepository EmailQueueRepository;
 
         public EmailQueueController()
         {
@@ -33,12 +34,22 @@ namespace MixERP.Net.Api.Core
             this._OfficeId = AppUsers.GetCurrent().View.OfficeId.ToInt();
             this._Catalog = AppUsers.GetCurrentUserDB();
 
-            this.EmailQueueContext = new MixERP.Net.Schemas.Core.Data.EmailQueue
+            this.EmailQueueRepository = new MixERP.Net.Schemas.Core.Data.EmailQueue
             {
                 _Catalog = this._Catalog,
                 _LoginId = this._LoginId,
                 _UserId = this._UserId
             };
+        }
+
+        public EmailQueueController(IEmailQueueRepository repository, string catalog, LoginView view)
+        {
+            this._LoginId = view.LoginId.ToLong();
+            this._UserId = view.UserId.ToInt();
+            this._OfficeId = view.OfficeId.ToInt();
+            this._Catalog = catalog;
+
+            this.EmailQueueRepository = repository;
         }
 
         public long _LoginId { get; }
@@ -55,6 +66,11 @@ namespace MixERP.Net.Api.Core
         [Route("~/api/core/email-queue/meta")]
         public EntityView GetEntityView()
         {
+            if (this._LoginId == 0)
+            {
+                return new EntityView();
+            }
+
             return new EntityView
             {
                 PrimaryKey = "queue_id",
@@ -85,7 +101,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.EmailQueueContext.Count();
+                return this.EmailQueueRepository.Count();
             }
             catch (UnauthorizedException)
             {
@@ -116,7 +132,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.EmailQueueContext.GetAll();
+                return this.EmailQueueRepository.GetAll();
             }
             catch (UnauthorizedException)
             {
@@ -147,7 +163,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.EmailQueueContext.Export();
+                return this.EmailQueueRepository.Export();
             }
             catch (UnauthorizedException)
             {
@@ -179,7 +195,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.EmailQueueContext.Get(queueId);
+                return this.EmailQueueRepository.Get(queueId);
             }
             catch (UnauthorizedException)
             {
@@ -206,7 +222,133 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.EmailQueueContext.Get(queueIds);
+                return this.EmailQueueRepository.Get(queueIds);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the first instance of email queue.
+        /// </summary>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("first")]
+        [Route("~/api/core/email-queue/first")]
+        public MixERP.Net.Entities.Core.EmailQueue GetFirst()
+        {
+            try
+            {
+                return this.EmailQueueRepository.GetFirst();
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the previous instance of email queue.
+        /// </summary>
+        /// <param name="queueId">Enter QueueId to search for.</param>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("previous/{queueId}")]
+        [Route("~/api/core/email-queue/previous/{queueId}")]
+        public MixERP.Net.Entities.Core.EmailQueue GetPrevious(long queueId)
+        {
+            try
+            {
+                return this.EmailQueueRepository.GetPrevious(queueId);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the next instance of email queue.
+        /// </summary>
+        /// <param name="queueId">Enter QueueId to search for.</param>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("next/{queueId}")]
+        [Route("~/api/core/email-queue/next/{queueId}")]
+        public MixERP.Net.Entities.Core.EmailQueue GetNext(long queueId)
+        {
+            try
+            {
+                return this.EmailQueueRepository.GetNext(queueId);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the last instance of email queue.
+        /// </summary>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("last")]
+        [Route("~/api/core/email-queue/last")]
+        public MixERP.Net.Entities.Core.EmailQueue GetLast()
+        {
+            try
+            {
+                return this.EmailQueueRepository.GetLast();
             }
             catch (UnauthorizedException)
             {
@@ -237,7 +379,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.EmailQueueContext.GetPaginatedResult();
+                return this.EmailQueueRepository.GetPaginatedResult();
             }
             catch (UnauthorizedException)
             {
@@ -269,7 +411,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.EmailQueueContext.GetPaginatedResult(pageNumber);
+                return this.EmailQueueRepository.GetPaginatedResult(pageNumber);
             }
             catch (UnauthorizedException)
             {
@@ -302,7 +444,7 @@ namespace MixERP.Net.Api.Core
             try
             {
                 List<EntityParser.Filter> f = filters.ToObject<List<EntityParser.Filter>>(JsonHelper.GetJsonSerializer());
-                return this.EmailQueueContext.CountWhere(f);
+                return this.EmailQueueRepository.CountWhere(f);
             }
             catch (UnauthorizedException)
             {
@@ -336,7 +478,7 @@ namespace MixERP.Net.Api.Core
             try
             {
                 List<EntityParser.Filter> f = filters.ToObject<List<EntityParser.Filter>>(JsonHelper.GetJsonSerializer());
-                return this.EmailQueueContext.GetWhere(pageNumber, f);
+                return this.EmailQueueRepository.GetWhere(pageNumber, f);
             }
             catch (UnauthorizedException)
             {
@@ -368,7 +510,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.EmailQueueContext.CountFiltered(filterName);
+                return this.EmailQueueRepository.CountFiltered(filterName);
             }
             catch (UnauthorizedException)
             {
@@ -401,7 +543,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.EmailQueueContext.GetFiltered(pageNumber, filterName);
+                return this.EmailQueueRepository.GetFiltered(pageNumber, filterName);
             }
             catch (UnauthorizedException)
             {
@@ -432,7 +574,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.EmailQueueContext.GetDisplayFields();
+                return this.EmailQueueRepository.GetDisplayFields();
             }
             catch (UnauthorizedException)
             {
@@ -463,7 +605,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.EmailQueueContext.GetCustomFields(null);
+                return this.EmailQueueRepository.GetCustomFields(null);
             }
             catch (UnauthorizedException)
             {
@@ -494,7 +636,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.EmailQueueContext.GetCustomFields(resourceId);
+                return this.EmailQueueRepository.GetCustomFields(resourceId);
             }
             catch (UnauthorizedException)
             {
@@ -533,7 +675,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                return this.EmailQueueContext.AddOrEdit(emailQueue, customFields);
+                return this.EmailQueueRepository.AddOrEdit(emailQueue, customFields);
             }
             catch (UnauthorizedException)
             {
@@ -569,7 +711,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                this.EmailQueueContext.Add(emailQueue);
+                this.EmailQueueRepository.Add(emailQueue);
             }
             catch (UnauthorizedException)
             {
@@ -606,7 +748,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                this.EmailQueueContext.Update(emailQueue, queueId);
+                this.EmailQueueRepository.Update(emailQueue, queueId);
             }
             catch (UnauthorizedException)
             {
@@ -651,7 +793,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                return this.EmailQueueContext.BulkImport(emailQueueCollection);
+                return this.EmailQueueRepository.BulkImport(emailQueueCollection);
             }
             catch (UnauthorizedException)
             {
@@ -682,7 +824,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                this.EmailQueueContext.Delete(queueId);
+                this.EmailQueueRepository.Delete(queueId);
             }
             catch (UnauthorizedException)
             {

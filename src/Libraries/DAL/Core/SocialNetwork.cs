@@ -16,7 +16,7 @@ namespace MixERP.Net.Schemas.Core.Data
     /// <summary>
     /// Provides simplified data access features to perform SCRUD operation on the database table "core.social_networks".
     /// </summary>
-    public class SocialNetwork : DbAccess
+    public class SocialNetwork : DbAccess, ISocialNetworkRepository
     {
         /// <summary>
         /// The schema of this table. Returns literal "core".
@@ -73,7 +73,7 @@ namespace MixERP.Net.Schemas.Core.Data
         }
 
         /// <summary>
-        /// Executes a select query on the table "core.social_networks" to return a all instances of the "SocialNetwork" class. 
+        /// Executes a select query on the table "core.social_networks" to return all instances of the "SocialNetwork" class. 
         /// </summary>
         /// <returns>Returns a non-live, non-mapped instances of "SocialNetwork" class.</returns>
         /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
@@ -102,7 +102,7 @@ namespace MixERP.Net.Schemas.Core.Data
         }
 
         /// <summary>
-        /// Executes a select query on the table "core.social_networks" to return a all instances of the "SocialNetwork" class to export. 
+        /// Executes a select query on the table "core.social_networks" to return all instances of the "SocialNetwork" class to export. 
         /// </summary>
         /// <returns>Returns a non-live, non-mapped instances of "SocialNetwork" class.</returns>
         /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
@@ -158,6 +158,125 @@ namespace MixERP.Net.Schemas.Core.Data
 
             const string sql = "SELECT * FROM core.social_networks WHERE social_network_name=@0;";
             return Factory.Get<MixERP.Net.Entities.Core.SocialNetwork>(this._Catalog, sql, socialNetworkName).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Gets the first record of the table "core.social_networks". 
+        /// </summary>
+        /// <returns>Returns a non-live, non-mapped instance of "SocialNetwork" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.Core.SocialNetwork GetFirst()
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the first record of entity \"SocialNetwork\" was denied to the user with Login ID {_LoginId}", this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM core.social_networks ORDER BY social_network_name LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.Core.SocialNetwork>(this._Catalog, sql).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Gets the previous record of the table "core.social_networks" sorted by socialNetworkName.
+        /// </summary>
+        /// <param name="socialNetworkName">The column "social_network_name" parameter used to find the next record.</param>
+        /// <returns>Returns a non-live, non-mapped instance of "SocialNetwork" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.Core.SocialNetwork GetPrevious(string socialNetworkName)
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the previous entity of \"SocialNetwork\" by \"SocialNetworkName\" with value {SocialNetworkName} was denied to the user with Login ID {_LoginId}", socialNetworkName, this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM core.social_networks WHERE social_network_name < @0 ORDER BY social_network_name DESC LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.Core.SocialNetwork>(this._Catalog, sql, socialNetworkName).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Gets the next record of the table "core.social_networks" sorted by socialNetworkName.
+        /// </summary>
+        /// <param name="socialNetworkName">The column "social_network_name" parameter used to find the next record.</param>
+        /// <returns>Returns a non-live, non-mapped instance of "SocialNetwork" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.Core.SocialNetwork GetNext(string socialNetworkName)
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the next entity of \"SocialNetwork\" by \"SocialNetworkName\" with value {SocialNetworkName} was denied to the user with Login ID {_LoginId}", socialNetworkName, this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM core.social_networks WHERE social_network_name > @0 ORDER BY social_network_name LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.Core.SocialNetwork>(this._Catalog, sql, socialNetworkName).FirstOrDefault();
+        }
+
+
+        /// <summary>
+        /// Gets the last record of the table "core.social_networks". 
+        /// </summary>
+        /// <returns>Returns a non-live, non-mapped instance of "SocialNetwork" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.Core.SocialNetwork GetLast()
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the last record of entity \"SocialNetwork\" was denied to the user with Login ID {_LoginId}", this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM core.social_networks ORDER BY social_network_name DESC LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.Core.SocialNetwork>(this._Catalog, sql).FirstOrDefault();
         }
 
         /// <summary>
@@ -559,7 +678,7 @@ namespace MixERP.Net.Schemas.Core.Data
             return Factory.Get<MixERP.Net.Entities.Core.SocialNetwork>(this._Catalog, sql, offset);
         }
 
-        private List<EntityParser.Filter> GetFilters(string catalog, string filterName)
+        public List<EntityParser.Filter> GetFilters(string catalog, string filterName)
         {
             const string sql = "SELECT * FROM core.filters WHERE object_name='core.social_networks' AND lower(filter_name)=lower(@0);";
             return Factory.Get<EntityParser.Filter>(catalog, sql, filterName).ToList();

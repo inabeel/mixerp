@@ -19,10 +19,15 @@
     scrudFactory.live = "HolidayName";
 
     scrudFactory.layout = [
-        ["HolidayId", ""],
-        ["OfficeId", "HolidayName", "", ""],
-        ["OccursOn", "EndsOn", "", ""],
-        ["Description", ""]
+        {
+            tab: "",
+            fields: [
+                ["HolidayId", ""],
+                ["OfficeId", "HolidayName", "", ""],
+                ["OccursOn", "EndsOn", "", ""],
+                ["Description", ""]
+            ]
+        }
     ];
 
     scrudFactory.keys = [

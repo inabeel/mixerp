@@ -12,6 +12,7 @@ using MixERP.Net.Framework;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using PetaPoco;
+using MixERP.Net.Schemas.Office.Data;
 
 namespace MixERP.Net.Api.Office
 {
@@ -22,9 +23,9 @@ namespace MixERP.Net.Api.Office
     public class DepartmentController : ApiController
     {
         /// <summary>
-        ///     The Department data context.
+        ///     The Department repository.
         /// </summary>
-        private readonly MixERP.Net.Schemas.Office.Data.Department DepartmentContext;
+        private readonly IDepartmentRepository DepartmentRepository;
 
         public DepartmentController()
         {
@@ -33,12 +34,22 @@ namespace MixERP.Net.Api.Office
             this._OfficeId = AppUsers.GetCurrent().View.OfficeId.ToInt();
             this._Catalog = AppUsers.GetCurrentUserDB();
 
-            this.DepartmentContext = new MixERP.Net.Schemas.Office.Data.Department
+            this.DepartmentRepository = new MixERP.Net.Schemas.Office.Data.Department
             {
                 _Catalog = this._Catalog,
                 _LoginId = this._LoginId,
                 _UserId = this._UserId
             };
+        }
+
+        public DepartmentController(IDepartmentRepository repository, string catalog, LoginView view)
+        {
+            this._LoginId = view.LoginId.ToLong();
+            this._UserId = view.UserId.ToInt();
+            this._OfficeId = view.OfficeId.ToInt();
+            this._Catalog = catalog;
+
+            this.DepartmentRepository = repository;
         }
 
         public long _LoginId { get; }
@@ -55,6 +66,11 @@ namespace MixERP.Net.Api.Office
         [Route("~/api/office/department/meta")]
         public EntityView GetEntityView()
         {
+            if (this._LoginId == 0)
+            {
+                return new EntityView();
+            }
+
             return new EntityView
             {
                 PrimaryKey = "department_id",
@@ -80,7 +96,7 @@ namespace MixERP.Net.Api.Office
         {
             try
             {
-                return this.DepartmentContext.Count();
+                return this.DepartmentRepository.Count();
             }
             catch (UnauthorizedException)
             {
@@ -111,7 +127,7 @@ namespace MixERP.Net.Api.Office
         {
             try
             {
-                return this.DepartmentContext.GetAll();
+                return this.DepartmentRepository.GetAll();
             }
             catch (UnauthorizedException)
             {
@@ -142,7 +158,7 @@ namespace MixERP.Net.Api.Office
         {
             try
             {
-                return this.DepartmentContext.Export();
+                return this.DepartmentRepository.Export();
             }
             catch (UnauthorizedException)
             {
@@ -174,7 +190,7 @@ namespace MixERP.Net.Api.Office
         {
             try
             {
-                return this.DepartmentContext.Get(departmentId);
+                return this.DepartmentRepository.Get(departmentId);
             }
             catch (UnauthorizedException)
             {
@@ -201,7 +217,133 @@ namespace MixERP.Net.Api.Office
         {
             try
             {
-                return this.DepartmentContext.Get(departmentIds);
+                return this.DepartmentRepository.Get(departmentIds);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the first instance of department.
+        /// </summary>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("first")]
+        [Route("~/api/office/department/first")]
+        public MixERP.Net.Entities.Office.Department GetFirst()
+        {
+            try
+            {
+                return this.DepartmentRepository.GetFirst();
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the previous instance of department.
+        /// </summary>
+        /// <param name="departmentId">Enter DepartmentId to search for.</param>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("previous/{departmentId}")]
+        [Route("~/api/office/department/previous/{departmentId}")]
+        public MixERP.Net.Entities.Office.Department GetPrevious(int departmentId)
+        {
+            try
+            {
+                return this.DepartmentRepository.GetPrevious(departmentId);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the next instance of department.
+        /// </summary>
+        /// <param name="departmentId">Enter DepartmentId to search for.</param>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("next/{departmentId}")]
+        [Route("~/api/office/department/next/{departmentId}")]
+        public MixERP.Net.Entities.Office.Department GetNext(int departmentId)
+        {
+            try
+            {
+                return this.DepartmentRepository.GetNext(departmentId);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the last instance of department.
+        /// </summary>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("last")]
+        [Route("~/api/office/department/last")]
+        public MixERP.Net.Entities.Office.Department GetLast()
+        {
+            try
+            {
+                return this.DepartmentRepository.GetLast();
             }
             catch (UnauthorizedException)
             {
@@ -232,7 +374,7 @@ namespace MixERP.Net.Api.Office
         {
             try
             {
-                return this.DepartmentContext.GetPaginatedResult();
+                return this.DepartmentRepository.GetPaginatedResult();
             }
             catch (UnauthorizedException)
             {
@@ -264,7 +406,7 @@ namespace MixERP.Net.Api.Office
         {
             try
             {
-                return this.DepartmentContext.GetPaginatedResult(pageNumber);
+                return this.DepartmentRepository.GetPaginatedResult(pageNumber);
             }
             catch (UnauthorizedException)
             {
@@ -297,7 +439,7 @@ namespace MixERP.Net.Api.Office
             try
             {
                 List<EntityParser.Filter> f = filters.ToObject<List<EntityParser.Filter>>(JsonHelper.GetJsonSerializer());
-                return this.DepartmentContext.CountWhere(f);
+                return this.DepartmentRepository.CountWhere(f);
             }
             catch (UnauthorizedException)
             {
@@ -331,7 +473,7 @@ namespace MixERP.Net.Api.Office
             try
             {
                 List<EntityParser.Filter> f = filters.ToObject<List<EntityParser.Filter>>(JsonHelper.GetJsonSerializer());
-                return this.DepartmentContext.GetWhere(pageNumber, f);
+                return this.DepartmentRepository.GetWhere(pageNumber, f);
             }
             catch (UnauthorizedException)
             {
@@ -363,7 +505,7 @@ namespace MixERP.Net.Api.Office
         {
             try
             {
-                return this.DepartmentContext.CountFiltered(filterName);
+                return this.DepartmentRepository.CountFiltered(filterName);
             }
             catch (UnauthorizedException)
             {
@@ -396,7 +538,7 @@ namespace MixERP.Net.Api.Office
         {
             try
             {
-                return this.DepartmentContext.GetFiltered(pageNumber, filterName);
+                return this.DepartmentRepository.GetFiltered(pageNumber, filterName);
             }
             catch (UnauthorizedException)
             {
@@ -427,7 +569,7 @@ namespace MixERP.Net.Api.Office
         {
             try
             {
-                return this.DepartmentContext.GetDisplayFields();
+                return this.DepartmentRepository.GetDisplayFields();
             }
             catch (UnauthorizedException)
             {
@@ -458,7 +600,7 @@ namespace MixERP.Net.Api.Office
         {
             try
             {
-                return this.DepartmentContext.GetCustomFields(null);
+                return this.DepartmentRepository.GetCustomFields(null);
             }
             catch (UnauthorizedException)
             {
@@ -489,7 +631,7 @@ namespace MixERP.Net.Api.Office
         {
             try
             {
-                return this.DepartmentContext.GetCustomFields(resourceId);
+                return this.DepartmentRepository.GetCustomFields(resourceId);
             }
             catch (UnauthorizedException)
             {
@@ -528,7 +670,7 @@ namespace MixERP.Net.Api.Office
 
             try
             {
-                return this.DepartmentContext.AddOrEdit(department, customFields);
+                return this.DepartmentRepository.AddOrEdit(department, customFields);
             }
             catch (UnauthorizedException)
             {
@@ -564,7 +706,7 @@ namespace MixERP.Net.Api.Office
 
             try
             {
-                this.DepartmentContext.Add(department);
+                this.DepartmentRepository.Add(department);
             }
             catch (UnauthorizedException)
             {
@@ -601,7 +743,7 @@ namespace MixERP.Net.Api.Office
 
             try
             {
-                this.DepartmentContext.Update(department, departmentId);
+                this.DepartmentRepository.Update(department, departmentId);
             }
             catch (UnauthorizedException)
             {
@@ -646,7 +788,7 @@ namespace MixERP.Net.Api.Office
 
             try
             {
-                return this.DepartmentContext.BulkImport(departmentCollection);
+                return this.DepartmentRepository.BulkImport(departmentCollection);
             }
             catch (UnauthorizedException)
             {
@@ -677,7 +819,7 @@ namespace MixERP.Net.Api.Office
         {
             try
             {
-                this.DepartmentContext.Delete(departmentId);
+                this.DepartmentRepository.Delete(departmentId);
             }
             catch (UnauthorizedException)
             {

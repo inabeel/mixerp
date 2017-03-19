@@ -12,6 +12,7 @@ using MixERP.Net.Framework;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using PetaPoco;
+using MixERP.Net.Schemas.Config.Data;
 
 namespace MixERP.Net.Api.Config
 {
@@ -22,9 +23,9 @@ namespace MixERP.Net.Api.Config
     public class CurrencyLayerController : ApiController
     {
         /// <summary>
-        ///     The CurrencyLayer data context.
+        ///     The CurrencyLayer repository.
         /// </summary>
-        private readonly MixERP.Net.Schemas.Config.Data.CurrencyLayer CurrencyLayerContext;
+        private readonly ICurrencyLayerRepository CurrencyLayerRepository;
 
         public CurrencyLayerController()
         {
@@ -33,12 +34,22 @@ namespace MixERP.Net.Api.Config
             this._OfficeId = AppUsers.GetCurrent().View.OfficeId.ToInt();
             this._Catalog = AppUsers.GetCurrentUserDB();
 
-            this.CurrencyLayerContext = new MixERP.Net.Schemas.Config.Data.CurrencyLayer
+            this.CurrencyLayerRepository = new MixERP.Net.Schemas.Config.Data.CurrencyLayer
             {
                 _Catalog = this._Catalog,
                 _LoginId = this._LoginId,
                 _UserId = this._UserId
             };
+        }
+
+        public CurrencyLayerController(ICurrencyLayerRepository repository, string catalog, LoginView view)
+        {
+            this._LoginId = view.LoginId.ToLong();
+            this._UserId = view.UserId.ToInt();
+            this._OfficeId = view.OfficeId.ToInt();
+            this._Catalog = catalog;
+
+            this.CurrencyLayerRepository = repository;
         }
 
         public long _LoginId { get; }
@@ -55,6 +66,11 @@ namespace MixERP.Net.Api.Config
         [Route("~/api/config/currency-layer/meta")]
         public EntityView GetEntityView()
         {
+            if (this._LoginId == 0)
+            {
+                return new EntityView();
+            }
+
             return new EntityView
             {
                 PrimaryKey = "key",
@@ -80,7 +96,7 @@ namespace MixERP.Net.Api.Config
         {
             try
             {
-                return this.CurrencyLayerContext.Count();
+                return this.CurrencyLayerRepository.Count();
             }
             catch (UnauthorizedException)
             {
@@ -111,7 +127,7 @@ namespace MixERP.Net.Api.Config
         {
             try
             {
-                return this.CurrencyLayerContext.GetAll();
+                return this.CurrencyLayerRepository.GetAll();
             }
             catch (UnauthorizedException)
             {
@@ -142,7 +158,7 @@ namespace MixERP.Net.Api.Config
         {
             try
             {
-                return this.CurrencyLayerContext.Export();
+                return this.CurrencyLayerRepository.Export();
             }
             catch (UnauthorizedException)
             {
@@ -174,7 +190,7 @@ namespace MixERP.Net.Api.Config
         {
             try
             {
-                return this.CurrencyLayerContext.Get(key);
+                return this.CurrencyLayerRepository.Get(key);
             }
             catch (UnauthorizedException)
             {
@@ -201,7 +217,133 @@ namespace MixERP.Net.Api.Config
         {
             try
             {
-                return this.CurrencyLayerContext.Get(keys);
+                return this.CurrencyLayerRepository.Get(keys);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the first instance of currency layer.
+        /// </summary>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("first")]
+        [Route("~/api/config/currency-layer/first")]
+        public MixERP.Net.Entities.Config.CurrencyLayer GetFirst()
+        {
+            try
+            {
+                return this.CurrencyLayerRepository.GetFirst();
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the previous instance of currency layer.
+        /// </summary>
+        /// <param name="key">Enter Key to search for.</param>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("previous/{key}")]
+        [Route("~/api/config/currency-layer/previous/{key}")]
+        public MixERP.Net.Entities.Config.CurrencyLayer GetPrevious(string key)
+        {
+            try
+            {
+                return this.CurrencyLayerRepository.GetPrevious(key);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the next instance of currency layer.
+        /// </summary>
+        /// <param name="key">Enter Key to search for.</param>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("next/{key}")]
+        [Route("~/api/config/currency-layer/next/{key}")]
+        public MixERP.Net.Entities.Config.CurrencyLayer GetNext(string key)
+        {
+            try
+            {
+                return this.CurrencyLayerRepository.GetNext(key);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the last instance of currency layer.
+        /// </summary>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("last")]
+        [Route("~/api/config/currency-layer/last")]
+        public MixERP.Net.Entities.Config.CurrencyLayer GetLast()
+        {
+            try
+            {
+                return this.CurrencyLayerRepository.GetLast();
             }
             catch (UnauthorizedException)
             {
@@ -232,7 +374,7 @@ namespace MixERP.Net.Api.Config
         {
             try
             {
-                return this.CurrencyLayerContext.GetPaginatedResult();
+                return this.CurrencyLayerRepository.GetPaginatedResult();
             }
             catch (UnauthorizedException)
             {
@@ -264,7 +406,7 @@ namespace MixERP.Net.Api.Config
         {
             try
             {
-                return this.CurrencyLayerContext.GetPaginatedResult(pageNumber);
+                return this.CurrencyLayerRepository.GetPaginatedResult(pageNumber);
             }
             catch (UnauthorizedException)
             {
@@ -297,7 +439,7 @@ namespace MixERP.Net.Api.Config
             try
             {
                 List<EntityParser.Filter> f = filters.ToObject<List<EntityParser.Filter>>(JsonHelper.GetJsonSerializer());
-                return this.CurrencyLayerContext.CountWhere(f);
+                return this.CurrencyLayerRepository.CountWhere(f);
             }
             catch (UnauthorizedException)
             {
@@ -331,7 +473,7 @@ namespace MixERP.Net.Api.Config
             try
             {
                 List<EntityParser.Filter> f = filters.ToObject<List<EntityParser.Filter>>(JsonHelper.GetJsonSerializer());
-                return this.CurrencyLayerContext.GetWhere(pageNumber, f);
+                return this.CurrencyLayerRepository.GetWhere(pageNumber, f);
             }
             catch (UnauthorizedException)
             {
@@ -363,7 +505,7 @@ namespace MixERP.Net.Api.Config
         {
             try
             {
-                return this.CurrencyLayerContext.CountFiltered(filterName);
+                return this.CurrencyLayerRepository.CountFiltered(filterName);
             }
             catch (UnauthorizedException)
             {
@@ -396,7 +538,7 @@ namespace MixERP.Net.Api.Config
         {
             try
             {
-                return this.CurrencyLayerContext.GetFiltered(pageNumber, filterName);
+                return this.CurrencyLayerRepository.GetFiltered(pageNumber, filterName);
             }
             catch (UnauthorizedException)
             {
@@ -427,7 +569,7 @@ namespace MixERP.Net.Api.Config
         {
             try
             {
-                return this.CurrencyLayerContext.GetDisplayFields();
+                return this.CurrencyLayerRepository.GetDisplayFields();
             }
             catch (UnauthorizedException)
             {
@@ -458,7 +600,7 @@ namespace MixERP.Net.Api.Config
         {
             try
             {
-                return this.CurrencyLayerContext.GetCustomFields(null);
+                return this.CurrencyLayerRepository.GetCustomFields(null);
             }
             catch (UnauthorizedException)
             {
@@ -489,7 +631,7 @@ namespace MixERP.Net.Api.Config
         {
             try
             {
-                return this.CurrencyLayerContext.GetCustomFields(resourceId);
+                return this.CurrencyLayerRepository.GetCustomFields(resourceId);
             }
             catch (UnauthorizedException)
             {
@@ -528,7 +670,7 @@ namespace MixERP.Net.Api.Config
 
             try
             {
-                return this.CurrencyLayerContext.AddOrEdit(currencyLayer, customFields);
+                return this.CurrencyLayerRepository.AddOrEdit(currencyLayer, customFields);
             }
             catch (UnauthorizedException)
             {
@@ -564,7 +706,7 @@ namespace MixERP.Net.Api.Config
 
             try
             {
-                this.CurrencyLayerContext.Add(currencyLayer);
+                this.CurrencyLayerRepository.Add(currencyLayer);
             }
             catch (UnauthorizedException)
             {
@@ -601,7 +743,7 @@ namespace MixERP.Net.Api.Config
 
             try
             {
-                this.CurrencyLayerContext.Update(currencyLayer, key);
+                this.CurrencyLayerRepository.Update(currencyLayer, key);
             }
             catch (UnauthorizedException)
             {
@@ -646,7 +788,7 @@ namespace MixERP.Net.Api.Config
 
             try
             {
-                return this.CurrencyLayerContext.BulkImport(currencyLayerCollection);
+                return this.CurrencyLayerRepository.BulkImport(currencyLayerCollection);
             }
             catch (UnauthorizedException)
             {
@@ -677,7 +819,7 @@ namespace MixERP.Net.Api.Config
         {
             try
             {
-                this.CurrencyLayerContext.Delete(key);
+                this.CurrencyLayerRepository.Delete(key);
             }
             catch (UnauthorizedException)
             {

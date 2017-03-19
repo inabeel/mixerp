@@ -12,6 +12,7 @@ using MixERP.Net.Framework;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using PetaPoco;
+using MixERP.Net.Core.Modules.HRM.Data;
 
 namespace MixERP.Net.Api.HRM
 {
@@ -22,9 +23,9 @@ namespace MixERP.Net.Api.HRM
     public class ContractController : ApiController
     {
         /// <summary>
-        ///     The Contract data context.
+        ///     The Contract repository.
         /// </summary>
-        private readonly MixERP.Net.Core.Modules.HRM.Data.Contract ContractContext;
+        private readonly IContractRepository ContractRepository;
 
         public ContractController()
         {
@@ -33,12 +34,22 @@ namespace MixERP.Net.Api.HRM
             this._OfficeId = AppUsers.GetCurrent().View.OfficeId.ToInt();
             this._Catalog = AppUsers.GetCurrentUserDB();
 
-            this.ContractContext = new MixERP.Net.Core.Modules.HRM.Data.Contract
+            this.ContractRepository = new MixERP.Net.Core.Modules.HRM.Data.Contract
             {
                 _Catalog = this._Catalog,
                 _LoginId = this._LoginId,
                 _UserId = this._UserId
             };
+        }
+
+        public ContractController(IContractRepository repository, string catalog, LoginView view)
+        {
+            this._LoginId = view.LoginId.ToLong();
+            this._UserId = view.UserId.ToInt();
+            this._OfficeId = view.OfficeId.ToInt();
+            this._Catalog = catalog;
+
+            this.ContractRepository = repository;
         }
 
         public long _LoginId { get; }
@@ -55,6 +66,11 @@ namespace MixERP.Net.Api.HRM
         [Route("~/api/hrm/contract/meta")]
         public EntityView GetEntityView()
         {
+            if (this._LoginId == 0)
+            {
+                return new EntityView();
+            }
+
             return new EntityView
             {
                 PrimaryKey = "contract_id",
@@ -90,7 +106,7 @@ namespace MixERP.Net.Api.HRM
         {
             try
             {
-                return this.ContractContext.Count();
+                return this.ContractRepository.Count();
             }
             catch (UnauthorizedException)
             {
@@ -121,7 +137,7 @@ namespace MixERP.Net.Api.HRM
         {
             try
             {
-                return this.ContractContext.GetAll();
+                return this.ContractRepository.GetAll();
             }
             catch (UnauthorizedException)
             {
@@ -152,7 +168,7 @@ namespace MixERP.Net.Api.HRM
         {
             try
             {
-                return this.ContractContext.Export();
+                return this.ContractRepository.Export();
             }
             catch (UnauthorizedException)
             {
@@ -184,7 +200,7 @@ namespace MixERP.Net.Api.HRM
         {
             try
             {
-                return this.ContractContext.Get(contractId);
+                return this.ContractRepository.Get(contractId);
             }
             catch (UnauthorizedException)
             {
@@ -211,7 +227,133 @@ namespace MixERP.Net.Api.HRM
         {
             try
             {
-                return this.ContractContext.Get(contractIds);
+                return this.ContractRepository.Get(contractIds);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the first instance of contract.
+        /// </summary>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("first")]
+        [Route("~/api/hrm/contract/first")]
+        public MixERP.Net.Entities.HRM.Contract GetFirst()
+        {
+            try
+            {
+                return this.ContractRepository.GetFirst();
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the previous instance of contract.
+        /// </summary>
+        /// <param name="contractId">Enter ContractId to search for.</param>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("previous/{contractId}")]
+        [Route("~/api/hrm/contract/previous/{contractId}")]
+        public MixERP.Net.Entities.HRM.Contract GetPrevious(long contractId)
+        {
+            try
+            {
+                return this.ContractRepository.GetPrevious(contractId);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the next instance of contract.
+        /// </summary>
+        /// <param name="contractId">Enter ContractId to search for.</param>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("next/{contractId}")]
+        [Route("~/api/hrm/contract/next/{contractId}")]
+        public MixERP.Net.Entities.HRM.Contract GetNext(long contractId)
+        {
+            try
+            {
+                return this.ContractRepository.GetNext(contractId);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the last instance of contract.
+        /// </summary>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("last")]
+        [Route("~/api/hrm/contract/last")]
+        public MixERP.Net.Entities.HRM.Contract GetLast()
+        {
+            try
+            {
+                return this.ContractRepository.GetLast();
             }
             catch (UnauthorizedException)
             {
@@ -242,7 +384,7 @@ namespace MixERP.Net.Api.HRM
         {
             try
             {
-                return this.ContractContext.GetPaginatedResult();
+                return this.ContractRepository.GetPaginatedResult();
             }
             catch (UnauthorizedException)
             {
@@ -274,7 +416,7 @@ namespace MixERP.Net.Api.HRM
         {
             try
             {
-                return this.ContractContext.GetPaginatedResult(pageNumber);
+                return this.ContractRepository.GetPaginatedResult(pageNumber);
             }
             catch (UnauthorizedException)
             {
@@ -307,7 +449,7 @@ namespace MixERP.Net.Api.HRM
             try
             {
                 List<EntityParser.Filter> f = filters.ToObject<List<EntityParser.Filter>>(JsonHelper.GetJsonSerializer());
-                return this.ContractContext.CountWhere(f);
+                return this.ContractRepository.CountWhere(f);
             }
             catch (UnauthorizedException)
             {
@@ -341,7 +483,7 @@ namespace MixERP.Net.Api.HRM
             try
             {
                 List<EntityParser.Filter> f = filters.ToObject<List<EntityParser.Filter>>(JsonHelper.GetJsonSerializer());
-                return this.ContractContext.GetWhere(pageNumber, f);
+                return this.ContractRepository.GetWhere(pageNumber, f);
             }
             catch (UnauthorizedException)
             {
@@ -373,7 +515,7 @@ namespace MixERP.Net.Api.HRM
         {
             try
             {
-                return this.ContractContext.CountFiltered(filterName);
+                return this.ContractRepository.CountFiltered(filterName);
             }
             catch (UnauthorizedException)
             {
@@ -406,7 +548,7 @@ namespace MixERP.Net.Api.HRM
         {
             try
             {
-                return this.ContractContext.GetFiltered(pageNumber, filterName);
+                return this.ContractRepository.GetFiltered(pageNumber, filterName);
             }
             catch (UnauthorizedException)
             {
@@ -437,7 +579,7 @@ namespace MixERP.Net.Api.HRM
         {
             try
             {
-                return this.ContractContext.GetDisplayFields();
+                return this.ContractRepository.GetDisplayFields();
             }
             catch (UnauthorizedException)
             {
@@ -468,7 +610,7 @@ namespace MixERP.Net.Api.HRM
         {
             try
             {
-                return this.ContractContext.GetCustomFields(null);
+                return this.ContractRepository.GetCustomFields(null);
             }
             catch (UnauthorizedException)
             {
@@ -499,7 +641,7 @@ namespace MixERP.Net.Api.HRM
         {
             try
             {
-                return this.ContractContext.GetCustomFields(resourceId);
+                return this.ContractRepository.GetCustomFields(resourceId);
             }
             catch (UnauthorizedException)
             {
@@ -538,7 +680,7 @@ namespace MixERP.Net.Api.HRM
 
             try
             {
-                return this.ContractContext.AddOrEdit(contract, customFields);
+                return this.ContractRepository.AddOrEdit(contract, customFields);
             }
             catch (UnauthorizedException)
             {
@@ -574,7 +716,7 @@ namespace MixERP.Net.Api.HRM
 
             try
             {
-                this.ContractContext.Add(contract);
+                this.ContractRepository.Add(contract);
             }
             catch (UnauthorizedException)
             {
@@ -611,7 +753,7 @@ namespace MixERP.Net.Api.HRM
 
             try
             {
-                this.ContractContext.Update(contract, contractId);
+                this.ContractRepository.Update(contract, contractId);
             }
             catch (UnauthorizedException)
             {
@@ -656,7 +798,7 @@ namespace MixERP.Net.Api.HRM
 
             try
             {
-                return this.ContractContext.BulkImport(contractCollection);
+                return this.ContractRepository.BulkImport(contractCollection);
             }
             catch (UnauthorizedException)
             {
@@ -687,7 +829,7 @@ namespace MixERP.Net.Api.HRM
         {
             try
             {
-                this.ContractContext.Delete(contractId);
+                this.ContractRepository.Delete(contractId);
             }
             catch (UnauthorizedException)
             {
@@ -720,7 +862,7 @@ namespace MixERP.Net.Api.HRM
         {
             try
             {
-                this.ContractContext.Verify(contractId, verificationStatusId, reason);
+                this.ContractRepository.Verify(contractId, verificationStatusId, reason);
             }
             catch (UnauthorizedException)
             {

@@ -12,6 +12,7 @@ using MixERP.Net.Framework;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using PetaPoco;
+using MixERP.Net.Schemas.Config.Data;
 
 namespace MixERP.Net.Api.Config
 {
@@ -22,9 +23,9 @@ namespace MixERP.Net.Api.Config
     public class AttachmentFactoryController : ApiController
     {
         /// <summary>
-        ///     The AttachmentFactory data context.
+        ///     The AttachmentFactory repository.
         /// </summary>
-        private readonly MixERP.Net.Schemas.Config.Data.AttachmentFactory AttachmentFactoryContext;
+        private readonly IAttachmentFactoryRepository AttachmentFactoryRepository;
 
         public AttachmentFactoryController()
         {
@@ -33,12 +34,22 @@ namespace MixERP.Net.Api.Config
             this._OfficeId = AppUsers.GetCurrent().View.OfficeId.ToInt();
             this._Catalog = AppUsers.GetCurrentUserDB();
 
-            this.AttachmentFactoryContext = new MixERP.Net.Schemas.Config.Data.AttachmentFactory
+            this.AttachmentFactoryRepository = new MixERP.Net.Schemas.Config.Data.AttachmentFactory
             {
                 _Catalog = this._Catalog,
                 _LoginId = this._LoginId,
                 _UserId = this._UserId
             };
+        }
+
+        public AttachmentFactoryController(IAttachmentFactoryRepository repository, string catalog, LoginView view)
+        {
+            this._LoginId = view.LoginId.ToLong();
+            this._UserId = view.UserId.ToInt();
+            this._OfficeId = view.OfficeId.ToInt();
+            this._Catalog = catalog;
+
+            this.AttachmentFactoryRepository = repository;
         }
 
         public long _LoginId { get; }
@@ -55,6 +66,11 @@ namespace MixERP.Net.Api.Config
         [Route("~/api/config/attachment-factory/meta")]
         public EntityView GetEntityView()
         {
+            if (this._LoginId == 0)
+            {
+                return new EntityView();
+            }
+
             return new EntityView
             {
                 PrimaryKey = "key",
@@ -79,7 +95,7 @@ namespace MixERP.Net.Api.Config
         {
             try
             {
-                return this.AttachmentFactoryContext.Count();
+                return this.AttachmentFactoryRepository.Count();
             }
             catch (UnauthorizedException)
             {
@@ -110,7 +126,7 @@ namespace MixERP.Net.Api.Config
         {
             try
             {
-                return this.AttachmentFactoryContext.GetAll();
+                return this.AttachmentFactoryRepository.GetAll();
             }
             catch (UnauthorizedException)
             {
@@ -141,7 +157,7 @@ namespace MixERP.Net.Api.Config
         {
             try
             {
-                return this.AttachmentFactoryContext.Export();
+                return this.AttachmentFactoryRepository.Export();
             }
             catch (UnauthorizedException)
             {
@@ -173,7 +189,7 @@ namespace MixERP.Net.Api.Config
         {
             try
             {
-                return this.AttachmentFactoryContext.Get(key);
+                return this.AttachmentFactoryRepository.Get(key);
             }
             catch (UnauthorizedException)
             {
@@ -200,7 +216,133 @@ namespace MixERP.Net.Api.Config
         {
             try
             {
-                return this.AttachmentFactoryContext.Get(keys);
+                return this.AttachmentFactoryRepository.Get(keys);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the first instance of attachment factory.
+        /// </summary>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("first")]
+        [Route("~/api/config/attachment-factory/first")]
+        public MixERP.Net.Entities.Config.AttachmentFactory GetFirst()
+        {
+            try
+            {
+                return this.AttachmentFactoryRepository.GetFirst();
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the previous instance of attachment factory.
+        /// </summary>
+        /// <param name="key">Enter Key to search for.</param>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("previous/{key}")]
+        [Route("~/api/config/attachment-factory/previous/{key}")]
+        public MixERP.Net.Entities.Config.AttachmentFactory GetPrevious(string key)
+        {
+            try
+            {
+                return this.AttachmentFactoryRepository.GetPrevious(key);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the next instance of attachment factory.
+        /// </summary>
+        /// <param name="key">Enter Key to search for.</param>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("next/{key}")]
+        [Route("~/api/config/attachment-factory/next/{key}")]
+        public MixERP.Net.Entities.Config.AttachmentFactory GetNext(string key)
+        {
+            try
+            {
+                return this.AttachmentFactoryRepository.GetNext(key);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the last instance of attachment factory.
+        /// </summary>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("last")]
+        [Route("~/api/config/attachment-factory/last")]
+        public MixERP.Net.Entities.Config.AttachmentFactory GetLast()
+        {
+            try
+            {
+                return this.AttachmentFactoryRepository.GetLast();
             }
             catch (UnauthorizedException)
             {
@@ -231,7 +373,7 @@ namespace MixERP.Net.Api.Config
         {
             try
             {
-                return this.AttachmentFactoryContext.GetPaginatedResult();
+                return this.AttachmentFactoryRepository.GetPaginatedResult();
             }
             catch (UnauthorizedException)
             {
@@ -263,7 +405,7 @@ namespace MixERP.Net.Api.Config
         {
             try
             {
-                return this.AttachmentFactoryContext.GetPaginatedResult(pageNumber);
+                return this.AttachmentFactoryRepository.GetPaginatedResult(pageNumber);
             }
             catch (UnauthorizedException)
             {
@@ -296,7 +438,7 @@ namespace MixERP.Net.Api.Config
             try
             {
                 List<EntityParser.Filter> f = filters.ToObject<List<EntityParser.Filter>>(JsonHelper.GetJsonSerializer());
-                return this.AttachmentFactoryContext.CountWhere(f);
+                return this.AttachmentFactoryRepository.CountWhere(f);
             }
             catch (UnauthorizedException)
             {
@@ -330,7 +472,7 @@ namespace MixERP.Net.Api.Config
             try
             {
                 List<EntityParser.Filter> f = filters.ToObject<List<EntityParser.Filter>>(JsonHelper.GetJsonSerializer());
-                return this.AttachmentFactoryContext.GetWhere(pageNumber, f);
+                return this.AttachmentFactoryRepository.GetWhere(pageNumber, f);
             }
             catch (UnauthorizedException)
             {
@@ -362,7 +504,7 @@ namespace MixERP.Net.Api.Config
         {
             try
             {
-                return this.AttachmentFactoryContext.CountFiltered(filterName);
+                return this.AttachmentFactoryRepository.CountFiltered(filterName);
             }
             catch (UnauthorizedException)
             {
@@ -395,7 +537,7 @@ namespace MixERP.Net.Api.Config
         {
             try
             {
-                return this.AttachmentFactoryContext.GetFiltered(pageNumber, filterName);
+                return this.AttachmentFactoryRepository.GetFiltered(pageNumber, filterName);
             }
             catch (UnauthorizedException)
             {
@@ -426,7 +568,7 @@ namespace MixERP.Net.Api.Config
         {
             try
             {
-                return this.AttachmentFactoryContext.GetDisplayFields();
+                return this.AttachmentFactoryRepository.GetDisplayFields();
             }
             catch (UnauthorizedException)
             {
@@ -457,7 +599,7 @@ namespace MixERP.Net.Api.Config
         {
             try
             {
-                return this.AttachmentFactoryContext.GetCustomFields(null);
+                return this.AttachmentFactoryRepository.GetCustomFields(null);
             }
             catch (UnauthorizedException)
             {
@@ -488,7 +630,7 @@ namespace MixERP.Net.Api.Config
         {
             try
             {
-                return this.AttachmentFactoryContext.GetCustomFields(resourceId);
+                return this.AttachmentFactoryRepository.GetCustomFields(resourceId);
             }
             catch (UnauthorizedException)
             {
@@ -527,7 +669,7 @@ namespace MixERP.Net.Api.Config
 
             try
             {
-                return this.AttachmentFactoryContext.AddOrEdit(attachmentFactory, customFields);
+                return this.AttachmentFactoryRepository.AddOrEdit(attachmentFactory, customFields);
             }
             catch (UnauthorizedException)
             {
@@ -563,7 +705,7 @@ namespace MixERP.Net.Api.Config
 
             try
             {
-                this.AttachmentFactoryContext.Add(attachmentFactory);
+                this.AttachmentFactoryRepository.Add(attachmentFactory);
             }
             catch (UnauthorizedException)
             {
@@ -600,7 +742,7 @@ namespace MixERP.Net.Api.Config
 
             try
             {
-                this.AttachmentFactoryContext.Update(attachmentFactory, key);
+                this.AttachmentFactoryRepository.Update(attachmentFactory, key);
             }
             catch (UnauthorizedException)
             {
@@ -645,7 +787,7 @@ namespace MixERP.Net.Api.Config
 
             try
             {
-                return this.AttachmentFactoryContext.BulkImport(attachmentFactoryCollection);
+                return this.AttachmentFactoryRepository.BulkImport(attachmentFactoryCollection);
             }
             catch (UnauthorizedException)
             {
@@ -676,7 +818,7 @@ namespace MixERP.Net.Api.Config
         {
             try
             {
-                this.AttachmentFactoryContext.Delete(key);
+                this.AttachmentFactoryRepository.Delete(key);
             }
             catch (UnauthorizedException)
             {

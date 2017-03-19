@@ -16,7 +16,7 @@ namespace MixERP.Net.Schemas.Core.Data
     /// <summary>
     /// Provides simplified data access features to perform SCRUD operation on the database table "core.frequencies".
     /// </summary>
-    public class Frequency : DbAccess
+    public class Frequency : DbAccess, IFrequencyRepository
     {
         /// <summary>
         /// The schema of this table. Returns literal "core".
@@ -73,7 +73,7 @@ namespace MixERP.Net.Schemas.Core.Data
         }
 
         /// <summary>
-        /// Executes a select query on the table "core.frequencies" to return a all instances of the "Frequency" class. 
+        /// Executes a select query on the table "core.frequencies" to return all instances of the "Frequency" class. 
         /// </summary>
         /// <returns>Returns a non-live, non-mapped instances of "Frequency" class.</returns>
         /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
@@ -102,7 +102,7 @@ namespace MixERP.Net.Schemas.Core.Data
         }
 
         /// <summary>
-        /// Executes a select query on the table "core.frequencies" to return a all instances of the "Frequency" class to export. 
+        /// Executes a select query on the table "core.frequencies" to return all instances of the "Frequency" class to export. 
         /// </summary>
         /// <returns>Returns a non-live, non-mapped instances of "Frequency" class.</returns>
         /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
@@ -158,6 +158,125 @@ namespace MixERP.Net.Schemas.Core.Data
 
             const string sql = "SELECT * FROM core.frequencies WHERE frequency_id=@0;";
             return Factory.Get<MixERP.Net.Entities.Core.Frequency>(this._Catalog, sql, frequencyId).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Gets the first record of the table "core.frequencies". 
+        /// </summary>
+        /// <returns>Returns a non-live, non-mapped instance of "Frequency" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.Core.Frequency GetFirst()
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the first record of entity \"Frequency\" was denied to the user with Login ID {_LoginId}", this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM core.frequencies ORDER BY frequency_id LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.Core.Frequency>(this._Catalog, sql).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Gets the previous record of the table "core.frequencies" sorted by frequencyId.
+        /// </summary>
+        /// <param name="frequencyId">The column "frequency_id" parameter used to find the next record.</param>
+        /// <returns>Returns a non-live, non-mapped instance of "Frequency" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.Core.Frequency GetPrevious(int frequencyId)
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the previous entity of \"Frequency\" by \"FrequencyId\" with value {FrequencyId} was denied to the user with Login ID {_LoginId}", frequencyId, this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM core.frequencies WHERE frequency_id < @0 ORDER BY frequency_id DESC LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.Core.Frequency>(this._Catalog, sql, frequencyId).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Gets the next record of the table "core.frequencies" sorted by frequencyId.
+        /// </summary>
+        /// <param name="frequencyId">The column "frequency_id" parameter used to find the next record.</param>
+        /// <returns>Returns a non-live, non-mapped instance of "Frequency" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.Core.Frequency GetNext(int frequencyId)
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the next entity of \"Frequency\" by \"FrequencyId\" with value {FrequencyId} was denied to the user with Login ID {_LoginId}", frequencyId, this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM core.frequencies WHERE frequency_id > @0 ORDER BY frequency_id LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.Core.Frequency>(this._Catalog, sql, frequencyId).FirstOrDefault();
+        }
+
+
+        /// <summary>
+        /// Gets the last record of the table "core.frequencies". 
+        /// </summary>
+        /// <returns>Returns a non-live, non-mapped instance of "Frequency" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.Core.Frequency GetLast()
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the last record of entity \"Frequency\" was denied to the user with Login ID {_LoginId}", this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM core.frequencies ORDER BY frequency_id DESC LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.Core.Frequency>(this._Catalog, sql).FirstOrDefault();
         }
 
         /// <summary>
@@ -557,7 +676,7 @@ namespace MixERP.Net.Schemas.Core.Data
             return Factory.Get<MixERP.Net.Entities.Core.Frequency>(this._Catalog, sql, offset);
         }
 
-        private List<EntityParser.Filter> GetFilters(string catalog, string filterName)
+        public List<EntityParser.Filter> GetFilters(string catalog, string filterName)
         {
             const string sql = "SELECT * FROM core.filters WHERE object_name='core.frequencies' AND lower(filter_name)=lower(@0);";
             return Factory.Get<EntityParser.Filter>(catalog, sql, filterName).ToList();

@@ -12,6 +12,7 @@ using MixERP.Net.Framework;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using PetaPoco;
+using MixERP.Net.Schemas.Core.Data;
 
 namespace MixERP.Net.Api.Core
 {
@@ -22,9 +23,9 @@ namespace MixERP.Net.Api.Core
     public class CountySalesTaxController : ApiController
     {
         /// <summary>
-        ///     The CountySalesTax data context.
+        ///     The CountySalesTax repository.
         /// </summary>
-        private readonly MixERP.Net.Schemas.Core.Data.CountySalesTax CountySalesTaxContext;
+        private readonly ICountySalesTaxRepository CountySalesTaxRepository;
 
         public CountySalesTaxController()
         {
@@ -33,12 +34,22 @@ namespace MixERP.Net.Api.Core
             this._OfficeId = AppUsers.GetCurrent().View.OfficeId.ToInt();
             this._Catalog = AppUsers.GetCurrentUserDB();
 
-            this.CountySalesTaxContext = new MixERP.Net.Schemas.Core.Data.CountySalesTax
+            this.CountySalesTaxRepository = new MixERP.Net.Schemas.Core.Data.CountySalesTax
             {
                 _Catalog = this._Catalog,
                 _LoginId = this._LoginId,
                 _UserId = this._UserId
             };
+        }
+
+        public CountySalesTaxController(ICountySalesTaxRepository repository, string catalog, LoginView view)
+        {
+            this._LoginId = view.LoginId.ToLong();
+            this._UserId = view.UserId.ToInt();
+            this._OfficeId = view.OfficeId.ToInt();
+            this._Catalog = catalog;
+
+            this.CountySalesTaxRepository = repository;
         }
 
         public long _LoginId { get; }
@@ -55,6 +66,11 @@ namespace MixERP.Net.Api.Core
         [Route("~/api/core/county-sales-tax/meta")]
         public EntityView GetEntityView()
         {
+            if (this._LoginId == 0)
+            {
+                return new EntityView();
+            }
+
             return new EntityView
             {
                 PrimaryKey = "county_sales_tax_id",
@@ -85,7 +101,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.CountySalesTaxContext.Count();
+                return this.CountySalesTaxRepository.Count();
             }
             catch (UnauthorizedException)
             {
@@ -116,7 +132,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.CountySalesTaxContext.GetAll();
+                return this.CountySalesTaxRepository.GetAll();
             }
             catch (UnauthorizedException)
             {
@@ -147,7 +163,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.CountySalesTaxContext.Export();
+                return this.CountySalesTaxRepository.Export();
             }
             catch (UnauthorizedException)
             {
@@ -179,7 +195,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.CountySalesTaxContext.Get(countySalesTaxId);
+                return this.CountySalesTaxRepository.Get(countySalesTaxId);
             }
             catch (UnauthorizedException)
             {
@@ -206,7 +222,133 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.CountySalesTaxContext.Get(countySalesTaxIds);
+                return this.CountySalesTaxRepository.Get(countySalesTaxIds);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the first instance of county sales tax.
+        /// </summary>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("first")]
+        [Route("~/api/core/county-sales-tax/first")]
+        public MixERP.Net.Entities.Core.CountySalesTax GetFirst()
+        {
+            try
+            {
+                return this.CountySalesTaxRepository.GetFirst();
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the previous instance of county sales tax.
+        /// </summary>
+        /// <param name="countySalesTaxId">Enter CountySalesTaxId to search for.</param>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("previous/{countySalesTaxId}")]
+        [Route("~/api/core/county-sales-tax/previous/{countySalesTaxId}")]
+        public MixERP.Net.Entities.Core.CountySalesTax GetPrevious(int countySalesTaxId)
+        {
+            try
+            {
+                return this.CountySalesTaxRepository.GetPrevious(countySalesTaxId);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the next instance of county sales tax.
+        /// </summary>
+        /// <param name="countySalesTaxId">Enter CountySalesTaxId to search for.</param>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("next/{countySalesTaxId}")]
+        [Route("~/api/core/county-sales-tax/next/{countySalesTaxId}")]
+        public MixERP.Net.Entities.Core.CountySalesTax GetNext(int countySalesTaxId)
+        {
+            try
+            {
+                return this.CountySalesTaxRepository.GetNext(countySalesTaxId);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the last instance of county sales tax.
+        /// </summary>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("last")]
+        [Route("~/api/core/county-sales-tax/last")]
+        public MixERP.Net.Entities.Core.CountySalesTax GetLast()
+        {
+            try
+            {
+                return this.CountySalesTaxRepository.GetLast();
             }
             catch (UnauthorizedException)
             {
@@ -237,7 +379,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.CountySalesTaxContext.GetPaginatedResult();
+                return this.CountySalesTaxRepository.GetPaginatedResult();
             }
             catch (UnauthorizedException)
             {
@@ -269,7 +411,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.CountySalesTaxContext.GetPaginatedResult(pageNumber);
+                return this.CountySalesTaxRepository.GetPaginatedResult(pageNumber);
             }
             catch (UnauthorizedException)
             {
@@ -302,7 +444,7 @@ namespace MixERP.Net.Api.Core
             try
             {
                 List<EntityParser.Filter> f = filters.ToObject<List<EntityParser.Filter>>(JsonHelper.GetJsonSerializer());
-                return this.CountySalesTaxContext.CountWhere(f);
+                return this.CountySalesTaxRepository.CountWhere(f);
             }
             catch (UnauthorizedException)
             {
@@ -336,7 +478,7 @@ namespace MixERP.Net.Api.Core
             try
             {
                 List<EntityParser.Filter> f = filters.ToObject<List<EntityParser.Filter>>(JsonHelper.GetJsonSerializer());
-                return this.CountySalesTaxContext.GetWhere(pageNumber, f);
+                return this.CountySalesTaxRepository.GetWhere(pageNumber, f);
             }
             catch (UnauthorizedException)
             {
@@ -368,7 +510,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.CountySalesTaxContext.CountFiltered(filterName);
+                return this.CountySalesTaxRepository.CountFiltered(filterName);
             }
             catch (UnauthorizedException)
             {
@@ -401,7 +543,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.CountySalesTaxContext.GetFiltered(pageNumber, filterName);
+                return this.CountySalesTaxRepository.GetFiltered(pageNumber, filterName);
             }
             catch (UnauthorizedException)
             {
@@ -432,7 +574,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.CountySalesTaxContext.GetDisplayFields();
+                return this.CountySalesTaxRepository.GetDisplayFields();
             }
             catch (UnauthorizedException)
             {
@@ -463,7 +605,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.CountySalesTaxContext.GetCustomFields(null);
+                return this.CountySalesTaxRepository.GetCustomFields(null);
             }
             catch (UnauthorizedException)
             {
@@ -494,7 +636,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.CountySalesTaxContext.GetCustomFields(resourceId);
+                return this.CountySalesTaxRepository.GetCustomFields(resourceId);
             }
             catch (UnauthorizedException)
             {
@@ -533,7 +675,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                return this.CountySalesTaxContext.AddOrEdit(countySalesTax, customFields);
+                return this.CountySalesTaxRepository.AddOrEdit(countySalesTax, customFields);
             }
             catch (UnauthorizedException)
             {
@@ -569,7 +711,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                this.CountySalesTaxContext.Add(countySalesTax);
+                this.CountySalesTaxRepository.Add(countySalesTax);
             }
             catch (UnauthorizedException)
             {
@@ -606,7 +748,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                this.CountySalesTaxContext.Update(countySalesTax, countySalesTaxId);
+                this.CountySalesTaxRepository.Update(countySalesTax, countySalesTaxId);
             }
             catch (UnauthorizedException)
             {
@@ -651,7 +793,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                return this.CountySalesTaxContext.BulkImport(countySalesTaxCollection);
+                return this.CountySalesTaxRepository.BulkImport(countySalesTaxCollection);
             }
             catch (UnauthorizedException)
             {
@@ -682,7 +824,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                this.CountySalesTaxContext.Delete(countySalesTaxId);
+                this.CountySalesTaxRepository.Delete(countySalesTaxId);
             }
             catch (UnauthorizedException)
             {

@@ -12,6 +12,7 @@ using MixERP.Net.Framework;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using PetaPoco;
+using MixERP.Net.Core.Modules.HRM.Data;
 
 namespace MixERP.Net.Api.HRM
 {
@@ -22,9 +23,9 @@ namespace MixERP.Net.Api.HRM
     public class EducationLevelController : ApiController
     {
         /// <summary>
-        ///     The EducationLevel data context.
+        ///     The EducationLevel repository.
         /// </summary>
-        private readonly MixERP.Net.Core.Modules.HRM.Data.EducationLevel EducationLevelContext;
+        private readonly IEducationLevelRepository EducationLevelRepository;
 
         public EducationLevelController()
         {
@@ -33,12 +34,22 @@ namespace MixERP.Net.Api.HRM
             this._OfficeId = AppUsers.GetCurrent().View.OfficeId.ToInt();
             this._Catalog = AppUsers.GetCurrentUserDB();
 
-            this.EducationLevelContext = new MixERP.Net.Core.Modules.HRM.Data.EducationLevel
+            this.EducationLevelRepository = new MixERP.Net.Core.Modules.HRM.Data.EducationLevel
             {
                 _Catalog = this._Catalog,
                 _LoginId = this._LoginId,
                 _UserId = this._UserId
             };
+        }
+
+        public EducationLevelController(IEducationLevelRepository repository, string catalog, LoginView view)
+        {
+            this._LoginId = view.LoginId.ToLong();
+            this._UserId = view.UserId.ToInt();
+            this._OfficeId = view.OfficeId.ToInt();
+            this._Catalog = catalog;
+
+            this.EducationLevelRepository = repository;
         }
 
         public long _LoginId { get; }
@@ -55,6 +66,11 @@ namespace MixERP.Net.Api.HRM
         [Route("~/api/hrm/education-level/meta")]
         public EntityView GetEntityView()
         {
+            if (this._LoginId == 0)
+            {
+                return new EntityView();
+            }
+
             return new EntityView
             {
                 PrimaryKey = "education_level_id",
@@ -79,7 +95,7 @@ namespace MixERP.Net.Api.HRM
         {
             try
             {
-                return this.EducationLevelContext.Count();
+                return this.EducationLevelRepository.Count();
             }
             catch (UnauthorizedException)
             {
@@ -110,7 +126,7 @@ namespace MixERP.Net.Api.HRM
         {
             try
             {
-                return this.EducationLevelContext.GetAll();
+                return this.EducationLevelRepository.GetAll();
             }
             catch (UnauthorizedException)
             {
@@ -141,7 +157,7 @@ namespace MixERP.Net.Api.HRM
         {
             try
             {
-                return this.EducationLevelContext.Export();
+                return this.EducationLevelRepository.Export();
             }
             catch (UnauthorizedException)
             {
@@ -173,7 +189,7 @@ namespace MixERP.Net.Api.HRM
         {
             try
             {
-                return this.EducationLevelContext.Get(educationLevelId);
+                return this.EducationLevelRepository.Get(educationLevelId);
             }
             catch (UnauthorizedException)
             {
@@ -200,7 +216,133 @@ namespace MixERP.Net.Api.HRM
         {
             try
             {
-                return this.EducationLevelContext.Get(educationLevelIds);
+                return this.EducationLevelRepository.Get(educationLevelIds);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the first instance of education level.
+        /// </summary>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("first")]
+        [Route("~/api/hrm/education-level/first")]
+        public MixERP.Net.Entities.HRM.EducationLevel GetFirst()
+        {
+            try
+            {
+                return this.EducationLevelRepository.GetFirst();
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the previous instance of education level.
+        /// </summary>
+        /// <param name="educationLevelId">Enter EducationLevelId to search for.</param>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("previous/{educationLevelId}")]
+        [Route("~/api/hrm/education-level/previous/{educationLevelId}")]
+        public MixERP.Net.Entities.HRM.EducationLevel GetPrevious(int educationLevelId)
+        {
+            try
+            {
+                return this.EducationLevelRepository.GetPrevious(educationLevelId);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the next instance of education level.
+        /// </summary>
+        /// <param name="educationLevelId">Enter EducationLevelId to search for.</param>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("next/{educationLevelId}")]
+        [Route("~/api/hrm/education-level/next/{educationLevelId}")]
+        public MixERP.Net.Entities.HRM.EducationLevel GetNext(int educationLevelId)
+        {
+            try
+            {
+                return this.EducationLevelRepository.GetNext(educationLevelId);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the last instance of education level.
+        /// </summary>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("last")]
+        [Route("~/api/hrm/education-level/last")]
+        public MixERP.Net.Entities.HRM.EducationLevel GetLast()
+        {
+            try
+            {
+                return this.EducationLevelRepository.GetLast();
             }
             catch (UnauthorizedException)
             {
@@ -231,7 +373,7 @@ namespace MixERP.Net.Api.HRM
         {
             try
             {
-                return this.EducationLevelContext.GetPaginatedResult();
+                return this.EducationLevelRepository.GetPaginatedResult();
             }
             catch (UnauthorizedException)
             {
@@ -263,7 +405,7 @@ namespace MixERP.Net.Api.HRM
         {
             try
             {
-                return this.EducationLevelContext.GetPaginatedResult(pageNumber);
+                return this.EducationLevelRepository.GetPaginatedResult(pageNumber);
             }
             catch (UnauthorizedException)
             {
@@ -296,7 +438,7 @@ namespace MixERP.Net.Api.HRM
             try
             {
                 List<EntityParser.Filter> f = filters.ToObject<List<EntityParser.Filter>>(JsonHelper.GetJsonSerializer());
-                return this.EducationLevelContext.CountWhere(f);
+                return this.EducationLevelRepository.CountWhere(f);
             }
             catch (UnauthorizedException)
             {
@@ -330,7 +472,7 @@ namespace MixERP.Net.Api.HRM
             try
             {
                 List<EntityParser.Filter> f = filters.ToObject<List<EntityParser.Filter>>(JsonHelper.GetJsonSerializer());
-                return this.EducationLevelContext.GetWhere(pageNumber, f);
+                return this.EducationLevelRepository.GetWhere(pageNumber, f);
             }
             catch (UnauthorizedException)
             {
@@ -362,7 +504,7 @@ namespace MixERP.Net.Api.HRM
         {
             try
             {
-                return this.EducationLevelContext.CountFiltered(filterName);
+                return this.EducationLevelRepository.CountFiltered(filterName);
             }
             catch (UnauthorizedException)
             {
@@ -395,7 +537,7 @@ namespace MixERP.Net.Api.HRM
         {
             try
             {
-                return this.EducationLevelContext.GetFiltered(pageNumber, filterName);
+                return this.EducationLevelRepository.GetFiltered(pageNumber, filterName);
             }
             catch (UnauthorizedException)
             {
@@ -426,7 +568,7 @@ namespace MixERP.Net.Api.HRM
         {
             try
             {
-                return this.EducationLevelContext.GetDisplayFields();
+                return this.EducationLevelRepository.GetDisplayFields();
             }
             catch (UnauthorizedException)
             {
@@ -457,7 +599,7 @@ namespace MixERP.Net.Api.HRM
         {
             try
             {
-                return this.EducationLevelContext.GetCustomFields(null);
+                return this.EducationLevelRepository.GetCustomFields(null);
             }
             catch (UnauthorizedException)
             {
@@ -488,7 +630,7 @@ namespace MixERP.Net.Api.HRM
         {
             try
             {
-                return this.EducationLevelContext.GetCustomFields(resourceId);
+                return this.EducationLevelRepository.GetCustomFields(resourceId);
             }
             catch (UnauthorizedException)
             {
@@ -527,7 +669,7 @@ namespace MixERP.Net.Api.HRM
 
             try
             {
-                return this.EducationLevelContext.AddOrEdit(educationLevel, customFields);
+                return this.EducationLevelRepository.AddOrEdit(educationLevel, customFields);
             }
             catch (UnauthorizedException)
             {
@@ -563,7 +705,7 @@ namespace MixERP.Net.Api.HRM
 
             try
             {
-                this.EducationLevelContext.Add(educationLevel);
+                this.EducationLevelRepository.Add(educationLevel);
             }
             catch (UnauthorizedException)
             {
@@ -600,7 +742,7 @@ namespace MixERP.Net.Api.HRM
 
             try
             {
-                this.EducationLevelContext.Update(educationLevel, educationLevelId);
+                this.EducationLevelRepository.Update(educationLevel, educationLevelId);
             }
             catch (UnauthorizedException)
             {
@@ -645,7 +787,7 @@ namespace MixERP.Net.Api.HRM
 
             try
             {
-                return this.EducationLevelContext.BulkImport(educationLevelCollection);
+                return this.EducationLevelRepository.BulkImport(educationLevelCollection);
             }
             catch (UnauthorizedException)
             {
@@ -676,7 +818,7 @@ namespace MixERP.Net.Api.HRM
         {
             try
             {
-                this.EducationLevelContext.Delete(educationLevelId);
+                this.EducationLevelRepository.Delete(educationLevelId);
             }
             catch (UnauthorizedException)
             {

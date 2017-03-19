@@ -12,6 +12,7 @@ using MixERP.Net.Framework;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using PetaPoco;
+using MixERP.Net.Schemas.Core.Data;
 
 namespace MixERP.Net.Api.Core
 {
@@ -22,9 +23,9 @@ namespace MixERP.Net.Api.Core
     public class VerificationStatusController : ApiController
     {
         /// <summary>
-        ///     The VerificationStatus data context.
+        ///     The VerificationStatus repository.
         /// </summary>
-        private readonly MixERP.Net.Schemas.Core.Data.VerificationStatus VerificationStatusContext;
+        private readonly IVerificationStatusRepository VerificationStatusRepository;
 
         public VerificationStatusController()
         {
@@ -33,12 +34,22 @@ namespace MixERP.Net.Api.Core
             this._OfficeId = AppUsers.GetCurrent().View.OfficeId.ToInt();
             this._Catalog = AppUsers.GetCurrentUserDB();
 
-            this.VerificationStatusContext = new MixERP.Net.Schemas.Core.Data.VerificationStatus
+            this.VerificationStatusRepository = new MixERP.Net.Schemas.Core.Data.VerificationStatus
             {
                 _Catalog = this._Catalog,
                 _LoginId = this._LoginId,
                 _UserId = this._UserId
             };
+        }
+
+        public VerificationStatusController(IVerificationStatusRepository repository, string catalog, LoginView view)
+        {
+            this._LoginId = view.LoginId.ToLong();
+            this._UserId = view.UserId.ToInt();
+            this._OfficeId = view.OfficeId.ToInt();
+            this._Catalog = catalog;
+
+            this.VerificationStatusRepository = repository;
         }
 
         public long _LoginId { get; }
@@ -55,6 +66,11 @@ namespace MixERP.Net.Api.Core
         [Route("~/api/core/verification-status/meta")]
         public EntityView GetEntityView()
         {
+            if (this._LoginId == 0)
+            {
+                return new EntityView();
+            }
+
             return new EntityView
             {
                 PrimaryKey = "verification_status_id",
@@ -77,7 +93,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.VerificationStatusContext.Count();
+                return this.VerificationStatusRepository.Count();
             }
             catch (UnauthorizedException)
             {
@@ -108,7 +124,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.VerificationStatusContext.GetAll();
+                return this.VerificationStatusRepository.GetAll();
             }
             catch (UnauthorizedException)
             {
@@ -139,7 +155,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.VerificationStatusContext.Export();
+                return this.VerificationStatusRepository.Export();
             }
             catch (UnauthorizedException)
             {
@@ -171,7 +187,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.VerificationStatusContext.Get(verificationStatusId);
+                return this.VerificationStatusRepository.Get(verificationStatusId);
             }
             catch (UnauthorizedException)
             {
@@ -198,7 +214,133 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.VerificationStatusContext.Get(verificationStatusIds);
+                return this.VerificationStatusRepository.Get(verificationStatusIds);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the first instance of verification status.
+        /// </summary>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("first")]
+        [Route("~/api/core/verification-status/first")]
+        public MixERP.Net.Entities.Core.VerificationStatus GetFirst()
+        {
+            try
+            {
+                return this.VerificationStatusRepository.GetFirst();
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the previous instance of verification status.
+        /// </summary>
+        /// <param name="verificationStatusId">Enter VerificationStatusId to search for.</param>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("previous/{verificationStatusId}")]
+        [Route("~/api/core/verification-status/previous/{verificationStatusId}")]
+        public MixERP.Net.Entities.Core.VerificationStatus GetPrevious(short verificationStatusId)
+        {
+            try
+            {
+                return this.VerificationStatusRepository.GetPrevious(verificationStatusId);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the next instance of verification status.
+        /// </summary>
+        /// <param name="verificationStatusId">Enter VerificationStatusId to search for.</param>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("next/{verificationStatusId}")]
+        [Route("~/api/core/verification-status/next/{verificationStatusId}")]
+        public MixERP.Net.Entities.Core.VerificationStatus GetNext(short verificationStatusId)
+        {
+            try
+            {
+                return this.VerificationStatusRepository.GetNext(verificationStatusId);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the last instance of verification status.
+        /// </summary>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("last")]
+        [Route("~/api/core/verification-status/last")]
+        public MixERP.Net.Entities.Core.VerificationStatus GetLast()
+        {
+            try
+            {
+                return this.VerificationStatusRepository.GetLast();
             }
             catch (UnauthorizedException)
             {
@@ -229,7 +371,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.VerificationStatusContext.GetPaginatedResult();
+                return this.VerificationStatusRepository.GetPaginatedResult();
             }
             catch (UnauthorizedException)
             {
@@ -261,7 +403,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.VerificationStatusContext.GetPaginatedResult(pageNumber);
+                return this.VerificationStatusRepository.GetPaginatedResult(pageNumber);
             }
             catch (UnauthorizedException)
             {
@@ -294,7 +436,7 @@ namespace MixERP.Net.Api.Core
             try
             {
                 List<EntityParser.Filter> f = filters.ToObject<List<EntityParser.Filter>>(JsonHelper.GetJsonSerializer());
-                return this.VerificationStatusContext.CountWhere(f);
+                return this.VerificationStatusRepository.CountWhere(f);
             }
             catch (UnauthorizedException)
             {
@@ -328,7 +470,7 @@ namespace MixERP.Net.Api.Core
             try
             {
                 List<EntityParser.Filter> f = filters.ToObject<List<EntityParser.Filter>>(JsonHelper.GetJsonSerializer());
-                return this.VerificationStatusContext.GetWhere(pageNumber, f);
+                return this.VerificationStatusRepository.GetWhere(pageNumber, f);
             }
             catch (UnauthorizedException)
             {
@@ -360,7 +502,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.VerificationStatusContext.CountFiltered(filterName);
+                return this.VerificationStatusRepository.CountFiltered(filterName);
             }
             catch (UnauthorizedException)
             {
@@ -393,7 +535,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.VerificationStatusContext.GetFiltered(pageNumber, filterName);
+                return this.VerificationStatusRepository.GetFiltered(pageNumber, filterName);
             }
             catch (UnauthorizedException)
             {
@@ -424,7 +566,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.VerificationStatusContext.GetDisplayFields();
+                return this.VerificationStatusRepository.GetDisplayFields();
             }
             catch (UnauthorizedException)
             {
@@ -455,7 +597,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.VerificationStatusContext.GetCustomFields(null);
+                return this.VerificationStatusRepository.GetCustomFields(null);
             }
             catch (UnauthorizedException)
             {
@@ -486,7 +628,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.VerificationStatusContext.GetCustomFields(resourceId);
+                return this.VerificationStatusRepository.GetCustomFields(resourceId);
             }
             catch (UnauthorizedException)
             {
@@ -525,7 +667,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                return this.VerificationStatusContext.AddOrEdit(verificationStatus, customFields);
+                return this.VerificationStatusRepository.AddOrEdit(verificationStatus, customFields);
             }
             catch (UnauthorizedException)
             {
@@ -561,7 +703,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                this.VerificationStatusContext.Add(verificationStatus);
+                this.VerificationStatusRepository.Add(verificationStatus);
             }
             catch (UnauthorizedException)
             {
@@ -598,7 +740,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                this.VerificationStatusContext.Update(verificationStatus, verificationStatusId);
+                this.VerificationStatusRepository.Update(verificationStatus, verificationStatusId);
             }
             catch (UnauthorizedException)
             {
@@ -643,7 +785,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                return this.VerificationStatusContext.BulkImport(verificationStatusCollection);
+                return this.VerificationStatusRepository.BulkImport(verificationStatusCollection);
             }
             catch (UnauthorizedException)
             {
@@ -674,7 +816,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                this.VerificationStatusContext.Delete(verificationStatusId);
+                this.VerificationStatusRepository.Delete(verificationStatusId);
             }
             catch (UnauthorizedException)
             {

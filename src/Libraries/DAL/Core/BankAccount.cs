@@ -16,7 +16,7 @@ namespace MixERP.Net.Schemas.Core.Data
     /// <summary>
     /// Provides simplified data access features to perform SCRUD operation on the database table "core.bank_accounts".
     /// </summary>
-    public class BankAccount : DbAccess
+    public class BankAccount : DbAccess, IBankAccountRepository
     {
         /// <summary>
         /// The schema of this table. Returns literal "core".
@@ -73,7 +73,7 @@ namespace MixERP.Net.Schemas.Core.Data
         }
 
         /// <summary>
-        /// Executes a select query on the table "core.bank_accounts" to return a all instances of the "BankAccount" class. 
+        /// Executes a select query on the table "core.bank_accounts" to return all instances of the "BankAccount" class. 
         /// </summary>
         /// <returns>Returns a non-live, non-mapped instances of "BankAccount" class.</returns>
         /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
@@ -102,7 +102,7 @@ namespace MixERP.Net.Schemas.Core.Data
         }
 
         /// <summary>
-        /// Executes a select query on the table "core.bank_accounts" to return a all instances of the "BankAccount" class to export. 
+        /// Executes a select query on the table "core.bank_accounts" to return all instances of the "BankAccount" class to export. 
         /// </summary>
         /// <returns>Returns a non-live, non-mapped instances of "BankAccount" class.</returns>
         /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
@@ -158,6 +158,125 @@ namespace MixERP.Net.Schemas.Core.Data
 
             const string sql = "SELECT * FROM core.bank_accounts WHERE account_id=@0;";
             return Factory.Get<MixERP.Net.Entities.Core.BankAccount>(this._Catalog, sql, accountId).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Gets the first record of the table "core.bank_accounts". 
+        /// </summary>
+        /// <returns>Returns a non-live, non-mapped instance of "BankAccount" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.Core.BankAccount GetFirst()
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the first record of entity \"BankAccount\" was denied to the user with Login ID {_LoginId}", this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM core.bank_accounts ORDER BY account_id LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.Core.BankAccount>(this._Catalog, sql).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Gets the previous record of the table "core.bank_accounts" sorted by accountId.
+        /// </summary>
+        /// <param name="accountId">The column "account_id" parameter used to find the next record.</param>
+        /// <returns>Returns a non-live, non-mapped instance of "BankAccount" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.Core.BankAccount GetPrevious(long accountId)
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the previous entity of \"BankAccount\" by \"AccountId\" with value {AccountId} was denied to the user with Login ID {_LoginId}", accountId, this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM core.bank_accounts WHERE account_id < @0 ORDER BY account_id DESC LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.Core.BankAccount>(this._Catalog, sql, accountId).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Gets the next record of the table "core.bank_accounts" sorted by accountId.
+        /// </summary>
+        /// <param name="accountId">The column "account_id" parameter used to find the next record.</param>
+        /// <returns>Returns a non-live, non-mapped instance of "BankAccount" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.Core.BankAccount GetNext(long accountId)
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the next entity of \"BankAccount\" by \"AccountId\" with value {AccountId} was denied to the user with Login ID {_LoginId}", accountId, this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM core.bank_accounts WHERE account_id > @0 ORDER BY account_id LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.Core.BankAccount>(this._Catalog, sql, accountId).FirstOrDefault();
+        }
+
+
+        /// <summary>
+        /// Gets the last record of the table "core.bank_accounts". 
+        /// </summary>
+        /// <returns>Returns a non-live, non-mapped instance of "BankAccount" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.Core.BankAccount GetLast()
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the last record of entity \"BankAccount\" was denied to the user with Login ID {_LoginId}", this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM core.bank_accounts ORDER BY account_id DESC LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.Core.BankAccount>(this._Catalog, sql).FirstOrDefault();
         }
 
         /// <summary>
@@ -299,16 +418,16 @@ namespace MixERP.Net.Schemas.Core.Data
             bankAccount.audit_user_id = this._UserId;
             bankAccount.audit_ts = System.DateTime.UtcNow;
 
-            object primaryKeyValue = bankAccount.account_id;
+            object candidateKeyValue = bankAccount.bank_account_id;
 
-            if (Cast.To<long>(primaryKeyValue) > 0)
+            if (Cast.To<long>(candidateKeyValue) > 0)
             {
-                primaryKeyValue = bankAccount.account_id;
-                this.Update(bankAccount, long.Parse(bankAccount.account_id));
+                candidateKeyValue = bankAccount.bank_account_id;
+                this.Update(bankAccount, long.Parse(bankAccount.bank_account_id));
             }
             else
             {
-                primaryKeyValue = this.Add(bankAccount);
+                candidateKeyValue = this.Add(bankAccount);
             }
 
             string sql = "DELETE FROM core.custom_fields WHERE custom_field_setup_id IN(" +
@@ -321,7 +440,7 @@ namespace MixERP.Net.Schemas.Core.Data
 
             if (customFields == null)
             {
-                return primaryKeyValue;
+                return candidateKeyValue;
             }
 
             foreach (var field in customFields)
@@ -330,10 +449,10 @@ namespace MixERP.Net.Schemas.Core.Data
                       "SELECT core.get_custom_field_setup_id_by_table_name('core.bank_accounts', @0::character varying(100)), " +
                       "@1, @2;";
 
-                Factory.NonQuery(this._Catalog, sql, field.FieldName, primaryKeyValue, field.Value);
+                Factory.NonQuery(this._Catalog, sql, field.FieldName, candidateKeyValue, field.Value);
             }
 
-            return primaryKeyValue;
+            return candidateKeyValue;
         }
 
         /// <summary>
@@ -361,7 +480,7 @@ namespace MixERP.Net.Schemas.Core.Data
                 }
             }
 
-            return Factory.Insert(this._Catalog, bankAccount, "core.bank_accounts", "account_id");
+            return Factory.Insert(this._Catalog, bankAccount, "core.bank_accounts", "bank_account_id");
         }
 
         /// <summary>
@@ -444,9 +563,9 @@ namespace MixERP.Net.Schemas.Core.Data
         /// Updates the row of the table "core.bank_accounts" with an instance of "BankAccount" class against the primary key value.
         /// </summary>
         /// <param name="bankAccount">The instance of "BankAccount" class to update.</param>
-        /// <param name="accountId">The value of the column "account_id" which will be updated.</param>
+        /// <param name="bankAccountId">The value of the column "account_id" which will be updated.</param>
         /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
-        public void Update(dynamic bankAccount, long accountId)
+        public void Update(dynamic bankAccount, long bankAccountId)
         {
             if (string.IsNullOrWhiteSpace(this._Catalog))
             {
@@ -461,12 +580,12 @@ namespace MixERP.Net.Schemas.Core.Data
                 }
                 if (!this.HasAccess)
                 {
-                    Log.Information("Access to edit entity \"BankAccount\" with Primary Key {PrimaryKey} was denied to the user with Login ID {LoginId}. {BankAccount}", accountId, this._LoginId, bankAccount);
+                    Log.Information("Access to edit entity \"BankAccount\" with Primary Key {PrimaryKey} was denied to the user with Login ID {LoginId}. {BankAccount}", bankAccountId, this._LoginId, bankAccount);
                     throw new UnauthorizedException("Access is denied.");
                 }
             }
 
-            Factory.Update(this._Catalog, bankAccount, accountId, "core.bank_accounts", "account_id");
+            Factory.Update(this._Catalog, bankAccount, bankAccountId, "core.bank_accounts", "bank_account_id");
         }
 
         /// <summary>
@@ -559,7 +678,7 @@ namespace MixERP.Net.Schemas.Core.Data
             return Factory.Get<MixERP.Net.Entities.Core.BankAccount>(this._Catalog, sql, offset);
         }
 
-        private List<EntityParser.Filter> GetFilters(string catalog, string filterName)
+        public List<EntityParser.Filter> GetFilters(string catalog, string filterName)
         {
             const string sql = "SELECT * FROM core.filters WHERE object_name='core.bank_accounts' AND lower(filter_name)=lower(@0);";
             return Factory.Get<EntityParser.Filter>(catalog, sql, filterName).ToList();

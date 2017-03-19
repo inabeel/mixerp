@@ -12,6 +12,7 @@ using MixERP.Net.Framework;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using PetaPoco;
+using MixERP.Net.Schemas.Core.Data;
 
 namespace MixERP.Net.Api.Core
 {
@@ -22,9 +23,9 @@ namespace MixERP.Net.Api.Core
     public class FilterController : ApiController
     {
         /// <summary>
-        ///     The Filter data context.
+        ///     The Filter repository.
         /// </summary>
-        private readonly MixERP.Net.Schemas.Core.Data.Filter FilterContext;
+        private readonly IFilterRepository FilterRepository;
 
         public FilterController()
         {
@@ -33,12 +34,22 @@ namespace MixERP.Net.Api.Core
             this._OfficeId = AppUsers.GetCurrent().View.OfficeId.ToInt();
             this._Catalog = AppUsers.GetCurrentUserDB();
 
-            this.FilterContext = new MixERP.Net.Schemas.Core.Data.Filter
+            this.FilterRepository = new MixERP.Net.Schemas.Core.Data.Filter
             {
                 _Catalog = this._Catalog,
                 _LoginId = this._LoginId,
                 _UserId = this._UserId
             };
+        }
+
+        public FilterController(IFilterRepository repository, string catalog, LoginView view)
+        {
+            this._LoginId = view.LoginId.ToLong();
+            this._UserId = view.UserId.ToInt();
+            this._OfficeId = view.OfficeId.ToInt();
+            this._Catalog = catalog;
+
+            this.FilterRepository = repository;
         }
 
         public long _LoginId { get; }
@@ -55,6 +66,11 @@ namespace MixERP.Net.Api.Core
         [Route("~/api/core/filter/meta")]
         public EntityView GetEntityView()
         {
+            if (this._LoginId == 0)
+            {
+                return new EntityView();
+            }
+
             return new EntityView
             {
                 PrimaryKey = "filter_id",
@@ -87,7 +103,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.FilterContext.Count();
+                return this.FilterRepository.Count();
             }
             catch (UnauthorizedException)
             {
@@ -118,7 +134,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.FilterContext.GetAll();
+                return this.FilterRepository.GetAll();
             }
             catch (UnauthorizedException)
             {
@@ -149,7 +165,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.FilterContext.Export();
+                return this.FilterRepository.Export();
             }
             catch (UnauthorizedException)
             {
@@ -181,7 +197,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.FilterContext.Get(filterId);
+                return this.FilterRepository.Get(filterId);
             }
             catch (UnauthorizedException)
             {
@@ -208,7 +224,133 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.FilterContext.Get(filterIds);
+                return this.FilterRepository.Get(filterIds);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the first instance of filter.
+        /// </summary>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("first")]
+        [Route("~/api/core/filter/first")]
+        public MixERP.Net.Entities.Core.Filter GetFirst()
+        {
+            try
+            {
+                return this.FilterRepository.GetFirst();
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the previous instance of filter.
+        /// </summary>
+        /// <param name="filterId">Enter FilterId to search for.</param>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("previous/{filterId}")]
+        [Route("~/api/core/filter/previous/{filterId}")]
+        public MixERP.Net.Entities.Core.Filter GetPrevious(long filterId)
+        {
+            try
+            {
+                return this.FilterRepository.GetPrevious(filterId);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the next instance of filter.
+        /// </summary>
+        /// <param name="filterId">Enter FilterId to search for.</param>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("next/{filterId}")]
+        [Route("~/api/core/filter/next/{filterId}")]
+        public MixERP.Net.Entities.Core.Filter GetNext(long filterId)
+        {
+            try
+            {
+                return this.FilterRepository.GetNext(filterId);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the last instance of filter.
+        /// </summary>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("last")]
+        [Route("~/api/core/filter/last")]
+        public MixERP.Net.Entities.Core.Filter GetLast()
+        {
+            try
+            {
+                return this.FilterRepository.GetLast();
             }
             catch (UnauthorizedException)
             {
@@ -239,7 +381,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.FilterContext.GetPaginatedResult();
+                return this.FilterRepository.GetPaginatedResult();
             }
             catch (UnauthorizedException)
             {
@@ -271,7 +413,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.FilterContext.GetPaginatedResult(pageNumber);
+                return this.FilterRepository.GetPaginatedResult(pageNumber);
             }
             catch (UnauthorizedException)
             {
@@ -304,7 +446,7 @@ namespace MixERP.Net.Api.Core
             try
             {
                 List<EntityParser.Filter> f = filters.ToObject<List<EntityParser.Filter>>(JsonHelper.GetJsonSerializer());
-                return this.FilterContext.CountWhere(f);
+                return this.FilterRepository.CountWhere(f);
             }
             catch (UnauthorizedException)
             {
@@ -338,7 +480,7 @@ namespace MixERP.Net.Api.Core
             try
             {
                 List<EntityParser.Filter> f = filters.ToObject<List<EntityParser.Filter>>(JsonHelper.GetJsonSerializer());
-                return this.FilterContext.GetWhere(pageNumber, f);
+                return this.FilterRepository.GetWhere(pageNumber, f);
             }
             catch (UnauthorizedException)
             {
@@ -370,7 +512,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.FilterContext.CountFiltered(filterName);
+                return this.FilterRepository.CountFiltered(filterName);
             }
             catch (UnauthorizedException)
             {
@@ -403,7 +545,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.FilterContext.GetFiltered(pageNumber, filterName);
+                return this.FilterRepository.GetFiltered(pageNumber, filterName);
             }
             catch (UnauthorizedException)
             {
@@ -434,7 +576,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.FilterContext.GetDisplayFields();
+                return this.FilterRepository.GetDisplayFields();
             }
             catch (UnauthorizedException)
             {
@@ -465,7 +607,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.FilterContext.GetCustomFields(null);
+                return this.FilterRepository.GetCustomFields(null);
             }
             catch (UnauthorizedException)
             {
@@ -496,7 +638,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.FilterContext.GetCustomFields(resourceId);
+                return this.FilterRepository.GetCustomFields(resourceId);
             }
             catch (UnauthorizedException)
             {
@@ -535,7 +677,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                return this.FilterContext.AddOrEdit(filter, customFields);
+                return this.FilterRepository.AddOrEdit(filter, customFields);
             }
             catch (UnauthorizedException)
             {
@@ -571,7 +713,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                this.FilterContext.Add(filter);
+                this.FilterRepository.Add(filter);
             }
             catch (UnauthorizedException)
             {
@@ -608,7 +750,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                this.FilterContext.Update(filter, filterId);
+                this.FilterRepository.Update(filter, filterId);
             }
             catch (UnauthorizedException)
             {
@@ -653,7 +795,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                return this.FilterContext.BulkImport(filterCollection);
+                return this.FilterRepository.BulkImport(filterCollection);
             }
             catch (UnauthorizedException)
             {
@@ -684,7 +826,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                this.FilterContext.Delete(filterId);
+                this.FilterRepository.Delete(filterId);
             }
             catch (UnauthorizedException)
             {
@@ -715,7 +857,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                this.FilterContext.Delete(filterName);
+                this.FilterRepository.Delete(filterName);
             }
             catch (UnauthorizedException)
             {
@@ -744,7 +886,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                this.FilterContext.RecreateFilters(objectName, filterName, filters);
+                this.FilterRepository.RecreateFilters(objectName, filterName, filters);
             }
             catch (UnauthorizedException)
             {
@@ -767,7 +909,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                this.FilterContext.MakeDefault(objectName, filterName);
+                this.FilterRepository.MakeDefault(objectName, filterName);
             }
             catch (UnauthorizedException)
             {
@@ -790,7 +932,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                this.FilterContext.RemoveDefault(objectName);
+                this.FilterRepository.RemoveDefault(objectName);
             }
             catch (UnauthorizedException)
             {

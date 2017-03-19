@@ -12,6 +12,7 @@ using MixERP.Net.Framework;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using PetaPoco;
+using MixERP.Net.Schemas.Localization.Data;
 
 namespace MixERP.Net.Api.Localization
 {
@@ -22,9 +23,9 @@ namespace MixERP.Net.Api.Localization
     public class CultureController : ApiController
     {
         /// <summary>
-        ///     The Culture data context.
+        ///     The Culture repository.
         /// </summary>
-        private readonly MixERP.Net.Schemas.Localization.Data.Culture CultureContext;
+        private readonly ICultureRepository CultureRepository;
 
         public CultureController()
         {
@@ -33,12 +34,22 @@ namespace MixERP.Net.Api.Localization
             this._OfficeId = AppUsers.GetCurrent().View.OfficeId.ToInt();
             this._Catalog = AppUsers.GetCurrentUserDB();
 
-            this.CultureContext = new MixERP.Net.Schemas.Localization.Data.Culture
+            this.CultureRepository = new MixERP.Net.Schemas.Localization.Data.Culture
             {
                 _Catalog = this._Catalog,
                 _LoginId = this._LoginId,
                 _UserId = this._UserId
             };
+        }
+
+        public CultureController(ICultureRepository repository, string catalog, LoginView view)
+        {
+            this._LoginId = view.LoginId.ToLong();
+            this._UserId = view.UserId.ToInt();
+            this._OfficeId = view.OfficeId.ToInt();
+            this._Catalog = catalog;
+
+            this.CultureRepository = repository;
         }
 
         public long _LoginId { get; }
@@ -55,6 +66,11 @@ namespace MixERP.Net.Api.Localization
         [Route("~/api/localization/culture/meta")]
         public EntityView GetEntityView()
         {
+            if (this._LoginId == 0)
+            {
+                return new EntityView();
+            }
+
             return new EntityView
             {
                 PrimaryKey = "culture_code",
@@ -77,7 +93,7 @@ namespace MixERP.Net.Api.Localization
         {
             try
             {
-                return this.CultureContext.Count();
+                return this.CultureRepository.Count();
             }
             catch (UnauthorizedException)
             {
@@ -108,7 +124,7 @@ namespace MixERP.Net.Api.Localization
         {
             try
             {
-                return this.CultureContext.GetAll();
+                return this.CultureRepository.GetAll();
             }
             catch (UnauthorizedException)
             {
@@ -139,7 +155,7 @@ namespace MixERP.Net.Api.Localization
         {
             try
             {
-                return this.CultureContext.Export();
+                return this.CultureRepository.Export();
             }
             catch (UnauthorizedException)
             {
@@ -171,7 +187,7 @@ namespace MixERP.Net.Api.Localization
         {
             try
             {
-                return this.CultureContext.Get(cultureCode);
+                return this.CultureRepository.Get(cultureCode);
             }
             catch (UnauthorizedException)
             {
@@ -198,7 +214,133 @@ namespace MixERP.Net.Api.Localization
         {
             try
             {
-                return this.CultureContext.Get(cultureCodes);
+                return this.CultureRepository.Get(cultureCodes);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the first instance of culture.
+        /// </summary>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("first")]
+        [Route("~/api/localization/culture/first")]
+        public MixERP.Net.Entities.Localization.Culture GetFirst()
+        {
+            try
+            {
+                return this.CultureRepository.GetFirst();
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the previous instance of culture.
+        /// </summary>
+        /// <param name="cultureCode">Enter CultureCode to search for.</param>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("previous/{cultureCode}")]
+        [Route("~/api/localization/culture/previous/{cultureCode}")]
+        public MixERP.Net.Entities.Localization.Culture GetPrevious(string cultureCode)
+        {
+            try
+            {
+                return this.CultureRepository.GetPrevious(cultureCode);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the next instance of culture.
+        /// </summary>
+        /// <param name="cultureCode">Enter CultureCode to search for.</param>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("next/{cultureCode}")]
+        [Route("~/api/localization/culture/next/{cultureCode}")]
+        public MixERP.Net.Entities.Localization.Culture GetNext(string cultureCode)
+        {
+            try
+            {
+                return this.CultureRepository.GetNext(cultureCode);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the last instance of culture.
+        /// </summary>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("last")]
+        [Route("~/api/localization/culture/last")]
+        public MixERP.Net.Entities.Localization.Culture GetLast()
+        {
+            try
+            {
+                return this.CultureRepository.GetLast();
             }
             catch (UnauthorizedException)
             {
@@ -229,7 +371,7 @@ namespace MixERP.Net.Api.Localization
         {
             try
             {
-                return this.CultureContext.GetPaginatedResult();
+                return this.CultureRepository.GetPaginatedResult();
             }
             catch (UnauthorizedException)
             {
@@ -261,7 +403,7 @@ namespace MixERP.Net.Api.Localization
         {
             try
             {
-                return this.CultureContext.GetPaginatedResult(pageNumber);
+                return this.CultureRepository.GetPaginatedResult(pageNumber);
             }
             catch (UnauthorizedException)
             {
@@ -294,7 +436,7 @@ namespace MixERP.Net.Api.Localization
             try
             {
                 List<EntityParser.Filter> f = filters.ToObject<List<EntityParser.Filter>>(JsonHelper.GetJsonSerializer());
-                return this.CultureContext.CountWhere(f);
+                return this.CultureRepository.CountWhere(f);
             }
             catch (UnauthorizedException)
             {
@@ -328,7 +470,7 @@ namespace MixERP.Net.Api.Localization
             try
             {
                 List<EntityParser.Filter> f = filters.ToObject<List<EntityParser.Filter>>(JsonHelper.GetJsonSerializer());
-                return this.CultureContext.GetWhere(pageNumber, f);
+                return this.CultureRepository.GetWhere(pageNumber, f);
             }
             catch (UnauthorizedException)
             {
@@ -360,7 +502,7 @@ namespace MixERP.Net.Api.Localization
         {
             try
             {
-                return this.CultureContext.CountFiltered(filterName);
+                return this.CultureRepository.CountFiltered(filterName);
             }
             catch (UnauthorizedException)
             {
@@ -393,7 +535,7 @@ namespace MixERP.Net.Api.Localization
         {
             try
             {
-                return this.CultureContext.GetFiltered(pageNumber, filterName);
+                return this.CultureRepository.GetFiltered(pageNumber, filterName);
             }
             catch (UnauthorizedException)
             {
@@ -424,7 +566,7 @@ namespace MixERP.Net.Api.Localization
         {
             try
             {
-                return this.CultureContext.GetDisplayFields();
+                return this.CultureRepository.GetDisplayFields();
             }
             catch (UnauthorizedException)
             {
@@ -455,7 +597,7 @@ namespace MixERP.Net.Api.Localization
         {
             try
             {
-                return this.CultureContext.GetCustomFields(null);
+                return this.CultureRepository.GetCustomFields(null);
             }
             catch (UnauthorizedException)
             {
@@ -486,7 +628,7 @@ namespace MixERP.Net.Api.Localization
         {
             try
             {
-                return this.CultureContext.GetCustomFields(resourceId);
+                return this.CultureRepository.GetCustomFields(resourceId);
             }
             catch (UnauthorizedException)
             {
@@ -525,7 +667,7 @@ namespace MixERP.Net.Api.Localization
 
             try
             {
-                return this.CultureContext.AddOrEdit(culture, customFields);
+                return this.CultureRepository.AddOrEdit(culture, customFields);
             }
             catch (UnauthorizedException)
             {
@@ -561,7 +703,7 @@ namespace MixERP.Net.Api.Localization
 
             try
             {
-                this.CultureContext.Add(culture);
+                this.CultureRepository.Add(culture);
             }
             catch (UnauthorizedException)
             {
@@ -598,7 +740,7 @@ namespace MixERP.Net.Api.Localization
 
             try
             {
-                this.CultureContext.Update(culture, cultureCode);
+                this.CultureRepository.Update(culture, cultureCode);
             }
             catch (UnauthorizedException)
             {
@@ -643,7 +785,7 @@ namespace MixERP.Net.Api.Localization
 
             try
             {
-                return this.CultureContext.BulkImport(cultureCollection);
+                return this.CultureRepository.BulkImport(cultureCollection);
             }
             catch (UnauthorizedException)
             {
@@ -674,7 +816,7 @@ namespace MixERP.Net.Api.Localization
         {
             try
             {
-                this.CultureContext.Delete(cultureCode);
+                this.CultureRepository.Delete(cultureCode);
             }
             catch (UnauthorizedException)
             {

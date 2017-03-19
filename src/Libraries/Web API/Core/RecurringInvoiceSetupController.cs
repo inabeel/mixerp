@@ -12,6 +12,7 @@ using MixERP.Net.Framework;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using PetaPoco;
+using MixERP.Net.Schemas.Core.Data;
 
 namespace MixERP.Net.Api.Core
 {
@@ -22,9 +23,9 @@ namespace MixERP.Net.Api.Core
     public class RecurringInvoiceSetupController : ApiController
     {
         /// <summary>
-        ///     The RecurringInvoiceSetup data context.
+        ///     The RecurringInvoiceSetup repository.
         /// </summary>
-        private readonly MixERP.Net.Schemas.Core.Data.RecurringInvoiceSetup RecurringInvoiceSetupContext;
+        private readonly IRecurringInvoiceSetupRepository RecurringInvoiceSetupRepository;
 
         public RecurringInvoiceSetupController()
         {
@@ -33,12 +34,22 @@ namespace MixERP.Net.Api.Core
             this._OfficeId = AppUsers.GetCurrent().View.OfficeId.ToInt();
             this._Catalog = AppUsers.GetCurrentUserDB();
 
-            this.RecurringInvoiceSetupContext = new MixERP.Net.Schemas.Core.Data.RecurringInvoiceSetup
+            this.RecurringInvoiceSetupRepository = new MixERP.Net.Schemas.Core.Data.RecurringInvoiceSetup
             {
                 _Catalog = this._Catalog,
                 _LoginId = this._LoginId,
                 _UserId = this._UserId
             };
+        }
+
+        public RecurringInvoiceSetupController(IRecurringInvoiceSetupRepository repository, string catalog, LoginView view)
+        {
+            this._LoginId = view.LoginId.ToLong();
+            this._UserId = view.UserId.ToInt();
+            this._OfficeId = view.OfficeId.ToInt();
+            this._Catalog = catalog;
+
+            this.RecurringInvoiceSetupRepository = repository;
         }
 
         public long _LoginId { get; }
@@ -55,6 +66,11 @@ namespace MixERP.Net.Api.Core
         [Route("~/api/core/recurring-invoice-setup/meta")]
         public EntityView GetEntityView()
         {
+            if (this._LoginId == 0)
+            {
+                return new EntityView();
+            }
+
             return new EntityView
             {
                 PrimaryKey = "recurring_invoice_setup_id",
@@ -91,7 +107,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.RecurringInvoiceSetupContext.Count();
+                return this.RecurringInvoiceSetupRepository.Count();
             }
             catch (UnauthorizedException)
             {
@@ -122,7 +138,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.RecurringInvoiceSetupContext.GetAll();
+                return this.RecurringInvoiceSetupRepository.GetAll();
             }
             catch (UnauthorizedException)
             {
@@ -153,7 +169,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.RecurringInvoiceSetupContext.Export();
+                return this.RecurringInvoiceSetupRepository.Export();
             }
             catch (UnauthorizedException)
             {
@@ -185,7 +201,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.RecurringInvoiceSetupContext.Get(recurringInvoiceSetupId);
+                return this.RecurringInvoiceSetupRepository.Get(recurringInvoiceSetupId);
             }
             catch (UnauthorizedException)
             {
@@ -212,7 +228,133 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.RecurringInvoiceSetupContext.Get(recurringInvoiceSetupIds);
+                return this.RecurringInvoiceSetupRepository.Get(recurringInvoiceSetupIds);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the first instance of recurring invoice setup.
+        /// </summary>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("first")]
+        [Route("~/api/core/recurring-invoice-setup/first")]
+        public MixERP.Net.Entities.Core.RecurringInvoiceSetup GetFirst()
+        {
+            try
+            {
+                return this.RecurringInvoiceSetupRepository.GetFirst();
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the previous instance of recurring invoice setup.
+        /// </summary>
+        /// <param name="recurringInvoiceSetupId">Enter RecurringInvoiceSetupId to search for.</param>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("previous/{recurringInvoiceSetupId}")]
+        [Route("~/api/core/recurring-invoice-setup/previous/{recurringInvoiceSetupId}")]
+        public MixERP.Net.Entities.Core.RecurringInvoiceSetup GetPrevious(int recurringInvoiceSetupId)
+        {
+            try
+            {
+                return this.RecurringInvoiceSetupRepository.GetPrevious(recurringInvoiceSetupId);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the next instance of recurring invoice setup.
+        /// </summary>
+        /// <param name="recurringInvoiceSetupId">Enter RecurringInvoiceSetupId to search for.</param>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("next/{recurringInvoiceSetupId}")]
+        [Route("~/api/core/recurring-invoice-setup/next/{recurringInvoiceSetupId}")]
+        public MixERP.Net.Entities.Core.RecurringInvoiceSetup GetNext(int recurringInvoiceSetupId)
+        {
+            try
+            {
+                return this.RecurringInvoiceSetupRepository.GetNext(recurringInvoiceSetupId);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the last instance of recurring invoice setup.
+        /// </summary>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("last")]
+        [Route("~/api/core/recurring-invoice-setup/last")]
+        public MixERP.Net.Entities.Core.RecurringInvoiceSetup GetLast()
+        {
+            try
+            {
+                return this.RecurringInvoiceSetupRepository.GetLast();
             }
             catch (UnauthorizedException)
             {
@@ -243,7 +385,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.RecurringInvoiceSetupContext.GetPaginatedResult();
+                return this.RecurringInvoiceSetupRepository.GetPaginatedResult();
             }
             catch (UnauthorizedException)
             {
@@ -275,7 +417,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.RecurringInvoiceSetupContext.GetPaginatedResult(pageNumber);
+                return this.RecurringInvoiceSetupRepository.GetPaginatedResult(pageNumber);
             }
             catch (UnauthorizedException)
             {
@@ -308,7 +450,7 @@ namespace MixERP.Net.Api.Core
             try
             {
                 List<EntityParser.Filter> f = filters.ToObject<List<EntityParser.Filter>>(JsonHelper.GetJsonSerializer());
-                return this.RecurringInvoiceSetupContext.CountWhere(f);
+                return this.RecurringInvoiceSetupRepository.CountWhere(f);
             }
             catch (UnauthorizedException)
             {
@@ -342,7 +484,7 @@ namespace MixERP.Net.Api.Core
             try
             {
                 List<EntityParser.Filter> f = filters.ToObject<List<EntityParser.Filter>>(JsonHelper.GetJsonSerializer());
-                return this.RecurringInvoiceSetupContext.GetWhere(pageNumber, f);
+                return this.RecurringInvoiceSetupRepository.GetWhere(pageNumber, f);
             }
             catch (UnauthorizedException)
             {
@@ -374,7 +516,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.RecurringInvoiceSetupContext.CountFiltered(filterName);
+                return this.RecurringInvoiceSetupRepository.CountFiltered(filterName);
             }
             catch (UnauthorizedException)
             {
@@ -407,7 +549,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.RecurringInvoiceSetupContext.GetFiltered(pageNumber, filterName);
+                return this.RecurringInvoiceSetupRepository.GetFiltered(pageNumber, filterName);
             }
             catch (UnauthorizedException)
             {
@@ -438,7 +580,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.RecurringInvoiceSetupContext.GetDisplayFields();
+                return this.RecurringInvoiceSetupRepository.GetDisplayFields();
             }
             catch (UnauthorizedException)
             {
@@ -469,7 +611,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.RecurringInvoiceSetupContext.GetCustomFields(null);
+                return this.RecurringInvoiceSetupRepository.GetCustomFields(null);
             }
             catch (UnauthorizedException)
             {
@@ -500,7 +642,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.RecurringInvoiceSetupContext.GetCustomFields(resourceId);
+                return this.RecurringInvoiceSetupRepository.GetCustomFields(resourceId);
             }
             catch (UnauthorizedException)
             {
@@ -539,7 +681,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                return this.RecurringInvoiceSetupContext.AddOrEdit(recurringInvoiceSetup, customFields);
+                return this.RecurringInvoiceSetupRepository.AddOrEdit(recurringInvoiceSetup, customFields);
             }
             catch (UnauthorizedException)
             {
@@ -575,7 +717,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                this.RecurringInvoiceSetupContext.Add(recurringInvoiceSetup);
+                this.RecurringInvoiceSetupRepository.Add(recurringInvoiceSetup);
             }
             catch (UnauthorizedException)
             {
@@ -612,7 +754,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                this.RecurringInvoiceSetupContext.Update(recurringInvoiceSetup, recurringInvoiceSetupId);
+                this.RecurringInvoiceSetupRepository.Update(recurringInvoiceSetup, recurringInvoiceSetupId);
             }
             catch (UnauthorizedException)
             {
@@ -657,7 +799,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                return this.RecurringInvoiceSetupContext.BulkImport(recurringInvoiceSetupCollection);
+                return this.RecurringInvoiceSetupRepository.BulkImport(recurringInvoiceSetupCollection);
             }
             catch (UnauthorizedException)
             {
@@ -688,7 +830,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                this.RecurringInvoiceSetupContext.Delete(recurringInvoiceSetupId);
+                this.RecurringInvoiceSetupRepository.Delete(recurringInvoiceSetupId);
             }
             catch (UnauthorizedException)
             {

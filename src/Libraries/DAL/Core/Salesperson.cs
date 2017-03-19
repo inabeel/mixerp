@@ -16,7 +16,7 @@ namespace MixERP.Net.Schemas.Core.Data
     /// <summary>
     /// Provides simplified data access features to perform SCRUD operation on the database table "core.salespersons".
     /// </summary>
-    public class Salesperson : DbAccess
+    public class Salesperson : DbAccess, ISalespersonRepository
     {
         /// <summary>
         /// The schema of this table. Returns literal "core".
@@ -73,7 +73,7 @@ namespace MixERP.Net.Schemas.Core.Data
         }
 
         /// <summary>
-        /// Executes a select query on the table "core.salespersons" to return a all instances of the "Salesperson" class. 
+        /// Executes a select query on the table "core.salespersons" to return all instances of the "Salesperson" class. 
         /// </summary>
         /// <returns>Returns a non-live, non-mapped instances of "Salesperson" class.</returns>
         /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
@@ -102,7 +102,7 @@ namespace MixERP.Net.Schemas.Core.Data
         }
 
         /// <summary>
-        /// Executes a select query on the table "core.salespersons" to return a all instances of the "Salesperson" class to export. 
+        /// Executes a select query on the table "core.salespersons" to return all instances of the "Salesperson" class to export. 
         /// </summary>
         /// <returns>Returns a non-live, non-mapped instances of "Salesperson" class.</returns>
         /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
@@ -158,6 +158,125 @@ namespace MixERP.Net.Schemas.Core.Data
 
             const string sql = "SELECT * FROM core.salespersons WHERE salesperson_id=@0;";
             return Factory.Get<MixERP.Net.Entities.Core.Salesperson>(this._Catalog, sql, salespersonId).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Gets the first record of the table "core.salespersons". 
+        /// </summary>
+        /// <returns>Returns a non-live, non-mapped instance of "Salesperson" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.Core.Salesperson GetFirst()
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the first record of entity \"Salesperson\" was denied to the user with Login ID {_LoginId}", this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM core.salespersons ORDER BY salesperson_id LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.Core.Salesperson>(this._Catalog, sql).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Gets the previous record of the table "core.salespersons" sorted by salespersonId.
+        /// </summary>
+        /// <param name="salespersonId">The column "salesperson_id" parameter used to find the next record.</param>
+        /// <returns>Returns a non-live, non-mapped instance of "Salesperson" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.Core.Salesperson GetPrevious(int salespersonId)
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the previous entity of \"Salesperson\" by \"SalespersonId\" with value {SalespersonId} was denied to the user with Login ID {_LoginId}", salespersonId, this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM core.salespersons WHERE salesperson_id < @0 ORDER BY salesperson_id DESC LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.Core.Salesperson>(this._Catalog, sql, salespersonId).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Gets the next record of the table "core.salespersons" sorted by salespersonId.
+        /// </summary>
+        /// <param name="salespersonId">The column "salesperson_id" parameter used to find the next record.</param>
+        /// <returns>Returns a non-live, non-mapped instance of "Salesperson" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.Core.Salesperson GetNext(int salespersonId)
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the next entity of \"Salesperson\" by \"SalespersonId\" with value {SalespersonId} was denied to the user with Login ID {_LoginId}", salespersonId, this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM core.salespersons WHERE salesperson_id > @0 ORDER BY salesperson_id LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.Core.Salesperson>(this._Catalog, sql, salespersonId).FirstOrDefault();
+        }
+
+
+        /// <summary>
+        /// Gets the last record of the table "core.salespersons". 
+        /// </summary>
+        /// <returns>Returns a non-live, non-mapped instance of "Salesperson" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.Core.Salesperson GetLast()
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the last record of entity \"Salesperson\" was denied to the user with Login ID {_LoginId}", this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM core.salespersons ORDER BY salesperson_id DESC LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.Core.Salesperson>(this._Catalog, sql).FirstOrDefault();
         }
 
         /// <summary>
@@ -559,7 +678,7 @@ namespace MixERP.Net.Schemas.Core.Data
             return Factory.Get<MixERP.Net.Entities.Core.Salesperson>(this._Catalog, sql, offset);
         }
 
-        private List<EntityParser.Filter> GetFilters(string catalog, string filterName)
+        public List<EntityParser.Filter> GetFilters(string catalog, string filterName)
         {
             const string sql = "SELECT * FROM core.filters WHERE object_name='core.salespersons' AND lower(filter_name)=lower(@0);";
             return Factory.Get<EntityParser.Filter>(catalog, sql, filterName).ToList();

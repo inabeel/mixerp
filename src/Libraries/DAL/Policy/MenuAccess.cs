@@ -16,7 +16,7 @@ namespace MixERP.Net.Schemas.Policy.Data
     /// <summary>
     /// Provides simplified data access features to perform SCRUD operation on the database table "policy.menu_access".
     /// </summary>
-    public class MenuAccess : DbAccess
+    public class MenuAccess : DbAccess, IMenuAccessRepository
     {
         /// <summary>
         /// The schema of this table. Returns literal "policy".
@@ -73,7 +73,7 @@ namespace MixERP.Net.Schemas.Policy.Data
         }
 
         /// <summary>
-        /// Executes a select query on the table "policy.menu_access" to return a all instances of the "MenuAccess" class. 
+        /// Executes a select query on the table "policy.menu_access" to return all instances of the "MenuAccess" class. 
         /// </summary>
         /// <returns>Returns a non-live, non-mapped instances of "MenuAccess" class.</returns>
         /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
@@ -102,7 +102,7 @@ namespace MixERP.Net.Schemas.Policy.Data
         }
 
         /// <summary>
-        /// Executes a select query on the table "policy.menu_access" to return a all instances of the "MenuAccess" class to export. 
+        /// Executes a select query on the table "policy.menu_access" to return all instances of the "MenuAccess" class to export. 
         /// </summary>
         /// <returns>Returns a non-live, non-mapped instances of "MenuAccess" class.</returns>
         /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
@@ -158,6 +158,125 @@ namespace MixERP.Net.Schemas.Policy.Data
 
             const string sql = "SELECT * FROM policy.menu_access WHERE access_id=@0;";
             return Factory.Get<MixERP.Net.Entities.Policy.MenuAccess>(this._Catalog, sql, accessId).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Gets the first record of the table "policy.menu_access". 
+        /// </summary>
+        /// <returns>Returns a non-live, non-mapped instance of "MenuAccess" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.Policy.MenuAccess GetFirst()
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the first record of entity \"MenuAccess\" was denied to the user with Login ID {_LoginId}", this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM policy.menu_access ORDER BY access_id LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.Policy.MenuAccess>(this._Catalog, sql).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Gets the previous record of the table "policy.menu_access" sorted by accessId.
+        /// </summary>
+        /// <param name="accessId">The column "access_id" parameter used to find the next record.</param>
+        /// <returns>Returns a non-live, non-mapped instance of "MenuAccess" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.Policy.MenuAccess GetPrevious(long accessId)
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the previous entity of \"MenuAccess\" by \"AccessId\" with value {AccessId} was denied to the user with Login ID {_LoginId}", accessId, this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM policy.menu_access WHERE access_id < @0 ORDER BY access_id DESC LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.Policy.MenuAccess>(this._Catalog, sql, accessId).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Gets the next record of the table "policy.menu_access" sorted by accessId.
+        /// </summary>
+        /// <param name="accessId">The column "access_id" parameter used to find the next record.</param>
+        /// <returns>Returns a non-live, non-mapped instance of "MenuAccess" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.Policy.MenuAccess GetNext(long accessId)
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the next entity of \"MenuAccess\" by \"AccessId\" with value {AccessId} was denied to the user with Login ID {_LoginId}", accessId, this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM policy.menu_access WHERE access_id > @0 ORDER BY access_id LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.Policy.MenuAccess>(this._Catalog, sql, accessId).FirstOrDefault();
+        }
+
+
+        /// <summary>
+        /// Gets the last record of the table "policy.menu_access". 
+        /// </summary>
+        /// <returns>Returns a non-live, non-mapped instance of "MenuAccess" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.Policy.MenuAccess GetLast()
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the last record of entity \"MenuAccess\" was denied to the user with Login ID {_LoginId}", this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM policy.menu_access ORDER BY access_id DESC LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.Policy.MenuAccess>(this._Catalog, sql).FirstOrDefault();
         }
 
         /// <summary>
@@ -557,7 +676,7 @@ namespace MixERP.Net.Schemas.Policy.Data
             return Factory.Get<MixERP.Net.Entities.Policy.MenuAccess>(this._Catalog, sql, offset);
         }
 
-        private List<EntityParser.Filter> GetFilters(string catalog, string filterName)
+        public List<EntityParser.Filter> GetFilters(string catalog, string filterName)
         {
             const string sql = "SELECT * FROM core.filters WHERE object_name='policy.menu_access' AND lower(filter_name)=lower(@0);";
             return Factory.Get<EntityParser.Filter>(catalog, sql, filterName).ToList();

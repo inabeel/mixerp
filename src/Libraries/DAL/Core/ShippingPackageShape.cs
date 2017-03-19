@@ -16,7 +16,7 @@ namespace MixERP.Net.Schemas.Core.Data
     /// <summary>
     /// Provides simplified data access features to perform SCRUD operation on the database table "core.shipping_package_shapes".
     /// </summary>
-    public class ShippingPackageShape : DbAccess
+    public class ShippingPackageShape : DbAccess, IShippingPackageShapeRepository
     {
         /// <summary>
         /// The schema of this table. Returns literal "core".
@@ -73,7 +73,7 @@ namespace MixERP.Net.Schemas.Core.Data
         }
 
         /// <summary>
-        /// Executes a select query on the table "core.shipping_package_shapes" to return a all instances of the "ShippingPackageShape" class. 
+        /// Executes a select query on the table "core.shipping_package_shapes" to return all instances of the "ShippingPackageShape" class. 
         /// </summary>
         /// <returns>Returns a non-live, non-mapped instances of "ShippingPackageShape" class.</returns>
         /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
@@ -102,7 +102,7 @@ namespace MixERP.Net.Schemas.Core.Data
         }
 
         /// <summary>
-        /// Executes a select query on the table "core.shipping_package_shapes" to return a all instances of the "ShippingPackageShape" class to export. 
+        /// Executes a select query on the table "core.shipping_package_shapes" to return all instances of the "ShippingPackageShape" class to export. 
         /// </summary>
         /// <returns>Returns a non-live, non-mapped instances of "ShippingPackageShape" class.</returns>
         /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
@@ -158,6 +158,125 @@ namespace MixERP.Net.Schemas.Core.Data
 
             const string sql = "SELECT * FROM core.shipping_package_shapes WHERE shipping_package_shape_id=@0;";
             return Factory.Get<MixERP.Net.Entities.Core.ShippingPackageShape>(this._Catalog, sql, shippingPackageShapeId).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Gets the first record of the table "core.shipping_package_shapes". 
+        /// </summary>
+        /// <returns>Returns a non-live, non-mapped instance of "ShippingPackageShape" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.Core.ShippingPackageShape GetFirst()
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the first record of entity \"ShippingPackageShape\" was denied to the user with Login ID {_LoginId}", this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM core.shipping_package_shapes ORDER BY shipping_package_shape_id LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.Core.ShippingPackageShape>(this._Catalog, sql).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Gets the previous record of the table "core.shipping_package_shapes" sorted by shippingPackageShapeId.
+        /// </summary>
+        /// <param name="shippingPackageShapeId">The column "shipping_package_shape_id" parameter used to find the next record.</param>
+        /// <returns>Returns a non-live, non-mapped instance of "ShippingPackageShape" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.Core.ShippingPackageShape GetPrevious(int shippingPackageShapeId)
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the previous entity of \"ShippingPackageShape\" by \"ShippingPackageShapeId\" with value {ShippingPackageShapeId} was denied to the user with Login ID {_LoginId}", shippingPackageShapeId, this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM core.shipping_package_shapes WHERE shipping_package_shape_id < @0 ORDER BY shipping_package_shape_id DESC LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.Core.ShippingPackageShape>(this._Catalog, sql, shippingPackageShapeId).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Gets the next record of the table "core.shipping_package_shapes" sorted by shippingPackageShapeId.
+        /// </summary>
+        /// <param name="shippingPackageShapeId">The column "shipping_package_shape_id" parameter used to find the next record.</param>
+        /// <returns>Returns a non-live, non-mapped instance of "ShippingPackageShape" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.Core.ShippingPackageShape GetNext(int shippingPackageShapeId)
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the next entity of \"ShippingPackageShape\" by \"ShippingPackageShapeId\" with value {ShippingPackageShapeId} was denied to the user with Login ID {_LoginId}", shippingPackageShapeId, this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM core.shipping_package_shapes WHERE shipping_package_shape_id > @0 ORDER BY shipping_package_shape_id LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.Core.ShippingPackageShape>(this._Catalog, sql, shippingPackageShapeId).FirstOrDefault();
+        }
+
+
+        /// <summary>
+        /// Gets the last record of the table "core.shipping_package_shapes". 
+        /// </summary>
+        /// <returns>Returns a non-live, non-mapped instance of "ShippingPackageShape" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.Core.ShippingPackageShape GetLast()
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the last record of entity \"ShippingPackageShape\" was denied to the user with Login ID {_LoginId}", this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM core.shipping_package_shapes ORDER BY shipping_package_shape_id DESC LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.Core.ShippingPackageShape>(this._Catalog, sql).FirstOrDefault();
         }
 
         /// <summary>
@@ -559,7 +678,7 @@ namespace MixERP.Net.Schemas.Core.Data
             return Factory.Get<MixERP.Net.Entities.Core.ShippingPackageShape>(this._Catalog, sql, offset);
         }
 
-        private List<EntityParser.Filter> GetFilters(string catalog, string filterName)
+        public List<EntityParser.Filter> GetFilters(string catalog, string filterName)
         {
             const string sql = "SELECT * FROM core.filters WHERE object_name='core.shipping_package_shapes' AND lower(filter_name)=lower(@0);";
             return Factory.Get<EntityParser.Filter>(catalog, sql, filterName).ToList();

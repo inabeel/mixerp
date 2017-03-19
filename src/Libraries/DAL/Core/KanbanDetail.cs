@@ -16,7 +16,7 @@ namespace MixERP.Net.Schemas.Core.Data
     /// <summary>
     /// Provides simplified data access features to perform SCRUD operation on the database table "core.kanban_details".
     /// </summary>
-    public class KanbanDetail : DbAccess
+    public class KanbanDetail : DbAccess, IKanbanDetailRepository
     {
         /// <summary>
         /// The schema of this table. Returns literal "core".
@@ -73,7 +73,7 @@ namespace MixERP.Net.Schemas.Core.Data
         }
 
         /// <summary>
-        /// Executes a select query on the table "core.kanban_details" to return a all instances of the "KanbanDetail" class. 
+        /// Executes a select query on the table "core.kanban_details" to return all instances of the "KanbanDetail" class. 
         /// </summary>
         /// <returns>Returns a non-live, non-mapped instances of "KanbanDetail" class.</returns>
         /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
@@ -102,7 +102,7 @@ namespace MixERP.Net.Schemas.Core.Data
         }
 
         /// <summary>
-        /// Executes a select query on the table "core.kanban_details" to return a all instances of the "KanbanDetail" class to export. 
+        /// Executes a select query on the table "core.kanban_details" to return all instances of the "KanbanDetail" class to export. 
         /// </summary>
         /// <returns>Returns a non-live, non-mapped instances of "KanbanDetail" class.</returns>
         /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
@@ -158,6 +158,125 @@ namespace MixERP.Net.Schemas.Core.Data
 
             const string sql = "SELECT * FROM core.kanban_details WHERE kanban_detail_id=@0;";
             return Factory.Get<MixERP.Net.Entities.Core.KanbanDetail>(this._Catalog, sql, kanbanDetailId).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Gets the first record of the table "core.kanban_details". 
+        /// </summary>
+        /// <returns>Returns a non-live, non-mapped instance of "KanbanDetail" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.Core.KanbanDetail GetFirst()
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the first record of entity \"KanbanDetail\" was denied to the user with Login ID {_LoginId}", this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM core.kanban_details ORDER BY kanban_detail_id LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.Core.KanbanDetail>(this._Catalog, sql).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Gets the previous record of the table "core.kanban_details" sorted by kanbanDetailId.
+        /// </summary>
+        /// <param name="kanbanDetailId">The column "kanban_detail_id" parameter used to find the next record.</param>
+        /// <returns>Returns a non-live, non-mapped instance of "KanbanDetail" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.Core.KanbanDetail GetPrevious(long kanbanDetailId)
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the previous entity of \"KanbanDetail\" by \"KanbanDetailId\" with value {KanbanDetailId} was denied to the user with Login ID {_LoginId}", kanbanDetailId, this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM core.kanban_details WHERE kanban_detail_id < @0 ORDER BY kanban_detail_id DESC LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.Core.KanbanDetail>(this._Catalog, sql, kanbanDetailId).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Gets the next record of the table "core.kanban_details" sorted by kanbanDetailId.
+        /// </summary>
+        /// <param name="kanbanDetailId">The column "kanban_detail_id" parameter used to find the next record.</param>
+        /// <returns>Returns a non-live, non-mapped instance of "KanbanDetail" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.Core.KanbanDetail GetNext(long kanbanDetailId)
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the next entity of \"KanbanDetail\" by \"KanbanDetailId\" with value {KanbanDetailId} was denied to the user with Login ID {_LoginId}", kanbanDetailId, this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM core.kanban_details WHERE kanban_detail_id > @0 ORDER BY kanban_detail_id LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.Core.KanbanDetail>(this._Catalog, sql, kanbanDetailId).FirstOrDefault();
+        }
+
+
+        /// <summary>
+        /// Gets the last record of the table "core.kanban_details". 
+        /// </summary>
+        /// <returns>Returns a non-live, non-mapped instance of "KanbanDetail" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.Core.KanbanDetail GetLast()
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the last record of entity \"KanbanDetail\" was denied to the user with Login ID {_LoginId}", this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM core.kanban_details ORDER BY kanban_detail_id DESC LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.Core.KanbanDetail>(this._Catalog, sql).FirstOrDefault();
         }
 
         /// <summary>
@@ -559,7 +678,7 @@ namespace MixERP.Net.Schemas.Core.Data
             return Factory.Get<MixERP.Net.Entities.Core.KanbanDetail>(this._Catalog, sql, offset);
         }
 
-        private List<EntityParser.Filter> GetFilters(string catalog, string filterName)
+        public List<EntityParser.Filter> GetFilters(string catalog, string filterName)
         {
             const string sql = "SELECT * FROM core.filters WHERE object_name='core.kanban_details' AND lower(filter_name)=lower(@0);";
             return Factory.Get<EntityParser.Filter>(catalog, sql, filterName).ToList();

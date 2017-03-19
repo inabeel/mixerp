@@ -16,7 +16,7 @@ namespace MixERP.Net.Schemas.Core.Data
     /// <summary>
     /// Provides simplified data access features to perform SCRUD operation on the database table "core.custom_field_forms".
     /// </summary>
-    public class CustomFieldForm : DbAccess
+    public class CustomFieldForm : DbAccess, ICustomFieldFormRepository
     {
         /// <summary>
         /// The schema of this table. Returns literal "core".
@@ -73,7 +73,7 @@ namespace MixERP.Net.Schemas.Core.Data
         }
 
         /// <summary>
-        /// Executes a select query on the table "core.custom_field_forms" to return a all instances of the "CustomFieldForm" class. 
+        /// Executes a select query on the table "core.custom_field_forms" to return all instances of the "CustomFieldForm" class. 
         /// </summary>
         /// <returns>Returns a non-live, non-mapped instances of "CustomFieldForm" class.</returns>
         /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
@@ -102,7 +102,7 @@ namespace MixERP.Net.Schemas.Core.Data
         }
 
         /// <summary>
-        /// Executes a select query on the table "core.custom_field_forms" to return a all instances of the "CustomFieldForm" class to export. 
+        /// Executes a select query on the table "core.custom_field_forms" to return all instances of the "CustomFieldForm" class to export. 
         /// </summary>
         /// <returns>Returns a non-live, non-mapped instances of "CustomFieldForm" class.</returns>
         /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
@@ -158,6 +158,125 @@ namespace MixERP.Net.Schemas.Core.Data
 
             const string sql = "SELECT * FROM core.custom_field_forms WHERE form_name=@0;";
             return Factory.Get<MixERP.Net.Entities.Core.CustomFieldForm>(this._Catalog, sql, formName).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Gets the first record of the table "core.custom_field_forms". 
+        /// </summary>
+        /// <returns>Returns a non-live, non-mapped instance of "CustomFieldForm" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.Core.CustomFieldForm GetFirst()
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the first record of entity \"CustomFieldForm\" was denied to the user with Login ID {_LoginId}", this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM core.custom_field_forms ORDER BY form_name LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.Core.CustomFieldForm>(this._Catalog, sql).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Gets the previous record of the table "core.custom_field_forms" sorted by formName.
+        /// </summary>
+        /// <param name="formName">The column "form_name" parameter used to find the next record.</param>
+        /// <returns>Returns a non-live, non-mapped instance of "CustomFieldForm" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.Core.CustomFieldForm GetPrevious(string formName)
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the previous entity of \"CustomFieldForm\" by \"FormName\" with value {FormName} was denied to the user with Login ID {_LoginId}", formName, this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM core.custom_field_forms WHERE form_name < @0 ORDER BY form_name DESC LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.Core.CustomFieldForm>(this._Catalog, sql, formName).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Gets the next record of the table "core.custom_field_forms" sorted by formName.
+        /// </summary>
+        /// <param name="formName">The column "form_name" parameter used to find the next record.</param>
+        /// <returns>Returns a non-live, non-mapped instance of "CustomFieldForm" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.Core.CustomFieldForm GetNext(string formName)
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the next entity of \"CustomFieldForm\" by \"FormName\" with value {FormName} was denied to the user with Login ID {_LoginId}", formName, this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM core.custom_field_forms WHERE form_name > @0 ORDER BY form_name LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.Core.CustomFieldForm>(this._Catalog, sql, formName).FirstOrDefault();
+        }
+
+
+        /// <summary>
+        /// Gets the last record of the table "core.custom_field_forms". 
+        /// </summary>
+        /// <returns>Returns a non-live, non-mapped instance of "CustomFieldForm" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.Core.CustomFieldForm GetLast()
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the last record of entity \"CustomFieldForm\" was denied to the user with Login ID {_LoginId}", this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM core.custom_field_forms ORDER BY form_name DESC LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.Core.CustomFieldForm>(this._Catalog, sql).FirstOrDefault();
         }
 
         /// <summary>
@@ -557,7 +676,7 @@ namespace MixERP.Net.Schemas.Core.Data
             return Factory.Get<MixERP.Net.Entities.Core.CustomFieldForm>(this._Catalog, sql, offset);
         }
 
-        private List<EntityParser.Filter> GetFilters(string catalog, string filterName)
+        public List<EntityParser.Filter> GetFilters(string catalog, string filterName)
         {
             const string sql = "SELECT * FROM core.filters WHERE object_name='core.custom_field_forms' AND lower(filter_name)=lower(@0);";
             return Factory.Get<EntityParser.Filter>(catalog, sql, filterName).ToList();

@@ -23,6 +23,10 @@ function removeTimezone(dateTime) {
 };
 
 function getTime(dateTime) {
+    if (!dateTime) {
+        return "";
+    };
+
     function padMinutes(minutes) {
         if (parseInt(minutes || 0) < 10) {
             return "0" + minutes;
@@ -118,7 +122,7 @@ function loadDatepicker() {
         };
     });
 
-    $('[data-type="time"], .time').timepicker({ timeFormat: "h:i" });
+    $('[data-type="time"], .time').timepicker({ timeFormat: "H:i" });
     $('[data-type="time"], .time').attr("placeholder", "hh:mm");
     candidates.trigger("blur");
 };

@@ -12,6 +12,7 @@ using MixERP.Net.Framework;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using PetaPoco;
+using MixERP.Net.Schemas.Core.Data;
 
 namespace MixERP.Net.Api.Core
 {
@@ -22,9 +23,9 @@ namespace MixERP.Net.Api.Core
     public class CashFlowHeadingController : ApiController
     {
         /// <summary>
-        ///     The CashFlowHeading data context.
+        ///     The CashFlowHeading repository.
         /// </summary>
-        private readonly MixERP.Net.Schemas.Core.Data.CashFlowHeading CashFlowHeadingContext;
+        private readonly ICashFlowHeadingRepository CashFlowHeadingRepository;
 
         public CashFlowHeadingController()
         {
@@ -33,12 +34,22 @@ namespace MixERP.Net.Api.Core
             this._OfficeId = AppUsers.GetCurrent().View.OfficeId.ToInt();
             this._Catalog = AppUsers.GetCurrentUserDB();
 
-            this.CashFlowHeadingContext = new MixERP.Net.Schemas.Core.Data.CashFlowHeading
+            this.CashFlowHeadingRepository = new MixERP.Net.Schemas.Core.Data.CashFlowHeading
             {
                 _Catalog = this._Catalog,
                 _LoginId = this._LoginId,
                 _UserId = this._UserId
             };
+        }
+
+        public CashFlowHeadingController(ICashFlowHeadingRepository repository, string catalog, LoginView view)
+        {
+            this._LoginId = view.LoginId.ToLong();
+            this._UserId = view.UserId.ToInt();
+            this._OfficeId = view.OfficeId.ToInt();
+            this._Catalog = catalog;
+
+            this.CashFlowHeadingRepository = repository;
         }
 
         public long _LoginId { get; }
@@ -55,6 +66,11 @@ namespace MixERP.Net.Api.Core
         [Route("~/api/core/cash-flow-heading/meta")]
         public EntityView GetEntityView()
         {
+            if (this._LoginId == 0)
+            {
+                return new EntityView();
+            }
+
             return new EntityView
             {
                 PrimaryKey = "cash_flow_heading_id",
@@ -84,7 +100,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.CashFlowHeadingContext.Count();
+                return this.CashFlowHeadingRepository.Count();
             }
             catch (UnauthorizedException)
             {
@@ -115,7 +131,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.CashFlowHeadingContext.GetAll();
+                return this.CashFlowHeadingRepository.GetAll();
             }
             catch (UnauthorizedException)
             {
@@ -146,7 +162,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.CashFlowHeadingContext.Export();
+                return this.CashFlowHeadingRepository.Export();
             }
             catch (UnauthorizedException)
             {
@@ -178,7 +194,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.CashFlowHeadingContext.Get(cashFlowHeadingId);
+                return this.CashFlowHeadingRepository.Get(cashFlowHeadingId);
             }
             catch (UnauthorizedException)
             {
@@ -205,7 +221,133 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.CashFlowHeadingContext.Get(cashFlowHeadingIds);
+                return this.CashFlowHeadingRepository.Get(cashFlowHeadingIds);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the first instance of cash flow heading.
+        /// </summary>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("first")]
+        [Route("~/api/core/cash-flow-heading/first")]
+        public MixERP.Net.Entities.Core.CashFlowHeading GetFirst()
+        {
+            try
+            {
+                return this.CashFlowHeadingRepository.GetFirst();
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the previous instance of cash flow heading.
+        /// </summary>
+        /// <param name="cashFlowHeadingId">Enter CashFlowHeadingId to search for.</param>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("previous/{cashFlowHeadingId}")]
+        [Route("~/api/core/cash-flow-heading/previous/{cashFlowHeadingId}")]
+        public MixERP.Net.Entities.Core.CashFlowHeading GetPrevious(int cashFlowHeadingId)
+        {
+            try
+            {
+                return this.CashFlowHeadingRepository.GetPrevious(cashFlowHeadingId);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the next instance of cash flow heading.
+        /// </summary>
+        /// <param name="cashFlowHeadingId">Enter CashFlowHeadingId to search for.</param>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("next/{cashFlowHeadingId}")]
+        [Route("~/api/core/cash-flow-heading/next/{cashFlowHeadingId}")]
+        public MixERP.Net.Entities.Core.CashFlowHeading GetNext(int cashFlowHeadingId)
+        {
+            try
+            {
+                return this.CashFlowHeadingRepository.GetNext(cashFlowHeadingId);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the last instance of cash flow heading.
+        /// </summary>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("last")]
+        [Route("~/api/core/cash-flow-heading/last")]
+        public MixERP.Net.Entities.Core.CashFlowHeading GetLast()
+        {
+            try
+            {
+                return this.CashFlowHeadingRepository.GetLast();
             }
             catch (UnauthorizedException)
             {
@@ -236,7 +378,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.CashFlowHeadingContext.GetPaginatedResult();
+                return this.CashFlowHeadingRepository.GetPaginatedResult();
             }
             catch (UnauthorizedException)
             {
@@ -268,7 +410,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.CashFlowHeadingContext.GetPaginatedResult(pageNumber);
+                return this.CashFlowHeadingRepository.GetPaginatedResult(pageNumber);
             }
             catch (UnauthorizedException)
             {
@@ -301,7 +443,7 @@ namespace MixERP.Net.Api.Core
             try
             {
                 List<EntityParser.Filter> f = filters.ToObject<List<EntityParser.Filter>>(JsonHelper.GetJsonSerializer());
-                return this.CashFlowHeadingContext.CountWhere(f);
+                return this.CashFlowHeadingRepository.CountWhere(f);
             }
             catch (UnauthorizedException)
             {
@@ -335,7 +477,7 @@ namespace MixERP.Net.Api.Core
             try
             {
                 List<EntityParser.Filter> f = filters.ToObject<List<EntityParser.Filter>>(JsonHelper.GetJsonSerializer());
-                return this.CashFlowHeadingContext.GetWhere(pageNumber, f);
+                return this.CashFlowHeadingRepository.GetWhere(pageNumber, f);
             }
             catch (UnauthorizedException)
             {
@@ -367,7 +509,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.CashFlowHeadingContext.CountFiltered(filterName);
+                return this.CashFlowHeadingRepository.CountFiltered(filterName);
             }
             catch (UnauthorizedException)
             {
@@ -400,7 +542,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.CashFlowHeadingContext.GetFiltered(pageNumber, filterName);
+                return this.CashFlowHeadingRepository.GetFiltered(pageNumber, filterName);
             }
             catch (UnauthorizedException)
             {
@@ -431,7 +573,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.CashFlowHeadingContext.GetDisplayFields();
+                return this.CashFlowHeadingRepository.GetDisplayFields();
             }
             catch (UnauthorizedException)
             {
@@ -462,7 +604,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.CashFlowHeadingContext.GetCustomFields(null);
+                return this.CashFlowHeadingRepository.GetCustomFields(null);
             }
             catch (UnauthorizedException)
             {
@@ -493,7 +635,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.CashFlowHeadingContext.GetCustomFields(resourceId);
+                return this.CashFlowHeadingRepository.GetCustomFields(resourceId);
             }
             catch (UnauthorizedException)
             {
@@ -532,7 +674,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                return this.CashFlowHeadingContext.AddOrEdit(cashFlowHeading, customFields);
+                return this.CashFlowHeadingRepository.AddOrEdit(cashFlowHeading, customFields);
             }
             catch (UnauthorizedException)
             {
@@ -568,7 +710,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                this.CashFlowHeadingContext.Add(cashFlowHeading);
+                this.CashFlowHeadingRepository.Add(cashFlowHeading);
             }
             catch (UnauthorizedException)
             {
@@ -605,7 +747,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                this.CashFlowHeadingContext.Update(cashFlowHeading, cashFlowHeadingId);
+                this.CashFlowHeadingRepository.Update(cashFlowHeading, cashFlowHeadingId);
             }
             catch (UnauthorizedException)
             {
@@ -650,7 +792,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                return this.CashFlowHeadingContext.BulkImport(cashFlowHeadingCollection);
+                return this.CashFlowHeadingRepository.BulkImport(cashFlowHeadingCollection);
             }
             catch (UnauthorizedException)
             {
@@ -681,7 +823,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                this.CashFlowHeadingContext.Delete(cashFlowHeadingId);
+                this.CashFlowHeadingRepository.Delete(cashFlowHeadingId);
             }
             catch (UnauthorizedException)
             {

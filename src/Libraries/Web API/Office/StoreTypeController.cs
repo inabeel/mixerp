@@ -12,6 +12,7 @@ using MixERP.Net.Framework;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using PetaPoco;
+using MixERP.Net.Schemas.Office.Data;
 
 namespace MixERP.Net.Api.Office
 {
@@ -22,9 +23,9 @@ namespace MixERP.Net.Api.Office
     public class StoreTypeController : ApiController
     {
         /// <summary>
-        ///     The StoreType data context.
+        ///     The StoreType repository.
         /// </summary>
-        private readonly MixERP.Net.Schemas.Office.Data.StoreType StoreTypeContext;
+        private readonly IStoreTypeRepository StoreTypeRepository;
 
         public StoreTypeController()
         {
@@ -33,12 +34,22 @@ namespace MixERP.Net.Api.Office
             this._OfficeId = AppUsers.GetCurrent().View.OfficeId.ToInt();
             this._Catalog = AppUsers.GetCurrentUserDB();
 
-            this.StoreTypeContext = new MixERP.Net.Schemas.Office.Data.StoreType
+            this.StoreTypeRepository = new MixERP.Net.Schemas.Office.Data.StoreType
             {
                 _Catalog = this._Catalog,
                 _LoginId = this._LoginId,
                 _UserId = this._UserId
             };
+        }
+
+        public StoreTypeController(IStoreTypeRepository repository, string catalog, LoginView view)
+        {
+            this._LoginId = view.LoginId.ToLong();
+            this._UserId = view.UserId.ToInt();
+            this._OfficeId = view.OfficeId.ToInt();
+            this._Catalog = catalog;
+
+            this.StoreTypeRepository = repository;
         }
 
         public long _LoginId { get; }
@@ -55,6 +66,11 @@ namespace MixERP.Net.Api.Office
         [Route("~/api/office/store-type/meta")]
         public EntityView GetEntityView()
         {
+            if (this._LoginId == 0)
+            {
+                return new EntityView();
+            }
+
             return new EntityView
             {
                 PrimaryKey = "store_type_id",
@@ -80,7 +96,7 @@ namespace MixERP.Net.Api.Office
         {
             try
             {
-                return this.StoreTypeContext.Count();
+                return this.StoreTypeRepository.Count();
             }
             catch (UnauthorizedException)
             {
@@ -111,7 +127,7 @@ namespace MixERP.Net.Api.Office
         {
             try
             {
-                return this.StoreTypeContext.GetAll();
+                return this.StoreTypeRepository.GetAll();
             }
             catch (UnauthorizedException)
             {
@@ -142,7 +158,7 @@ namespace MixERP.Net.Api.Office
         {
             try
             {
-                return this.StoreTypeContext.Export();
+                return this.StoreTypeRepository.Export();
             }
             catch (UnauthorizedException)
             {
@@ -174,7 +190,7 @@ namespace MixERP.Net.Api.Office
         {
             try
             {
-                return this.StoreTypeContext.Get(storeTypeId);
+                return this.StoreTypeRepository.Get(storeTypeId);
             }
             catch (UnauthorizedException)
             {
@@ -201,7 +217,133 @@ namespace MixERP.Net.Api.Office
         {
             try
             {
-                return this.StoreTypeContext.Get(storeTypeIds);
+                return this.StoreTypeRepository.Get(storeTypeIds);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the first instance of store type.
+        /// </summary>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("first")]
+        [Route("~/api/office/store-type/first")]
+        public MixERP.Net.Entities.Office.StoreType GetFirst()
+        {
+            try
+            {
+                return this.StoreTypeRepository.GetFirst();
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the previous instance of store type.
+        /// </summary>
+        /// <param name="storeTypeId">Enter StoreTypeId to search for.</param>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("previous/{storeTypeId}")]
+        [Route("~/api/office/store-type/previous/{storeTypeId}")]
+        public MixERP.Net.Entities.Office.StoreType GetPrevious(int storeTypeId)
+        {
+            try
+            {
+                return this.StoreTypeRepository.GetPrevious(storeTypeId);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the next instance of store type.
+        /// </summary>
+        /// <param name="storeTypeId">Enter StoreTypeId to search for.</param>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("next/{storeTypeId}")]
+        [Route("~/api/office/store-type/next/{storeTypeId}")]
+        public MixERP.Net.Entities.Office.StoreType GetNext(int storeTypeId)
+        {
+            try
+            {
+                return this.StoreTypeRepository.GetNext(storeTypeId);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the last instance of store type.
+        /// </summary>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("last")]
+        [Route("~/api/office/store-type/last")]
+        public MixERP.Net.Entities.Office.StoreType GetLast()
+        {
+            try
+            {
+                return this.StoreTypeRepository.GetLast();
             }
             catch (UnauthorizedException)
             {
@@ -232,7 +374,7 @@ namespace MixERP.Net.Api.Office
         {
             try
             {
-                return this.StoreTypeContext.GetPaginatedResult();
+                return this.StoreTypeRepository.GetPaginatedResult();
             }
             catch (UnauthorizedException)
             {
@@ -264,7 +406,7 @@ namespace MixERP.Net.Api.Office
         {
             try
             {
-                return this.StoreTypeContext.GetPaginatedResult(pageNumber);
+                return this.StoreTypeRepository.GetPaginatedResult(pageNumber);
             }
             catch (UnauthorizedException)
             {
@@ -297,7 +439,7 @@ namespace MixERP.Net.Api.Office
             try
             {
                 List<EntityParser.Filter> f = filters.ToObject<List<EntityParser.Filter>>(JsonHelper.GetJsonSerializer());
-                return this.StoreTypeContext.CountWhere(f);
+                return this.StoreTypeRepository.CountWhere(f);
             }
             catch (UnauthorizedException)
             {
@@ -331,7 +473,7 @@ namespace MixERP.Net.Api.Office
             try
             {
                 List<EntityParser.Filter> f = filters.ToObject<List<EntityParser.Filter>>(JsonHelper.GetJsonSerializer());
-                return this.StoreTypeContext.GetWhere(pageNumber, f);
+                return this.StoreTypeRepository.GetWhere(pageNumber, f);
             }
             catch (UnauthorizedException)
             {
@@ -363,7 +505,7 @@ namespace MixERP.Net.Api.Office
         {
             try
             {
-                return this.StoreTypeContext.CountFiltered(filterName);
+                return this.StoreTypeRepository.CountFiltered(filterName);
             }
             catch (UnauthorizedException)
             {
@@ -396,7 +538,7 @@ namespace MixERP.Net.Api.Office
         {
             try
             {
-                return this.StoreTypeContext.GetFiltered(pageNumber, filterName);
+                return this.StoreTypeRepository.GetFiltered(pageNumber, filterName);
             }
             catch (UnauthorizedException)
             {
@@ -427,7 +569,7 @@ namespace MixERP.Net.Api.Office
         {
             try
             {
-                return this.StoreTypeContext.GetDisplayFields();
+                return this.StoreTypeRepository.GetDisplayFields();
             }
             catch (UnauthorizedException)
             {
@@ -458,7 +600,7 @@ namespace MixERP.Net.Api.Office
         {
             try
             {
-                return this.StoreTypeContext.GetCustomFields(null);
+                return this.StoreTypeRepository.GetCustomFields(null);
             }
             catch (UnauthorizedException)
             {
@@ -489,7 +631,7 @@ namespace MixERP.Net.Api.Office
         {
             try
             {
-                return this.StoreTypeContext.GetCustomFields(resourceId);
+                return this.StoreTypeRepository.GetCustomFields(resourceId);
             }
             catch (UnauthorizedException)
             {
@@ -528,7 +670,7 @@ namespace MixERP.Net.Api.Office
 
             try
             {
-                return this.StoreTypeContext.AddOrEdit(storeType, customFields);
+                return this.StoreTypeRepository.AddOrEdit(storeType, customFields);
             }
             catch (UnauthorizedException)
             {
@@ -564,7 +706,7 @@ namespace MixERP.Net.Api.Office
 
             try
             {
-                this.StoreTypeContext.Add(storeType);
+                this.StoreTypeRepository.Add(storeType);
             }
             catch (UnauthorizedException)
             {
@@ -601,7 +743,7 @@ namespace MixERP.Net.Api.Office
 
             try
             {
-                this.StoreTypeContext.Update(storeType, storeTypeId);
+                this.StoreTypeRepository.Update(storeType, storeTypeId);
             }
             catch (UnauthorizedException)
             {
@@ -646,7 +788,7 @@ namespace MixERP.Net.Api.Office
 
             try
             {
-                return this.StoreTypeContext.BulkImport(storeTypeCollection);
+                return this.StoreTypeRepository.BulkImport(storeTypeCollection);
             }
             catch (UnauthorizedException)
             {
@@ -677,7 +819,7 @@ namespace MixERP.Net.Api.Office
         {
             try
             {
-                this.StoreTypeContext.Delete(storeTypeId);
+                this.StoreTypeRepository.Delete(storeTypeId);
             }
             catch (UnauthorizedException)
             {

@@ -41,9 +41,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\bin\MixERP.Net.DbFactory.dll</HintPath>
     </Reference>
-    <Reference Include="MixERP.Net.Entities">
-      <HintPath>..\..\bin\MixERP.Net.Entities.dll</HintPath>
-    </Reference>
     <Reference Include="MixERP.Net.EntityParser, Version=1.0.0.0, Culture=neutral, PublicKeyToken=a724a47a0879d02f, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\bin\MixERP.Net.EntityParser.dll</HintPath>
@@ -51,10 +48,6 @@
     <Reference Include="MixERP.Net.Framework, Version=1.5.0.0, Culture=neutral, PublicKeyToken=a724a47a0879d02f, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\bin\MixERP.Net.Framework.dll</HintPath>
-    </Reference>
-    <Reference Include="Mono.Security, Version=4.0.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
-      <HintPath>..\HRM\packages\Npgsql.2.2.3\lib\net45\Mono.Security.dll</HintPath>
-      <Private>True</Private>
     </Reference>
     <Reference Include="Npgsql, Version=2.2.3.0, Culture=neutral, PublicKeyToken=5d8b90d52f46fda7, processorArchitecture=MSIL">
       <HintPath>..\HRM\packages\Npgsql.2.2.3\lib\net45\Npgsql.dll</HintPath>
@@ -66,10 +59,6 @@
     </Reference>
     <Reference Include="Serilog, Version=1.5.0.0, Culture=neutral, PublicKeyToken=24c2f752a8e58a10, processorArchitecture=MSIL">
       <HintPath>..\HRM\packages\Serilog.1.5.7\lib\net45\Serilog.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Serilog.FullNetFx, Version=1.5.0.0, Culture=neutral, PublicKeyToken=24c2f752a8e58a10, processorArchitecture=MSIL">
-      <HintPath>..\HRM\packages\Serilog.1.5.7\lib\net45\Serilog.FullNetFx.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
@@ -108,6 +97,48 @@
     <Compile Include="GetEmployeeByEmployeeIdProcedure.cs" />
     <Compile Include="GetEmployeeCodeByEmployeeIdProcedure.cs" />
     <Compile Include="GetEmployeeNameByEmployeeIdProcedure.cs" />
+    <Compile Include="IAttendanceRepository.cs" />
+    <Compile Include="IAttendanceViewRepository.cs" />
+    <Compile Include="IContractRepository.cs" />
+    <Compile Include="IContractScrudViewRepository.cs" />
+    <Compile Include="IContractVerificationScrudViewRepository.cs" />
+    <Compile Include="IEducationLevelRepository.cs" />
+    <Compile Include="IEmployeeExperienceRepository.cs" />
+    <Compile Include="IEmployeeExperienceScrudViewRepository.cs" />
+    <Compile Include="IEmployeeIdentificationDetailRepository.cs" />
+    <Compile Include="IEmployeeIdentificationDetailScrudViewRepository.cs" />
+    <Compile Include="IEmployeeQualificationRepository.cs" />
+    <Compile Include="IEmployeeQualificationScrudViewRepository.cs" />
+    <Compile Include="IEmployeeRepository.cs" />
+    <Compile Include="IEmployeeSocialNetworkDetailRepository.cs" />
+    <Compile Include="IEmployeeSocialNetworkDetailScrudViewRepository.cs" />
+    <Compile Include="IEmployeeTypeRepository.cs" />
+    <Compile Include="IEmployeeTypeScrudViewRepository.cs" />
+    <Compile Include="IEmployeeViewRepository.cs" />
+    <Compile Include="IEmploymentStatusCodeRepository.cs" />
+    <Compile Include="IEmploymentStatusRepository.cs" />
+    <Compile Include="IExitRepository.cs" />
+    <Compile Include="IExitScrudViewRepository.cs" />
+    <Compile Include="IExitTypeRepository.cs" />
+    <Compile Include="IGetEmployeeByEmployeeIdRepository.cs" />
+    <Compile Include="IGetEmployeeCodeByEmployeeIdRepository.cs" />
+    <Compile Include="IGetEmployeeNameByEmployeeIdRepository.cs" />
+    <Compile Include="IJobTitleRepository.cs" />
+    <Compile Include="ILeaveApplicationRepository.cs" />
+    <Compile Include="ILeaveApplicationScrudViewRepository.cs" />
+    <Compile Include="ILeaveApplicationVerificationScrudViewRepository.cs" />
+    <Compile Include="ILeaveBenefitRepository.cs" />
+    <Compile Include="ILeaveTypeRepository.cs" />
+    <Compile Include="IOfficeHourRepository.cs" />
+    <Compile Include="IOfficeHourScrudViewRepository.cs" />
+    <Compile Include="IPayGradeRepository.cs" />
+    <Compile Include="IResignationRepository.cs" />
+    <Compile Include="IResignationScrudViewRepository.cs" />
+    <Compile Include="IResignationVerificationScrudViewRepository.cs" />
+    <Compile Include="IShiftRepository.cs" />
+    <Compile Include="ITerminationRepository.cs" />
+    <Compile Include="ITerminationScrudViewRepository.cs" />
+    <Compile Include="ITerminationVerificationScrudViewRepository.cs" />
     <Compile Include="JobTitle.cs" />
     <Compile Include="LeaveApplication.cs" />
     <Compile Include="LeaveApplicationScrudView.cs" />

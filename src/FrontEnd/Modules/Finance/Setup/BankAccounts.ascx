@@ -11,16 +11,23 @@
     scrudFactory.formTableName = "core.bank_accounts";
 
     scrudFactory.excludedColumns = ["AuditUserId", "AuditTs"];
+    scrudFactory.hiddenColumns = ["BankAccountId"];
 
     scrudFactory.allowDelete = true;
     scrudFactory.allowEdit = true;
 
     scrudFactory.layout = [
-        ["AccountId", ""],
-        ["BankName", "BankBranch", "", ""],
-        ["OfficeId", "MaintainedByUserId", "", ""],
-        ["BankAccountNumber", "BankContactNumber", "", ""],
-        ["BankAddress", ""]
+        {
+            tab: "",
+            fields: [
+                ["AccountId", ""],
+                ["BankName", "BankBranch", "", ""],
+                ["OfficeId", "MaintainedByUserId", "", ""],
+                ["BankAccountNumber", "BankContactNumber", "", ""],
+                ["BankAddress", ""],
+                ["BankAccountType", "RelationshipOfficerName","",""]
+            ]
+        }
     ];
 
     scrudFactory.keys = [

@@ -12,6 +12,7 @@ using MixERP.Net.Framework;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using PetaPoco;
+using MixERP.Net.Schemas.Core.Data;
 
 namespace MixERP.Net.Api.Core
 {
@@ -22,9 +23,9 @@ namespace MixERP.Net.Api.Core
     public class CompoundUnitController : ApiController
     {
         /// <summary>
-        ///     The CompoundUnit data context.
+        ///     The CompoundUnit repository.
         /// </summary>
-        private readonly MixERP.Net.Schemas.Core.Data.CompoundUnit CompoundUnitContext;
+        private readonly ICompoundUnitRepository CompoundUnitRepository;
 
         public CompoundUnitController()
         {
@@ -33,12 +34,22 @@ namespace MixERP.Net.Api.Core
             this._OfficeId = AppUsers.GetCurrent().View.OfficeId.ToInt();
             this._Catalog = AppUsers.GetCurrentUserDB();
 
-            this.CompoundUnitContext = new MixERP.Net.Schemas.Core.Data.CompoundUnit
+            this.CompoundUnitRepository = new MixERP.Net.Schemas.Core.Data.CompoundUnit
             {
                 _Catalog = this._Catalog,
                 _LoginId = this._LoginId,
                 _UserId = this._UserId
             };
+        }
+
+        public CompoundUnitController(ICompoundUnitRepository repository, string catalog, LoginView view)
+        {
+            this._LoginId = view.LoginId.ToLong();
+            this._UserId = view.UserId.ToInt();
+            this._OfficeId = view.OfficeId.ToInt();
+            this._Catalog = catalog;
+
+            this.CompoundUnitRepository = repository;
         }
 
         public long _LoginId { get; }
@@ -55,6 +66,11 @@ namespace MixERP.Net.Api.Core
         [Route("~/api/core/compound-unit/meta")]
         public EntityView GetEntityView()
         {
+            if (this._LoginId == 0)
+            {
+                return new EntityView();
+            }
+
             return new EntityView
             {
                 PrimaryKey = "compound_unit_id",
@@ -81,7 +97,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.CompoundUnitContext.Count();
+                return this.CompoundUnitRepository.Count();
             }
             catch (UnauthorizedException)
             {
@@ -112,7 +128,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.CompoundUnitContext.GetAll();
+                return this.CompoundUnitRepository.GetAll();
             }
             catch (UnauthorizedException)
             {
@@ -143,7 +159,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.CompoundUnitContext.Export();
+                return this.CompoundUnitRepository.Export();
             }
             catch (UnauthorizedException)
             {
@@ -175,7 +191,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.CompoundUnitContext.Get(compoundUnitId);
+                return this.CompoundUnitRepository.Get(compoundUnitId);
             }
             catch (UnauthorizedException)
             {
@@ -202,7 +218,133 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.CompoundUnitContext.Get(compoundUnitIds);
+                return this.CompoundUnitRepository.Get(compoundUnitIds);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the first instance of compound unit.
+        /// </summary>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("first")]
+        [Route("~/api/core/compound-unit/first")]
+        public MixERP.Net.Entities.Core.CompoundUnit GetFirst()
+        {
+            try
+            {
+                return this.CompoundUnitRepository.GetFirst();
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the previous instance of compound unit.
+        /// </summary>
+        /// <param name="compoundUnitId">Enter CompoundUnitId to search for.</param>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("previous/{compoundUnitId}")]
+        [Route("~/api/core/compound-unit/previous/{compoundUnitId}")]
+        public MixERP.Net.Entities.Core.CompoundUnit GetPrevious(int compoundUnitId)
+        {
+            try
+            {
+                return this.CompoundUnitRepository.GetPrevious(compoundUnitId);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the next instance of compound unit.
+        /// </summary>
+        /// <param name="compoundUnitId">Enter CompoundUnitId to search for.</param>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("next/{compoundUnitId}")]
+        [Route("~/api/core/compound-unit/next/{compoundUnitId}")]
+        public MixERP.Net.Entities.Core.CompoundUnit GetNext(int compoundUnitId)
+        {
+            try
+            {
+                return this.CompoundUnitRepository.GetNext(compoundUnitId);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the last instance of compound unit.
+        /// </summary>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("last")]
+        [Route("~/api/core/compound-unit/last")]
+        public MixERP.Net.Entities.Core.CompoundUnit GetLast()
+        {
+            try
+            {
+                return this.CompoundUnitRepository.GetLast();
             }
             catch (UnauthorizedException)
             {
@@ -233,7 +375,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.CompoundUnitContext.GetPaginatedResult();
+                return this.CompoundUnitRepository.GetPaginatedResult();
             }
             catch (UnauthorizedException)
             {
@@ -265,7 +407,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.CompoundUnitContext.GetPaginatedResult(pageNumber);
+                return this.CompoundUnitRepository.GetPaginatedResult(pageNumber);
             }
             catch (UnauthorizedException)
             {
@@ -298,7 +440,7 @@ namespace MixERP.Net.Api.Core
             try
             {
                 List<EntityParser.Filter> f = filters.ToObject<List<EntityParser.Filter>>(JsonHelper.GetJsonSerializer());
-                return this.CompoundUnitContext.CountWhere(f);
+                return this.CompoundUnitRepository.CountWhere(f);
             }
             catch (UnauthorizedException)
             {
@@ -332,7 +474,7 @@ namespace MixERP.Net.Api.Core
             try
             {
                 List<EntityParser.Filter> f = filters.ToObject<List<EntityParser.Filter>>(JsonHelper.GetJsonSerializer());
-                return this.CompoundUnitContext.GetWhere(pageNumber, f);
+                return this.CompoundUnitRepository.GetWhere(pageNumber, f);
             }
             catch (UnauthorizedException)
             {
@@ -364,7 +506,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.CompoundUnitContext.CountFiltered(filterName);
+                return this.CompoundUnitRepository.CountFiltered(filterName);
             }
             catch (UnauthorizedException)
             {
@@ -397,7 +539,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.CompoundUnitContext.GetFiltered(pageNumber, filterName);
+                return this.CompoundUnitRepository.GetFiltered(pageNumber, filterName);
             }
             catch (UnauthorizedException)
             {
@@ -428,7 +570,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.CompoundUnitContext.GetDisplayFields();
+                return this.CompoundUnitRepository.GetDisplayFields();
             }
             catch (UnauthorizedException)
             {
@@ -459,7 +601,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.CompoundUnitContext.GetCustomFields(null);
+                return this.CompoundUnitRepository.GetCustomFields(null);
             }
             catch (UnauthorizedException)
             {
@@ -490,7 +632,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.CompoundUnitContext.GetCustomFields(resourceId);
+                return this.CompoundUnitRepository.GetCustomFields(resourceId);
             }
             catch (UnauthorizedException)
             {
@@ -529,7 +671,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                return this.CompoundUnitContext.AddOrEdit(compoundUnit, customFields);
+                return this.CompoundUnitRepository.AddOrEdit(compoundUnit, customFields);
             }
             catch (UnauthorizedException)
             {
@@ -565,7 +707,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                this.CompoundUnitContext.Add(compoundUnit);
+                this.CompoundUnitRepository.Add(compoundUnit);
             }
             catch (UnauthorizedException)
             {
@@ -602,7 +744,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                this.CompoundUnitContext.Update(compoundUnit, compoundUnitId);
+                this.CompoundUnitRepository.Update(compoundUnit, compoundUnitId);
             }
             catch (UnauthorizedException)
             {
@@ -647,7 +789,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                return this.CompoundUnitContext.BulkImport(compoundUnitCollection);
+                return this.CompoundUnitRepository.BulkImport(compoundUnitCollection);
             }
             catch (UnauthorizedException)
             {
@@ -678,7 +820,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                this.CompoundUnitContext.Delete(compoundUnitId);
+                this.CompoundUnitRepository.Delete(compoundUnitId);
             }
             catch (UnauthorizedException)
             {

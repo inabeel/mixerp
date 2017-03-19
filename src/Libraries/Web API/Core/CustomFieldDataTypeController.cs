@@ -12,6 +12,7 @@ using MixERP.Net.Framework;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using PetaPoco;
+using MixERP.Net.Schemas.Core.Data;
 
 namespace MixERP.Net.Api.Core
 {
@@ -22,9 +23,9 @@ namespace MixERP.Net.Api.Core
     public class CustomFieldDataTypeController : ApiController
     {
         /// <summary>
-        ///     The CustomFieldDataType data context.
+        ///     The CustomFieldDataType repository.
         /// </summary>
-        private readonly MixERP.Net.Schemas.Core.Data.CustomFieldDataType CustomFieldDataTypeContext;
+        private readonly ICustomFieldDataTypeRepository CustomFieldDataTypeRepository;
 
         public CustomFieldDataTypeController()
         {
@@ -33,12 +34,22 @@ namespace MixERP.Net.Api.Core
             this._OfficeId = AppUsers.GetCurrent().View.OfficeId.ToInt();
             this._Catalog = AppUsers.GetCurrentUserDB();
 
-            this.CustomFieldDataTypeContext = new MixERP.Net.Schemas.Core.Data.CustomFieldDataType
+            this.CustomFieldDataTypeRepository = new MixERP.Net.Schemas.Core.Data.CustomFieldDataType
             {
                 _Catalog = this._Catalog,
                 _LoginId = this._LoginId,
                 _UserId = this._UserId
             };
+        }
+
+        public CustomFieldDataTypeController(ICustomFieldDataTypeRepository repository, string catalog, LoginView view)
+        {
+            this._LoginId = view.LoginId.ToLong();
+            this._UserId = view.UserId.ToInt();
+            this._OfficeId = view.OfficeId.ToInt();
+            this._Catalog = catalog;
+
+            this.CustomFieldDataTypeRepository = repository;
         }
 
         public long _LoginId { get; }
@@ -55,6 +66,11 @@ namespace MixERP.Net.Api.Core
         [Route("~/api/core/custom-field-data-type/meta")]
         public EntityView GetEntityView()
         {
+            if (this._LoginId == 0)
+            {
+                return new EntityView();
+            }
+
             return new EntityView
             {
                 PrimaryKey = "data_type",
@@ -80,7 +96,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.CustomFieldDataTypeContext.Count();
+                return this.CustomFieldDataTypeRepository.Count();
             }
             catch (UnauthorizedException)
             {
@@ -111,7 +127,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.CustomFieldDataTypeContext.GetAll();
+                return this.CustomFieldDataTypeRepository.GetAll();
             }
             catch (UnauthorizedException)
             {
@@ -142,7 +158,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.CustomFieldDataTypeContext.Export();
+                return this.CustomFieldDataTypeRepository.Export();
             }
             catch (UnauthorizedException)
             {
@@ -174,7 +190,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.CustomFieldDataTypeContext.Get(dataType);
+                return this.CustomFieldDataTypeRepository.Get(dataType);
             }
             catch (UnauthorizedException)
             {
@@ -201,7 +217,133 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.CustomFieldDataTypeContext.Get(dataTypes);
+                return this.CustomFieldDataTypeRepository.Get(dataTypes);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the first instance of custom field data type.
+        /// </summary>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("first")]
+        [Route("~/api/core/custom-field-data-type/first")]
+        public MixERP.Net.Entities.Core.CustomFieldDataType GetFirst()
+        {
+            try
+            {
+                return this.CustomFieldDataTypeRepository.GetFirst();
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the previous instance of custom field data type.
+        /// </summary>
+        /// <param name="dataType">Enter DataType to search for.</param>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("previous/{dataType}")]
+        [Route("~/api/core/custom-field-data-type/previous/{dataType}")]
+        public MixERP.Net.Entities.Core.CustomFieldDataType GetPrevious(string dataType)
+        {
+            try
+            {
+                return this.CustomFieldDataTypeRepository.GetPrevious(dataType);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the next instance of custom field data type.
+        /// </summary>
+        /// <param name="dataType">Enter DataType to search for.</param>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("next/{dataType}")]
+        [Route("~/api/core/custom-field-data-type/next/{dataType}")]
+        public MixERP.Net.Entities.Core.CustomFieldDataType GetNext(string dataType)
+        {
+            try
+            {
+                return this.CustomFieldDataTypeRepository.GetNext(dataType);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the last instance of custom field data type.
+        /// </summary>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("last")]
+        [Route("~/api/core/custom-field-data-type/last")]
+        public MixERP.Net.Entities.Core.CustomFieldDataType GetLast()
+        {
+            try
+            {
+                return this.CustomFieldDataTypeRepository.GetLast();
             }
             catch (UnauthorizedException)
             {
@@ -232,7 +374,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.CustomFieldDataTypeContext.GetPaginatedResult();
+                return this.CustomFieldDataTypeRepository.GetPaginatedResult();
             }
             catch (UnauthorizedException)
             {
@@ -264,7 +406,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.CustomFieldDataTypeContext.GetPaginatedResult(pageNumber);
+                return this.CustomFieldDataTypeRepository.GetPaginatedResult(pageNumber);
             }
             catch (UnauthorizedException)
             {
@@ -297,7 +439,7 @@ namespace MixERP.Net.Api.Core
             try
             {
                 List<EntityParser.Filter> f = filters.ToObject<List<EntityParser.Filter>>(JsonHelper.GetJsonSerializer());
-                return this.CustomFieldDataTypeContext.CountWhere(f);
+                return this.CustomFieldDataTypeRepository.CountWhere(f);
             }
             catch (UnauthorizedException)
             {
@@ -331,7 +473,7 @@ namespace MixERP.Net.Api.Core
             try
             {
                 List<EntityParser.Filter> f = filters.ToObject<List<EntityParser.Filter>>(JsonHelper.GetJsonSerializer());
-                return this.CustomFieldDataTypeContext.GetWhere(pageNumber, f);
+                return this.CustomFieldDataTypeRepository.GetWhere(pageNumber, f);
             }
             catch (UnauthorizedException)
             {
@@ -363,7 +505,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.CustomFieldDataTypeContext.CountFiltered(filterName);
+                return this.CustomFieldDataTypeRepository.CountFiltered(filterName);
             }
             catch (UnauthorizedException)
             {
@@ -396,7 +538,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.CustomFieldDataTypeContext.GetFiltered(pageNumber, filterName);
+                return this.CustomFieldDataTypeRepository.GetFiltered(pageNumber, filterName);
             }
             catch (UnauthorizedException)
             {
@@ -427,7 +569,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.CustomFieldDataTypeContext.GetDisplayFields();
+                return this.CustomFieldDataTypeRepository.GetDisplayFields();
             }
             catch (UnauthorizedException)
             {
@@ -458,7 +600,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.CustomFieldDataTypeContext.GetCustomFields(null);
+                return this.CustomFieldDataTypeRepository.GetCustomFields(null);
             }
             catch (UnauthorizedException)
             {
@@ -489,7 +631,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.CustomFieldDataTypeContext.GetCustomFields(resourceId);
+                return this.CustomFieldDataTypeRepository.GetCustomFields(resourceId);
             }
             catch (UnauthorizedException)
             {
@@ -528,7 +670,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                return this.CustomFieldDataTypeContext.AddOrEdit(customFieldDataType, customFields);
+                return this.CustomFieldDataTypeRepository.AddOrEdit(customFieldDataType, customFields);
             }
             catch (UnauthorizedException)
             {
@@ -564,7 +706,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                this.CustomFieldDataTypeContext.Add(customFieldDataType);
+                this.CustomFieldDataTypeRepository.Add(customFieldDataType);
             }
             catch (UnauthorizedException)
             {
@@ -601,7 +743,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                this.CustomFieldDataTypeContext.Update(customFieldDataType, dataType);
+                this.CustomFieldDataTypeRepository.Update(customFieldDataType, dataType);
             }
             catch (UnauthorizedException)
             {
@@ -646,7 +788,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                return this.CustomFieldDataTypeContext.BulkImport(customFieldDataTypeCollection);
+                return this.CustomFieldDataTypeRepository.BulkImport(customFieldDataTypeCollection);
             }
             catch (UnauthorizedException)
             {
@@ -677,7 +819,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                this.CustomFieldDataTypeContext.Delete(dataType);
+                this.CustomFieldDataTypeRepository.Delete(dataType);
             }
             catch (UnauthorizedException)
             {

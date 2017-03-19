@@ -16,7 +16,7 @@ namespace MixERP.Net.Schemas.Config.Data
     /// <summary>
     /// Provides simplified data access features to perform SCRUD operation on the database table "config.switches".
     /// </summary>
-    public class Switch : DbAccess
+    public class Switch : DbAccess, ISwitchRepository
     {
         /// <summary>
         /// The schema of this table. Returns literal "config".
@@ -73,7 +73,7 @@ namespace MixERP.Net.Schemas.Config.Data
         }
 
         /// <summary>
-        /// Executes a select query on the table "config.switches" to return a all instances of the "Switch" class. 
+        /// Executes a select query on the table "config.switches" to return all instances of the "Switch" class. 
         /// </summary>
         /// <returns>Returns a non-live, non-mapped instances of "Switch" class.</returns>
         /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
@@ -102,7 +102,7 @@ namespace MixERP.Net.Schemas.Config.Data
         }
 
         /// <summary>
-        /// Executes a select query on the table "config.switches" to return a all instances of the "Switch" class to export. 
+        /// Executes a select query on the table "config.switches" to return all instances of the "Switch" class to export. 
         /// </summary>
         /// <returns>Returns a non-live, non-mapped instances of "Switch" class.</returns>
         /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
@@ -158,6 +158,125 @@ namespace MixERP.Net.Schemas.Config.Data
 
             const string sql = "SELECT * FROM config.switches WHERE key=@0;";
             return Factory.Get<MixERP.Net.Entities.Config.Switch>(this._Catalog, sql, key).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Gets the first record of the table "config.switches". 
+        /// </summary>
+        /// <returns>Returns a non-live, non-mapped instance of "Switch" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.Config.Switch GetFirst()
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the first record of entity \"Switch\" was denied to the user with Login ID {_LoginId}", this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM config.switches ORDER BY key LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.Config.Switch>(this._Catalog, sql).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Gets the previous record of the table "config.switches" sorted by key.
+        /// </summary>
+        /// <param name="key">The column "key" parameter used to find the next record.</param>
+        /// <returns>Returns a non-live, non-mapped instance of "Switch" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.Config.Switch GetPrevious(string key)
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the previous entity of \"Switch\" by \"Key\" with value {Key} was denied to the user with Login ID {_LoginId}", key, this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM config.switches WHERE key < @0 ORDER BY key DESC LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.Config.Switch>(this._Catalog, sql, key).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Gets the next record of the table "config.switches" sorted by key.
+        /// </summary>
+        /// <param name="key">The column "key" parameter used to find the next record.</param>
+        /// <returns>Returns a non-live, non-mapped instance of "Switch" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.Config.Switch GetNext(string key)
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the next entity of \"Switch\" by \"Key\" with value {Key} was denied to the user with Login ID {_LoginId}", key, this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM config.switches WHERE key > @0 ORDER BY key LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.Config.Switch>(this._Catalog, sql, key).FirstOrDefault();
+        }
+
+
+        /// <summary>
+        /// Gets the last record of the table "config.switches". 
+        /// </summary>
+        /// <returns>Returns a non-live, non-mapped instance of "Switch" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.Config.Switch GetLast()
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the last record of entity \"Switch\" was denied to the user with Login ID {_LoginId}", this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM config.switches ORDER BY key DESC LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.Config.Switch>(this._Catalog, sql).FirstOrDefault();
         }
 
         /// <summary>
@@ -559,7 +678,7 @@ namespace MixERP.Net.Schemas.Config.Data
             return Factory.Get<MixERP.Net.Entities.Config.Switch>(this._Catalog, sql, offset);
         }
 
-        private List<EntityParser.Filter> GetFilters(string catalog, string filterName)
+        public List<EntityParser.Filter> GetFilters(string catalog, string filterName)
         {
             const string sql = "SELECT * FROM core.filters WHERE object_name='config.switches' AND lower(filter_name)=lower(@0);";
             return Factory.Get<EntityParser.Filter>(catalog, sql, filterName).ToList();

@@ -47,12 +47,17 @@
     ];
 
     scrudFactory.layout = [
-        ["TerminationId", ""],
-        ["EmployeeId", "NoticeDate", "", ""],
-        ["ForwardTo", "ServiceEndDate", "", ""],
-        ["ChangeStatusTo", ""],
-        ["Reason", ""],
-        ["Details", ""]
+        {
+            tab: "",
+            fields: [
+                ["TerminationId", ""],
+                ["EmployeeId", "NoticeDate", "", ""],
+                ["ForwardTo", "ServiceEndDate", "", ""],
+                ["ChangeStatusTo", ""],
+                ["Reason", ""],
+                ["Details", ""]
+            ]
+        }
     ];
 
     $(document).on("formready", function () {

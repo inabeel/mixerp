@@ -16,7 +16,7 @@ namespace MixERP.Net.Schemas.Core.Data
     /// <summary>
     /// Provides simplified data access features to perform SCRUD operation on the database table "core.nationalities".
     /// </summary>
-    public class Nationality : DbAccess
+    public class Nationality : DbAccess, INationalityRepository
     {
         /// <summary>
         /// The schema of this table. Returns literal "core".
@@ -73,7 +73,7 @@ namespace MixERP.Net.Schemas.Core.Data
         }
 
         /// <summary>
-        /// Executes a select query on the table "core.nationalities" to return a all instances of the "Nationality" class. 
+        /// Executes a select query on the table "core.nationalities" to return all instances of the "Nationality" class. 
         /// </summary>
         /// <returns>Returns a non-live, non-mapped instances of "Nationality" class.</returns>
         /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
@@ -102,7 +102,7 @@ namespace MixERP.Net.Schemas.Core.Data
         }
 
         /// <summary>
-        /// Executes a select query on the table "core.nationalities" to return a all instances of the "Nationality" class to export. 
+        /// Executes a select query on the table "core.nationalities" to return all instances of the "Nationality" class to export. 
         /// </summary>
         /// <returns>Returns a non-live, non-mapped instances of "Nationality" class.</returns>
         /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
@@ -158,6 +158,125 @@ namespace MixERP.Net.Schemas.Core.Data
 
             const string sql = "SELECT * FROM core.nationalities WHERE nationality_code=@0;";
             return Factory.Get<MixERP.Net.Entities.Core.Nationality>(this._Catalog, sql, nationalityCode).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Gets the first record of the table "core.nationalities". 
+        /// </summary>
+        /// <returns>Returns a non-live, non-mapped instance of "Nationality" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.Core.Nationality GetFirst()
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the first record of entity \"Nationality\" was denied to the user with Login ID {_LoginId}", this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM core.nationalities ORDER BY nationality_code LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.Core.Nationality>(this._Catalog, sql).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Gets the previous record of the table "core.nationalities" sorted by nationalityCode.
+        /// </summary>
+        /// <param name="nationalityCode">The column "nationality_code" parameter used to find the next record.</param>
+        /// <returns>Returns a non-live, non-mapped instance of "Nationality" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.Core.Nationality GetPrevious(string nationalityCode)
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the previous entity of \"Nationality\" by \"NationalityCode\" with value {NationalityCode} was denied to the user with Login ID {_LoginId}", nationalityCode, this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM core.nationalities WHERE nationality_code < @0 ORDER BY nationality_code DESC LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.Core.Nationality>(this._Catalog, sql, nationalityCode).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Gets the next record of the table "core.nationalities" sorted by nationalityCode.
+        /// </summary>
+        /// <param name="nationalityCode">The column "nationality_code" parameter used to find the next record.</param>
+        /// <returns>Returns a non-live, non-mapped instance of "Nationality" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.Core.Nationality GetNext(string nationalityCode)
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the next entity of \"Nationality\" by \"NationalityCode\" with value {NationalityCode} was denied to the user with Login ID {_LoginId}", nationalityCode, this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM core.nationalities WHERE nationality_code > @0 ORDER BY nationality_code LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.Core.Nationality>(this._Catalog, sql, nationalityCode).FirstOrDefault();
+        }
+
+
+        /// <summary>
+        /// Gets the last record of the table "core.nationalities". 
+        /// </summary>
+        /// <returns>Returns a non-live, non-mapped instance of "Nationality" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.Core.Nationality GetLast()
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the last record of entity \"Nationality\" was denied to the user with Login ID {_LoginId}", this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM core.nationalities ORDER BY nationality_code DESC LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.Core.Nationality>(this._Catalog, sql).FirstOrDefault();
         }
 
         /// <summary>
@@ -559,7 +678,7 @@ namespace MixERP.Net.Schemas.Core.Data
             return Factory.Get<MixERP.Net.Entities.Core.Nationality>(this._Catalog, sql, offset);
         }
 
-        private List<EntityParser.Filter> GetFilters(string catalog, string filterName)
+        public List<EntityParser.Filter> GetFilters(string catalog, string filterName)
         {
             const string sql = "SELECT * FROM core.filters WHERE object_name='core.nationalities' AND lower(filter_name)=lower(@0);";
             return Factory.Get<EntityParser.Filter>(catalog, sql, filterName).ToList();

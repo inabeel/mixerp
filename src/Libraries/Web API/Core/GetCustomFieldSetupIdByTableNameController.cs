@@ -40,12 +40,17 @@ namespace MixERP.Net.Api.Core
         /// </summary>
         public string _Catalog { get; set; }
 
-        private GetCustomFieldSetupIdByTableNameProcedure procedure;
+        /// <summary>
+        ///     The GetCustomFieldSetupIdByTableName repository.
+        /// </summary>
+        private readonly IGetCustomFieldSetupIdByTableNameRepository repository;
+
         public class Annotation
         {
             public string TableName { get; set; }
             public string FieldName { get; set; }
         }
+
 
         public GetCustomFieldSetupIdByTableNameController()
         {
@@ -53,13 +58,25 @@ namespace MixERP.Net.Api.Core
             this._UserId = AppUsers.GetCurrent().View.UserId.ToInt();
             this._OfficeId = AppUsers.GetCurrent().View.OfficeId.ToInt();
             this._Catalog = AppUsers.GetCurrentUserDB();
-            this.procedure = new GetCustomFieldSetupIdByTableNameProcedure
+
+            this.repository = new GetCustomFieldSetupIdByTableNameProcedure
             {
                 _Catalog = this._Catalog,
                 _LoginId = this._LoginId,
                 _UserId = this._UserId
             };
         }
+
+        public GetCustomFieldSetupIdByTableNameController(IGetCustomFieldSetupIdByTableNameRepository repository, string catalog, LoginView view)
+        {
+            this._LoginId = view.LoginId.ToLong();
+            this._UserId = view.UserId.ToInt();
+            this._OfficeId = view.OfficeId.ToInt();
+            this._Catalog = catalog;
+
+            this.repository = repository;
+        }
+
         /// <summary>
         ///     Creates meta information of "get custom field setup id by table name" annotation.
         /// </summary>
@@ -69,6 +86,10 @@ namespace MixERP.Net.Api.Core
         [Route("~/api/core/procedures/get-custom-field-setup-id-by-table-name/annotation")]
         public EntityView GetAnnotation()
         {
+            if (this._LoginId == 0)
+            {
+                return new EntityView();
+            }
             return new EntityView
             {
                 Columns = new List<EntityColumn>()
@@ -81,6 +102,8 @@ namespace MixERP.Net.Api.Core
         }
 
 
+
+
         [AcceptVerbs("POST")]
         [Route("execute")]
         [Route("~/api/core/procedures/get-custom-field-setup-id-by-table-name/execute")]
@@ -88,11 +111,11 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                this.procedure.TableName = annotation.TableName;
-                this.procedure.FieldName = annotation.FieldName;
+                this.repository.TableName = annotation.TableName;
+                this.repository.FieldName = annotation.FieldName;
 
 
-                return this.procedure.Execute();
+                return this.repository.Execute();
             }
             catch (UnauthorizedException)
             {

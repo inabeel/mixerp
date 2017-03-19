@@ -11,8 +11,8 @@
     scrudFactory.formAPI = "/api/hrm/leave-application";
     scrudFactory.formTableName = "hrm.leave_applications";
 
-    scrudFactory.excludedColumns = ["AuditUserId", "AuditTs"];
-    scrudFactory.hiddenColumns = ["EnteredBy", "AppliedOn", "EmployeeId"];
+    scrudFactory.excludedColumns = ["Photo", "AuditUserId", "AuditTs"];
+    scrudFactory.hiddenColumns = ["EnteredBy", "AppliedOn", "VerificationStatusId", "VerifiedByUserId", "VerifiedOn", "VerificationReason"];
 
     scrudFactory.live = "EmployeeId";
 
@@ -22,9 +22,15 @@
     };
 
     scrudFactory.layout = [
-        ["LeaveApplicationId", "LeaveTypeId", "", ""],
-        ["StartDate", "EndDate", "", ""],
-        ["Reason", ""]
+        {
+            tab: "",
+            fields: [
+                ["LeaveApplicationId", ""],
+                ["LeaveTypeId", "EmployeeId", "", ""],
+                ["StartDate", "EndDate", "", ""],
+                ["Reason", ""]
+            ]
+        }
     ];
 
     scrudFactory.keys = [
@@ -49,8 +55,9 @@
 <div data-ng-include="'/Modules/ScrudFactory/View.html'"></div>
 <div data-ng-include="'/Modules/ScrudFactory/Form.html'"></div>
 <script>
-    $(document).on("formready", function () {
+    $(document).on("formready", function() {
         $("#applied_on").val(window.today);
         $("#entered_by").val(window.userId);
+        $("#verification_status_id").val("0");
     });
 </script>

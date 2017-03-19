@@ -12,6 +12,7 @@ using MixERP.Net.Framework;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using PetaPoco;
+using MixERP.Net.Core.Modules.HRM.Data;
 
 namespace MixERP.Net.Api.HRM
 {
@@ -22,9 +23,9 @@ namespace MixERP.Net.Api.HRM
     public class EmployeeIdentificationDetailController : ApiController
     {
         /// <summary>
-        ///     The EmployeeIdentificationDetail data context.
+        ///     The EmployeeIdentificationDetail repository.
         /// </summary>
-        private readonly MixERP.Net.Core.Modules.HRM.Data.EmployeeIdentificationDetail EmployeeIdentificationDetailContext;
+        private readonly IEmployeeIdentificationDetailRepository EmployeeIdentificationDetailRepository;
 
         public EmployeeIdentificationDetailController()
         {
@@ -33,12 +34,22 @@ namespace MixERP.Net.Api.HRM
             this._OfficeId = AppUsers.GetCurrent().View.OfficeId.ToInt();
             this._Catalog = AppUsers.GetCurrentUserDB();
 
-            this.EmployeeIdentificationDetailContext = new MixERP.Net.Core.Modules.HRM.Data.EmployeeIdentificationDetail
+            this.EmployeeIdentificationDetailRepository = new MixERP.Net.Core.Modules.HRM.Data.EmployeeIdentificationDetail
             {
                 _Catalog = this._Catalog,
                 _LoginId = this._LoginId,
                 _UserId = this._UserId
             };
+        }
+
+        public EmployeeIdentificationDetailController(IEmployeeIdentificationDetailRepository repository, string catalog, LoginView view)
+        {
+            this._LoginId = view.LoginId.ToLong();
+            this._UserId = view.UserId.ToInt();
+            this._OfficeId = view.OfficeId.ToInt();
+            this._Catalog = catalog;
+
+            this.EmployeeIdentificationDetailRepository = repository;
         }
 
         public long _LoginId { get; }
@@ -55,6 +66,11 @@ namespace MixERP.Net.Api.HRM
         [Route("~/api/hrm/employee-identification-detail/meta")]
         public EntityView GetEntityView()
         {
+            if (this._LoginId == 0)
+            {
+                return new EntityView();
+            }
+
             return new EntityView
             {
                 PrimaryKey = "employee_identification_detail_id",
@@ -82,7 +98,7 @@ namespace MixERP.Net.Api.HRM
         {
             try
             {
-                return this.EmployeeIdentificationDetailContext.Count();
+                return this.EmployeeIdentificationDetailRepository.Count();
             }
             catch (UnauthorizedException)
             {
@@ -113,7 +129,7 @@ namespace MixERP.Net.Api.HRM
         {
             try
             {
-                return this.EmployeeIdentificationDetailContext.GetAll();
+                return this.EmployeeIdentificationDetailRepository.GetAll();
             }
             catch (UnauthorizedException)
             {
@@ -144,7 +160,7 @@ namespace MixERP.Net.Api.HRM
         {
             try
             {
-                return this.EmployeeIdentificationDetailContext.Export();
+                return this.EmployeeIdentificationDetailRepository.Export();
             }
             catch (UnauthorizedException)
             {
@@ -176,7 +192,7 @@ namespace MixERP.Net.Api.HRM
         {
             try
             {
-                return this.EmployeeIdentificationDetailContext.Get(employeeIdentificationDetailId);
+                return this.EmployeeIdentificationDetailRepository.Get(employeeIdentificationDetailId);
             }
             catch (UnauthorizedException)
             {
@@ -203,7 +219,133 @@ namespace MixERP.Net.Api.HRM
         {
             try
             {
-                return this.EmployeeIdentificationDetailContext.Get(employeeIdentificationDetailIds);
+                return this.EmployeeIdentificationDetailRepository.Get(employeeIdentificationDetailIds);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the first instance of employee identification detail.
+        /// </summary>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("first")]
+        [Route("~/api/hrm/employee-identification-detail/first")]
+        public MixERP.Net.Entities.HRM.EmployeeIdentificationDetail GetFirst()
+        {
+            try
+            {
+                return this.EmployeeIdentificationDetailRepository.GetFirst();
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the previous instance of employee identification detail.
+        /// </summary>
+        /// <param name="employeeIdentificationDetailId">Enter EmployeeIdentificationDetailId to search for.</param>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("previous/{employeeIdentificationDetailId}")]
+        [Route("~/api/hrm/employee-identification-detail/previous/{employeeIdentificationDetailId}")]
+        public MixERP.Net.Entities.HRM.EmployeeIdentificationDetail GetPrevious(long employeeIdentificationDetailId)
+        {
+            try
+            {
+                return this.EmployeeIdentificationDetailRepository.GetPrevious(employeeIdentificationDetailId);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the next instance of employee identification detail.
+        /// </summary>
+        /// <param name="employeeIdentificationDetailId">Enter EmployeeIdentificationDetailId to search for.</param>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("next/{employeeIdentificationDetailId}")]
+        [Route("~/api/hrm/employee-identification-detail/next/{employeeIdentificationDetailId}")]
+        public MixERP.Net.Entities.HRM.EmployeeIdentificationDetail GetNext(long employeeIdentificationDetailId)
+        {
+            try
+            {
+                return this.EmployeeIdentificationDetailRepository.GetNext(employeeIdentificationDetailId);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the last instance of employee identification detail.
+        /// </summary>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("last")]
+        [Route("~/api/hrm/employee-identification-detail/last")]
+        public MixERP.Net.Entities.HRM.EmployeeIdentificationDetail GetLast()
+        {
+            try
+            {
+                return this.EmployeeIdentificationDetailRepository.GetLast();
             }
             catch (UnauthorizedException)
             {
@@ -234,7 +376,7 @@ namespace MixERP.Net.Api.HRM
         {
             try
             {
-                return this.EmployeeIdentificationDetailContext.GetPaginatedResult();
+                return this.EmployeeIdentificationDetailRepository.GetPaginatedResult();
             }
             catch (UnauthorizedException)
             {
@@ -266,7 +408,7 @@ namespace MixERP.Net.Api.HRM
         {
             try
             {
-                return this.EmployeeIdentificationDetailContext.GetPaginatedResult(pageNumber);
+                return this.EmployeeIdentificationDetailRepository.GetPaginatedResult(pageNumber);
             }
             catch (UnauthorizedException)
             {
@@ -299,7 +441,7 @@ namespace MixERP.Net.Api.HRM
             try
             {
                 List<EntityParser.Filter> f = filters.ToObject<List<EntityParser.Filter>>(JsonHelper.GetJsonSerializer());
-                return this.EmployeeIdentificationDetailContext.CountWhere(f);
+                return this.EmployeeIdentificationDetailRepository.CountWhere(f);
             }
             catch (UnauthorizedException)
             {
@@ -333,7 +475,7 @@ namespace MixERP.Net.Api.HRM
             try
             {
                 List<EntityParser.Filter> f = filters.ToObject<List<EntityParser.Filter>>(JsonHelper.GetJsonSerializer());
-                return this.EmployeeIdentificationDetailContext.GetWhere(pageNumber, f);
+                return this.EmployeeIdentificationDetailRepository.GetWhere(pageNumber, f);
             }
             catch (UnauthorizedException)
             {
@@ -365,7 +507,7 @@ namespace MixERP.Net.Api.HRM
         {
             try
             {
-                return this.EmployeeIdentificationDetailContext.CountFiltered(filterName);
+                return this.EmployeeIdentificationDetailRepository.CountFiltered(filterName);
             }
             catch (UnauthorizedException)
             {
@@ -398,7 +540,7 @@ namespace MixERP.Net.Api.HRM
         {
             try
             {
-                return this.EmployeeIdentificationDetailContext.GetFiltered(pageNumber, filterName);
+                return this.EmployeeIdentificationDetailRepository.GetFiltered(pageNumber, filterName);
             }
             catch (UnauthorizedException)
             {
@@ -429,7 +571,7 @@ namespace MixERP.Net.Api.HRM
         {
             try
             {
-                return this.EmployeeIdentificationDetailContext.GetDisplayFields();
+                return this.EmployeeIdentificationDetailRepository.GetDisplayFields();
             }
             catch (UnauthorizedException)
             {
@@ -460,7 +602,7 @@ namespace MixERP.Net.Api.HRM
         {
             try
             {
-                return this.EmployeeIdentificationDetailContext.GetCustomFields(null);
+                return this.EmployeeIdentificationDetailRepository.GetCustomFields(null);
             }
             catch (UnauthorizedException)
             {
@@ -491,7 +633,7 @@ namespace MixERP.Net.Api.HRM
         {
             try
             {
-                return this.EmployeeIdentificationDetailContext.GetCustomFields(resourceId);
+                return this.EmployeeIdentificationDetailRepository.GetCustomFields(resourceId);
             }
             catch (UnauthorizedException)
             {
@@ -530,7 +672,7 @@ namespace MixERP.Net.Api.HRM
 
             try
             {
-                return this.EmployeeIdentificationDetailContext.AddOrEdit(employeeIdentificationDetail, customFields);
+                return this.EmployeeIdentificationDetailRepository.AddOrEdit(employeeIdentificationDetail, customFields);
             }
             catch (UnauthorizedException)
             {
@@ -566,7 +708,7 @@ namespace MixERP.Net.Api.HRM
 
             try
             {
-                this.EmployeeIdentificationDetailContext.Add(employeeIdentificationDetail);
+                this.EmployeeIdentificationDetailRepository.Add(employeeIdentificationDetail);
             }
             catch (UnauthorizedException)
             {
@@ -603,7 +745,7 @@ namespace MixERP.Net.Api.HRM
 
             try
             {
-                this.EmployeeIdentificationDetailContext.Update(employeeIdentificationDetail, employeeIdentificationDetailId);
+                this.EmployeeIdentificationDetailRepository.Update(employeeIdentificationDetail, employeeIdentificationDetailId);
             }
             catch (UnauthorizedException)
             {
@@ -648,7 +790,7 @@ namespace MixERP.Net.Api.HRM
 
             try
             {
-                return this.EmployeeIdentificationDetailContext.BulkImport(employeeIdentificationDetailCollection);
+                return this.EmployeeIdentificationDetailRepository.BulkImport(employeeIdentificationDetailCollection);
             }
             catch (UnauthorizedException)
             {
@@ -679,7 +821,7 @@ namespace MixERP.Net.Api.HRM
         {
             try
             {
-                this.EmployeeIdentificationDetailContext.Delete(employeeIdentificationDetailId);
+                this.EmployeeIdentificationDetailRepository.Delete(employeeIdentificationDetailId);
             }
             catch (UnauthorizedException)
             {

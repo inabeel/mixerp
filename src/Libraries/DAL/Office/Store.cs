@@ -16,7 +16,7 @@ namespace MixERP.Net.Schemas.Office.Data
     /// <summary>
     /// Provides simplified data access features to perform SCRUD operation on the database table "office.stores".
     /// </summary>
-    public class Store : DbAccess
+    public class Store : DbAccess, IStoreRepository
     {
         /// <summary>
         /// The schema of this table. Returns literal "office".
@@ -73,7 +73,7 @@ namespace MixERP.Net.Schemas.Office.Data
         }
 
         /// <summary>
-        /// Executes a select query on the table "office.stores" to return a all instances of the "Store" class. 
+        /// Executes a select query on the table "office.stores" to return all instances of the "Store" class. 
         /// </summary>
         /// <returns>Returns a non-live, non-mapped instances of "Store" class.</returns>
         /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
@@ -102,7 +102,7 @@ namespace MixERP.Net.Schemas.Office.Data
         }
 
         /// <summary>
-        /// Executes a select query on the table "office.stores" to return a all instances of the "Store" class to export. 
+        /// Executes a select query on the table "office.stores" to return all instances of the "Store" class to export. 
         /// </summary>
         /// <returns>Returns a non-live, non-mapped instances of "Store" class.</returns>
         /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
@@ -158,6 +158,125 @@ namespace MixERP.Net.Schemas.Office.Data
 
             const string sql = "SELECT * FROM office.stores WHERE store_id=@0;";
             return Factory.Get<MixERP.Net.Entities.Office.Store>(this._Catalog, sql, storeId).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Gets the first record of the table "office.stores". 
+        /// </summary>
+        /// <returns>Returns a non-live, non-mapped instance of "Store" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.Office.Store GetFirst()
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the first record of entity \"Store\" was denied to the user with Login ID {_LoginId}", this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM office.stores ORDER BY store_id LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.Office.Store>(this._Catalog, sql).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Gets the previous record of the table "office.stores" sorted by storeId.
+        /// </summary>
+        /// <param name="storeId">The column "store_id" parameter used to find the next record.</param>
+        /// <returns>Returns a non-live, non-mapped instance of "Store" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.Office.Store GetPrevious(int storeId)
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the previous entity of \"Store\" by \"StoreId\" with value {StoreId} was denied to the user with Login ID {_LoginId}", storeId, this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM office.stores WHERE store_id < @0 ORDER BY store_id DESC LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.Office.Store>(this._Catalog, sql, storeId).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Gets the next record of the table "office.stores" sorted by storeId.
+        /// </summary>
+        /// <param name="storeId">The column "store_id" parameter used to find the next record.</param>
+        /// <returns>Returns a non-live, non-mapped instance of "Store" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.Office.Store GetNext(int storeId)
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the next entity of \"Store\" by \"StoreId\" with value {StoreId} was denied to the user with Login ID {_LoginId}", storeId, this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM office.stores WHERE store_id > @0 ORDER BY store_id LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.Office.Store>(this._Catalog, sql, storeId).FirstOrDefault();
+        }
+
+
+        /// <summary>
+        /// Gets the last record of the table "office.stores". 
+        /// </summary>
+        /// <returns>Returns a non-live, non-mapped instance of "Store" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.Office.Store GetLast()
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the last record of entity \"Store\" was denied to the user with Login ID {_LoginId}", this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM office.stores ORDER BY store_id DESC LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.Office.Store>(this._Catalog, sql).FirstOrDefault();
         }
 
         /// <summary>
@@ -559,7 +678,7 @@ namespace MixERP.Net.Schemas.Office.Data
             return Factory.Get<MixERP.Net.Entities.Office.Store>(this._Catalog, sql, offset);
         }
 
-        private List<EntityParser.Filter> GetFilters(string catalog, string filterName)
+        public List<EntityParser.Filter> GetFilters(string catalog, string filterName)
         {
             const string sql = "SELECT * FROM core.filters WHERE object_name='office.stores' AND lower(filter_name)=lower(@0);";
             return Factory.Get<EntityParser.Filter>(catalog, sql, filterName).ToList();

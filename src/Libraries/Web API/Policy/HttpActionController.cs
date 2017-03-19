@@ -12,6 +12,7 @@ using MixERP.Net.Framework;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using PetaPoco;
+using MixERP.Net.Schemas.Policy.Data;
 
 namespace MixERP.Net.Api.Policy
 {
@@ -22,9 +23,9 @@ namespace MixERP.Net.Api.Policy
     public class HttpActionController : ApiController
     {
         /// <summary>
-        ///     The HttpAction data context.
+        ///     The HttpAction repository.
         /// </summary>
-        private readonly MixERP.Net.Schemas.Policy.Data.HttpAction HttpActionContext;
+        private readonly IHttpActionRepository HttpActionRepository;
 
         public HttpActionController()
         {
@@ -33,12 +34,22 @@ namespace MixERP.Net.Api.Policy
             this._OfficeId = AppUsers.GetCurrent().View.OfficeId.ToInt();
             this._Catalog = AppUsers.GetCurrentUserDB();
 
-            this.HttpActionContext = new MixERP.Net.Schemas.Policy.Data.HttpAction
+            this.HttpActionRepository = new MixERP.Net.Schemas.Policy.Data.HttpAction
             {
                 _Catalog = this._Catalog,
                 _LoginId = this._LoginId,
                 _UserId = this._UserId
             };
+        }
+
+        public HttpActionController(IHttpActionRepository repository, string catalog, LoginView view)
+        {
+            this._LoginId = view.LoginId.ToLong();
+            this._UserId = view.UserId.ToInt();
+            this._OfficeId = view.OfficeId.ToInt();
+            this._Catalog = catalog;
+
+            this.HttpActionRepository = repository;
         }
 
         public long _LoginId { get; }
@@ -55,6 +66,11 @@ namespace MixERP.Net.Api.Policy
         [Route("~/api/policy/http-action/meta")]
         public EntityView GetEntityView()
         {
+            if (this._LoginId == 0)
+            {
+                return new EntityView();
+            }
+
             return new EntityView
             {
                 PrimaryKey = "http_action_code",
@@ -76,7 +92,7 @@ namespace MixERP.Net.Api.Policy
         {
             try
             {
-                return this.HttpActionContext.Count();
+                return this.HttpActionRepository.Count();
             }
             catch (UnauthorizedException)
             {
@@ -107,7 +123,7 @@ namespace MixERP.Net.Api.Policy
         {
             try
             {
-                return this.HttpActionContext.GetAll();
+                return this.HttpActionRepository.GetAll();
             }
             catch (UnauthorizedException)
             {
@@ -138,7 +154,7 @@ namespace MixERP.Net.Api.Policy
         {
             try
             {
-                return this.HttpActionContext.Export();
+                return this.HttpActionRepository.Export();
             }
             catch (UnauthorizedException)
             {
@@ -170,7 +186,7 @@ namespace MixERP.Net.Api.Policy
         {
             try
             {
-                return this.HttpActionContext.Get(httpActionCode);
+                return this.HttpActionRepository.Get(httpActionCode);
             }
             catch (UnauthorizedException)
             {
@@ -197,7 +213,133 @@ namespace MixERP.Net.Api.Policy
         {
             try
             {
-                return this.HttpActionContext.Get(httpActionCodes);
+                return this.HttpActionRepository.Get(httpActionCodes);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the first instance of http action.
+        /// </summary>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("first")]
+        [Route("~/api/policy/http-action/first")]
+        public MixERP.Net.Entities.Policy.HttpAction GetFirst()
+        {
+            try
+            {
+                return this.HttpActionRepository.GetFirst();
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the previous instance of http action.
+        /// </summary>
+        /// <param name="httpActionCode">Enter HttpActionCode to search for.</param>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("previous/{httpActionCode}")]
+        [Route("~/api/policy/http-action/previous/{httpActionCode}")]
+        public MixERP.Net.Entities.Policy.HttpAction GetPrevious(string httpActionCode)
+        {
+            try
+            {
+                return this.HttpActionRepository.GetPrevious(httpActionCode);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the next instance of http action.
+        /// </summary>
+        /// <param name="httpActionCode">Enter HttpActionCode to search for.</param>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("next/{httpActionCode}")]
+        [Route("~/api/policy/http-action/next/{httpActionCode}")]
+        public MixERP.Net.Entities.Policy.HttpAction GetNext(string httpActionCode)
+        {
+            try
+            {
+                return this.HttpActionRepository.GetNext(httpActionCode);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the last instance of http action.
+        /// </summary>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("last")]
+        [Route("~/api/policy/http-action/last")]
+        public MixERP.Net.Entities.Policy.HttpAction GetLast()
+        {
+            try
+            {
+                return this.HttpActionRepository.GetLast();
             }
             catch (UnauthorizedException)
             {
@@ -228,7 +370,7 @@ namespace MixERP.Net.Api.Policy
         {
             try
             {
-                return this.HttpActionContext.GetPaginatedResult();
+                return this.HttpActionRepository.GetPaginatedResult();
             }
             catch (UnauthorizedException)
             {
@@ -260,7 +402,7 @@ namespace MixERP.Net.Api.Policy
         {
             try
             {
-                return this.HttpActionContext.GetPaginatedResult(pageNumber);
+                return this.HttpActionRepository.GetPaginatedResult(pageNumber);
             }
             catch (UnauthorizedException)
             {
@@ -293,7 +435,7 @@ namespace MixERP.Net.Api.Policy
             try
             {
                 List<EntityParser.Filter> f = filters.ToObject<List<EntityParser.Filter>>(JsonHelper.GetJsonSerializer());
-                return this.HttpActionContext.CountWhere(f);
+                return this.HttpActionRepository.CountWhere(f);
             }
             catch (UnauthorizedException)
             {
@@ -327,7 +469,7 @@ namespace MixERP.Net.Api.Policy
             try
             {
                 List<EntityParser.Filter> f = filters.ToObject<List<EntityParser.Filter>>(JsonHelper.GetJsonSerializer());
-                return this.HttpActionContext.GetWhere(pageNumber, f);
+                return this.HttpActionRepository.GetWhere(pageNumber, f);
             }
             catch (UnauthorizedException)
             {
@@ -359,7 +501,7 @@ namespace MixERP.Net.Api.Policy
         {
             try
             {
-                return this.HttpActionContext.CountFiltered(filterName);
+                return this.HttpActionRepository.CountFiltered(filterName);
             }
             catch (UnauthorizedException)
             {
@@ -392,7 +534,7 @@ namespace MixERP.Net.Api.Policy
         {
             try
             {
-                return this.HttpActionContext.GetFiltered(pageNumber, filterName);
+                return this.HttpActionRepository.GetFiltered(pageNumber, filterName);
             }
             catch (UnauthorizedException)
             {
@@ -423,7 +565,7 @@ namespace MixERP.Net.Api.Policy
         {
             try
             {
-                return this.HttpActionContext.GetDisplayFields();
+                return this.HttpActionRepository.GetDisplayFields();
             }
             catch (UnauthorizedException)
             {
@@ -454,7 +596,7 @@ namespace MixERP.Net.Api.Policy
         {
             try
             {
-                return this.HttpActionContext.GetCustomFields(null);
+                return this.HttpActionRepository.GetCustomFields(null);
             }
             catch (UnauthorizedException)
             {
@@ -485,7 +627,7 @@ namespace MixERP.Net.Api.Policy
         {
             try
             {
-                return this.HttpActionContext.GetCustomFields(resourceId);
+                return this.HttpActionRepository.GetCustomFields(resourceId);
             }
             catch (UnauthorizedException)
             {
@@ -524,7 +666,7 @@ namespace MixERP.Net.Api.Policy
 
             try
             {
-                return this.HttpActionContext.AddOrEdit(httpAction, customFields);
+                return this.HttpActionRepository.AddOrEdit(httpAction, customFields);
             }
             catch (UnauthorizedException)
             {
@@ -560,7 +702,7 @@ namespace MixERP.Net.Api.Policy
 
             try
             {
-                this.HttpActionContext.Add(httpAction);
+                this.HttpActionRepository.Add(httpAction);
             }
             catch (UnauthorizedException)
             {
@@ -597,7 +739,7 @@ namespace MixERP.Net.Api.Policy
 
             try
             {
-                this.HttpActionContext.Update(httpAction, httpActionCode);
+                this.HttpActionRepository.Update(httpAction, httpActionCode);
             }
             catch (UnauthorizedException)
             {
@@ -642,7 +784,7 @@ namespace MixERP.Net.Api.Policy
 
             try
             {
-                return this.HttpActionContext.BulkImport(httpActionCollection);
+                return this.HttpActionRepository.BulkImport(httpActionCollection);
             }
             catch (UnauthorizedException)
             {
@@ -673,7 +815,7 @@ namespace MixERP.Net.Api.Policy
         {
             try
             {
-                this.HttpActionContext.Delete(httpActionCode);
+                this.HttpActionRepository.Delete(httpActionCode);
             }
             catch (UnauthorizedException)
             {

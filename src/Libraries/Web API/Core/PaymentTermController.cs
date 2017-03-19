@@ -12,6 +12,7 @@ using MixERP.Net.Framework;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using PetaPoco;
+using MixERP.Net.Schemas.Core.Data;
 
 namespace MixERP.Net.Api.Core
 {
@@ -22,9 +23,9 @@ namespace MixERP.Net.Api.Core
     public class PaymentTermController : ApiController
     {
         /// <summary>
-        ///     The PaymentTerm data context.
+        ///     The PaymentTerm repository.
         /// </summary>
-        private readonly MixERP.Net.Schemas.Core.Data.PaymentTerm PaymentTermContext;
+        private readonly IPaymentTermRepository PaymentTermRepository;
 
         public PaymentTermController()
         {
@@ -33,12 +34,22 @@ namespace MixERP.Net.Api.Core
             this._OfficeId = AppUsers.GetCurrent().View.OfficeId.ToInt();
             this._Catalog = AppUsers.GetCurrentUserDB();
 
-            this.PaymentTermContext = new MixERP.Net.Schemas.Core.Data.PaymentTerm
+            this.PaymentTermRepository = new MixERP.Net.Schemas.Core.Data.PaymentTerm
             {
                 _Catalog = this._Catalog,
                 _LoginId = this._LoginId,
                 _UserId = this._UserId
             };
+        }
+
+        public PaymentTermController(IPaymentTermRepository repository, string catalog, LoginView view)
+        {
+            this._LoginId = view.LoginId.ToLong();
+            this._UserId = view.UserId.ToInt();
+            this._OfficeId = view.OfficeId.ToInt();
+            this._Catalog = catalog;
+
+            this.PaymentTermRepository = repository;
         }
 
         public long _LoginId { get; }
@@ -55,6 +66,11 @@ namespace MixERP.Net.Api.Core
         [Route("~/api/core/payment-term/meta")]
         public EntityView GetEntityView()
         {
+            if (this._LoginId == 0)
+            {
+                return new EntityView();
+            }
+
             return new EntityView
             {
                 PrimaryKey = "payment_term_id",
@@ -86,7 +102,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.PaymentTermContext.Count();
+                return this.PaymentTermRepository.Count();
             }
             catch (UnauthorizedException)
             {
@@ -117,7 +133,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.PaymentTermContext.GetAll();
+                return this.PaymentTermRepository.GetAll();
             }
             catch (UnauthorizedException)
             {
@@ -148,7 +164,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.PaymentTermContext.Export();
+                return this.PaymentTermRepository.Export();
             }
             catch (UnauthorizedException)
             {
@@ -180,7 +196,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.PaymentTermContext.Get(paymentTermId);
+                return this.PaymentTermRepository.Get(paymentTermId);
             }
             catch (UnauthorizedException)
             {
@@ -207,7 +223,133 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.PaymentTermContext.Get(paymentTermIds);
+                return this.PaymentTermRepository.Get(paymentTermIds);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the first instance of payment term.
+        /// </summary>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("first")]
+        [Route("~/api/core/payment-term/first")]
+        public MixERP.Net.Entities.Core.PaymentTerm GetFirst()
+        {
+            try
+            {
+                return this.PaymentTermRepository.GetFirst();
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the previous instance of payment term.
+        /// </summary>
+        /// <param name="paymentTermId">Enter PaymentTermId to search for.</param>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("previous/{paymentTermId}")]
+        [Route("~/api/core/payment-term/previous/{paymentTermId}")]
+        public MixERP.Net.Entities.Core.PaymentTerm GetPrevious(int paymentTermId)
+        {
+            try
+            {
+                return this.PaymentTermRepository.GetPrevious(paymentTermId);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the next instance of payment term.
+        /// </summary>
+        /// <param name="paymentTermId">Enter PaymentTermId to search for.</param>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("next/{paymentTermId}")]
+        [Route("~/api/core/payment-term/next/{paymentTermId}")]
+        public MixERP.Net.Entities.Core.PaymentTerm GetNext(int paymentTermId)
+        {
+            try
+            {
+                return this.PaymentTermRepository.GetNext(paymentTermId);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the last instance of payment term.
+        /// </summary>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("last")]
+        [Route("~/api/core/payment-term/last")]
+        public MixERP.Net.Entities.Core.PaymentTerm GetLast()
+        {
+            try
+            {
+                return this.PaymentTermRepository.GetLast();
             }
             catch (UnauthorizedException)
             {
@@ -238,7 +380,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.PaymentTermContext.GetPaginatedResult();
+                return this.PaymentTermRepository.GetPaginatedResult();
             }
             catch (UnauthorizedException)
             {
@@ -270,7 +412,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.PaymentTermContext.GetPaginatedResult(pageNumber);
+                return this.PaymentTermRepository.GetPaginatedResult(pageNumber);
             }
             catch (UnauthorizedException)
             {
@@ -303,7 +445,7 @@ namespace MixERP.Net.Api.Core
             try
             {
                 List<EntityParser.Filter> f = filters.ToObject<List<EntityParser.Filter>>(JsonHelper.GetJsonSerializer());
-                return this.PaymentTermContext.CountWhere(f);
+                return this.PaymentTermRepository.CountWhere(f);
             }
             catch (UnauthorizedException)
             {
@@ -337,7 +479,7 @@ namespace MixERP.Net.Api.Core
             try
             {
                 List<EntityParser.Filter> f = filters.ToObject<List<EntityParser.Filter>>(JsonHelper.GetJsonSerializer());
-                return this.PaymentTermContext.GetWhere(pageNumber, f);
+                return this.PaymentTermRepository.GetWhere(pageNumber, f);
             }
             catch (UnauthorizedException)
             {
@@ -369,7 +511,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.PaymentTermContext.CountFiltered(filterName);
+                return this.PaymentTermRepository.CountFiltered(filterName);
             }
             catch (UnauthorizedException)
             {
@@ -402,7 +544,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.PaymentTermContext.GetFiltered(pageNumber, filterName);
+                return this.PaymentTermRepository.GetFiltered(pageNumber, filterName);
             }
             catch (UnauthorizedException)
             {
@@ -433,7 +575,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.PaymentTermContext.GetDisplayFields();
+                return this.PaymentTermRepository.GetDisplayFields();
             }
             catch (UnauthorizedException)
             {
@@ -464,7 +606,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.PaymentTermContext.GetCustomFields(null);
+                return this.PaymentTermRepository.GetCustomFields(null);
             }
             catch (UnauthorizedException)
             {
@@ -495,7 +637,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.PaymentTermContext.GetCustomFields(resourceId);
+                return this.PaymentTermRepository.GetCustomFields(resourceId);
             }
             catch (UnauthorizedException)
             {
@@ -534,7 +676,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                return this.PaymentTermContext.AddOrEdit(paymentTerm, customFields);
+                return this.PaymentTermRepository.AddOrEdit(paymentTerm, customFields);
             }
             catch (UnauthorizedException)
             {
@@ -570,7 +712,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                this.PaymentTermContext.Add(paymentTerm);
+                this.PaymentTermRepository.Add(paymentTerm);
             }
             catch (UnauthorizedException)
             {
@@ -607,7 +749,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                this.PaymentTermContext.Update(paymentTerm, paymentTermId);
+                this.PaymentTermRepository.Update(paymentTerm, paymentTermId);
             }
             catch (UnauthorizedException)
             {
@@ -652,7 +794,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                return this.PaymentTermContext.BulkImport(paymentTermCollection);
+                return this.PaymentTermRepository.BulkImport(paymentTermCollection);
             }
             catch (UnauthorizedException)
             {
@@ -683,7 +825,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                this.PaymentTermContext.Delete(paymentTermId);
+                this.PaymentTermRepository.Delete(paymentTermId);
             }
             catch (UnauthorizedException)
             {

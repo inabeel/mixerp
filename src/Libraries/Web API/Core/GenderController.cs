@@ -12,6 +12,7 @@ using MixERP.Net.Framework;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using PetaPoco;
+using MixERP.Net.Schemas.Core.Data;
 
 namespace MixERP.Net.Api.Core
 {
@@ -22,9 +23,9 @@ namespace MixERP.Net.Api.Core
     public class GenderController : ApiController
     {
         /// <summary>
-        ///     The Gender data context.
+        ///     The Gender repository.
         /// </summary>
-        private readonly MixERP.Net.Schemas.Core.Data.Gender GenderContext;
+        private readonly IGenderRepository GenderRepository;
 
         public GenderController()
         {
@@ -33,12 +34,22 @@ namespace MixERP.Net.Api.Core
             this._OfficeId = AppUsers.GetCurrent().View.OfficeId.ToInt();
             this._Catalog = AppUsers.GetCurrentUserDB();
 
-            this.GenderContext = new MixERP.Net.Schemas.Core.Data.Gender
+            this.GenderRepository = new MixERP.Net.Schemas.Core.Data.Gender
             {
                 _Catalog = this._Catalog,
                 _LoginId = this._LoginId,
                 _UserId = this._UserId
             };
+        }
+
+        public GenderController(IGenderRepository repository, string catalog, LoginView view)
+        {
+            this._LoginId = view.LoginId.ToLong();
+            this._UserId = view.UserId.ToInt();
+            this._OfficeId = view.OfficeId.ToInt();
+            this._Catalog = catalog;
+
+            this.GenderRepository = repository;
         }
 
         public long _LoginId { get; }
@@ -55,6 +66,11 @@ namespace MixERP.Net.Api.Core
         [Route("~/api/core/gender/meta")]
         public EntityView GetEntityView()
         {
+            if (this._LoginId == 0)
+            {
+                return new EntityView();
+            }
+
             return new EntityView
             {
                 PrimaryKey = "gender_code",
@@ -79,7 +95,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.GenderContext.Count();
+                return this.GenderRepository.Count();
             }
             catch (UnauthorizedException)
             {
@@ -110,7 +126,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.GenderContext.GetAll();
+                return this.GenderRepository.GetAll();
             }
             catch (UnauthorizedException)
             {
@@ -141,7 +157,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.GenderContext.Export();
+                return this.GenderRepository.Export();
             }
             catch (UnauthorizedException)
             {
@@ -173,7 +189,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.GenderContext.Get(genderCode);
+                return this.GenderRepository.Get(genderCode);
             }
             catch (UnauthorizedException)
             {
@@ -200,7 +216,133 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.GenderContext.Get(genderCodes);
+                return this.GenderRepository.Get(genderCodes);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the first instance of gender.
+        /// </summary>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("first")]
+        [Route("~/api/core/gender/first")]
+        public MixERP.Net.Entities.Core.Gender GetFirst()
+        {
+            try
+            {
+                return this.GenderRepository.GetFirst();
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the previous instance of gender.
+        /// </summary>
+        /// <param name="genderCode">Enter GenderCode to search for.</param>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("previous/{genderCode}")]
+        [Route("~/api/core/gender/previous/{genderCode}")]
+        public MixERP.Net.Entities.Core.Gender GetPrevious(string genderCode)
+        {
+            try
+            {
+                return this.GenderRepository.GetPrevious(genderCode);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the next instance of gender.
+        /// </summary>
+        /// <param name="genderCode">Enter GenderCode to search for.</param>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("next/{genderCode}")]
+        [Route("~/api/core/gender/next/{genderCode}")]
+        public MixERP.Net.Entities.Core.Gender GetNext(string genderCode)
+        {
+            try
+            {
+                return this.GenderRepository.GetNext(genderCode);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the last instance of gender.
+        /// </summary>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("last")]
+        [Route("~/api/core/gender/last")]
+        public MixERP.Net.Entities.Core.Gender GetLast()
+        {
+            try
+            {
+                return this.GenderRepository.GetLast();
             }
             catch (UnauthorizedException)
             {
@@ -231,7 +373,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.GenderContext.GetPaginatedResult();
+                return this.GenderRepository.GetPaginatedResult();
             }
             catch (UnauthorizedException)
             {
@@ -263,7 +405,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.GenderContext.GetPaginatedResult(pageNumber);
+                return this.GenderRepository.GetPaginatedResult(pageNumber);
             }
             catch (UnauthorizedException)
             {
@@ -296,7 +438,7 @@ namespace MixERP.Net.Api.Core
             try
             {
                 List<EntityParser.Filter> f = filters.ToObject<List<EntityParser.Filter>>(JsonHelper.GetJsonSerializer());
-                return this.GenderContext.CountWhere(f);
+                return this.GenderRepository.CountWhere(f);
             }
             catch (UnauthorizedException)
             {
@@ -330,7 +472,7 @@ namespace MixERP.Net.Api.Core
             try
             {
                 List<EntityParser.Filter> f = filters.ToObject<List<EntityParser.Filter>>(JsonHelper.GetJsonSerializer());
-                return this.GenderContext.GetWhere(pageNumber, f);
+                return this.GenderRepository.GetWhere(pageNumber, f);
             }
             catch (UnauthorizedException)
             {
@@ -362,7 +504,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.GenderContext.CountFiltered(filterName);
+                return this.GenderRepository.CountFiltered(filterName);
             }
             catch (UnauthorizedException)
             {
@@ -395,7 +537,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.GenderContext.GetFiltered(pageNumber, filterName);
+                return this.GenderRepository.GetFiltered(pageNumber, filterName);
             }
             catch (UnauthorizedException)
             {
@@ -426,7 +568,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.GenderContext.GetDisplayFields();
+                return this.GenderRepository.GetDisplayFields();
             }
             catch (UnauthorizedException)
             {
@@ -457,7 +599,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.GenderContext.GetCustomFields(null);
+                return this.GenderRepository.GetCustomFields(null);
             }
             catch (UnauthorizedException)
             {
@@ -488,7 +630,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.GenderContext.GetCustomFields(resourceId);
+                return this.GenderRepository.GetCustomFields(resourceId);
             }
             catch (UnauthorizedException)
             {
@@ -527,7 +669,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                return this.GenderContext.AddOrEdit(gender, customFields);
+                return this.GenderRepository.AddOrEdit(gender, customFields);
             }
             catch (UnauthorizedException)
             {
@@ -563,7 +705,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                this.GenderContext.Add(gender);
+                this.GenderRepository.Add(gender);
             }
             catch (UnauthorizedException)
             {
@@ -600,7 +742,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                this.GenderContext.Update(gender, genderCode);
+                this.GenderRepository.Update(gender, genderCode);
             }
             catch (UnauthorizedException)
             {
@@ -645,7 +787,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                return this.GenderContext.BulkImport(genderCollection);
+                return this.GenderRepository.BulkImport(genderCollection);
             }
             catch (UnauthorizedException)
             {
@@ -676,7 +818,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                this.GenderContext.Delete(genderCode);
+                this.GenderRepository.Delete(genderCode);
             }
             catch (UnauthorizedException)
             {

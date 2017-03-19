@@ -12,6 +12,7 @@ using MixERP.Net.Framework;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using PetaPoco;
+using MixERP.Net.Schemas.Config.Data;
 
 namespace MixERP.Net.Api.Config
 {
@@ -22,9 +23,9 @@ namespace MixERP.Net.Api.Config
     public class OpenExchangeRateController : ApiController
     {
         /// <summary>
-        ///     The OpenExchangeRate data context.
+        ///     The OpenExchangeRate repository.
         /// </summary>
-        private readonly MixERP.Net.Schemas.Config.Data.OpenExchangeRate OpenExchangeRateContext;
+        private readonly IOpenExchangeRateRepository OpenExchangeRateRepository;
 
         public OpenExchangeRateController()
         {
@@ -33,12 +34,22 @@ namespace MixERP.Net.Api.Config
             this._OfficeId = AppUsers.GetCurrent().View.OfficeId.ToInt();
             this._Catalog = AppUsers.GetCurrentUserDB();
 
-            this.OpenExchangeRateContext = new MixERP.Net.Schemas.Config.Data.OpenExchangeRate
+            this.OpenExchangeRateRepository = new MixERP.Net.Schemas.Config.Data.OpenExchangeRate
             {
                 _Catalog = this._Catalog,
                 _LoginId = this._LoginId,
                 _UserId = this._UserId
             };
+        }
+
+        public OpenExchangeRateController(IOpenExchangeRateRepository repository, string catalog, LoginView view)
+        {
+            this._LoginId = view.LoginId.ToLong();
+            this._UserId = view.UserId.ToInt();
+            this._OfficeId = view.OfficeId.ToInt();
+            this._Catalog = catalog;
+
+            this.OpenExchangeRateRepository = repository;
         }
 
         public long _LoginId { get; }
@@ -55,6 +66,11 @@ namespace MixERP.Net.Api.Config
         [Route("~/api/config/open-exchange-rate/meta")]
         public EntityView GetEntityView()
         {
+            if (this._LoginId == 0)
+            {
+                return new EntityView();
+            }
+
             return new EntityView
             {
                 PrimaryKey = "key",
@@ -80,7 +96,7 @@ namespace MixERP.Net.Api.Config
         {
             try
             {
-                return this.OpenExchangeRateContext.Count();
+                return this.OpenExchangeRateRepository.Count();
             }
             catch (UnauthorizedException)
             {
@@ -111,7 +127,7 @@ namespace MixERP.Net.Api.Config
         {
             try
             {
-                return this.OpenExchangeRateContext.GetAll();
+                return this.OpenExchangeRateRepository.GetAll();
             }
             catch (UnauthorizedException)
             {
@@ -142,7 +158,7 @@ namespace MixERP.Net.Api.Config
         {
             try
             {
-                return this.OpenExchangeRateContext.Export();
+                return this.OpenExchangeRateRepository.Export();
             }
             catch (UnauthorizedException)
             {
@@ -174,7 +190,7 @@ namespace MixERP.Net.Api.Config
         {
             try
             {
-                return this.OpenExchangeRateContext.Get(key);
+                return this.OpenExchangeRateRepository.Get(key);
             }
             catch (UnauthorizedException)
             {
@@ -201,7 +217,133 @@ namespace MixERP.Net.Api.Config
         {
             try
             {
-                return this.OpenExchangeRateContext.Get(keys);
+                return this.OpenExchangeRateRepository.Get(keys);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the first instance of open exchange rate.
+        /// </summary>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("first")]
+        [Route("~/api/config/open-exchange-rate/first")]
+        public MixERP.Net.Entities.Config.OpenExchangeRate GetFirst()
+        {
+            try
+            {
+                return this.OpenExchangeRateRepository.GetFirst();
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the previous instance of open exchange rate.
+        /// </summary>
+        /// <param name="key">Enter Key to search for.</param>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("previous/{key}")]
+        [Route("~/api/config/open-exchange-rate/previous/{key}")]
+        public MixERP.Net.Entities.Config.OpenExchangeRate GetPrevious(string key)
+        {
+            try
+            {
+                return this.OpenExchangeRateRepository.GetPrevious(key);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the next instance of open exchange rate.
+        /// </summary>
+        /// <param name="key">Enter Key to search for.</param>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("next/{key}")]
+        [Route("~/api/config/open-exchange-rate/next/{key}")]
+        public MixERP.Net.Entities.Config.OpenExchangeRate GetNext(string key)
+        {
+            try
+            {
+                return this.OpenExchangeRateRepository.GetNext(key);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the last instance of open exchange rate.
+        /// </summary>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("last")]
+        [Route("~/api/config/open-exchange-rate/last")]
+        public MixERP.Net.Entities.Config.OpenExchangeRate GetLast()
+        {
+            try
+            {
+                return this.OpenExchangeRateRepository.GetLast();
             }
             catch (UnauthorizedException)
             {
@@ -232,7 +374,7 @@ namespace MixERP.Net.Api.Config
         {
             try
             {
-                return this.OpenExchangeRateContext.GetPaginatedResult();
+                return this.OpenExchangeRateRepository.GetPaginatedResult();
             }
             catch (UnauthorizedException)
             {
@@ -264,7 +406,7 @@ namespace MixERP.Net.Api.Config
         {
             try
             {
-                return this.OpenExchangeRateContext.GetPaginatedResult(pageNumber);
+                return this.OpenExchangeRateRepository.GetPaginatedResult(pageNumber);
             }
             catch (UnauthorizedException)
             {
@@ -297,7 +439,7 @@ namespace MixERP.Net.Api.Config
             try
             {
                 List<EntityParser.Filter> f = filters.ToObject<List<EntityParser.Filter>>(JsonHelper.GetJsonSerializer());
-                return this.OpenExchangeRateContext.CountWhere(f);
+                return this.OpenExchangeRateRepository.CountWhere(f);
             }
             catch (UnauthorizedException)
             {
@@ -331,7 +473,7 @@ namespace MixERP.Net.Api.Config
             try
             {
                 List<EntityParser.Filter> f = filters.ToObject<List<EntityParser.Filter>>(JsonHelper.GetJsonSerializer());
-                return this.OpenExchangeRateContext.GetWhere(pageNumber, f);
+                return this.OpenExchangeRateRepository.GetWhere(pageNumber, f);
             }
             catch (UnauthorizedException)
             {
@@ -363,7 +505,7 @@ namespace MixERP.Net.Api.Config
         {
             try
             {
-                return this.OpenExchangeRateContext.CountFiltered(filterName);
+                return this.OpenExchangeRateRepository.CountFiltered(filterName);
             }
             catch (UnauthorizedException)
             {
@@ -396,7 +538,7 @@ namespace MixERP.Net.Api.Config
         {
             try
             {
-                return this.OpenExchangeRateContext.GetFiltered(pageNumber, filterName);
+                return this.OpenExchangeRateRepository.GetFiltered(pageNumber, filterName);
             }
             catch (UnauthorizedException)
             {
@@ -427,7 +569,7 @@ namespace MixERP.Net.Api.Config
         {
             try
             {
-                return this.OpenExchangeRateContext.GetDisplayFields();
+                return this.OpenExchangeRateRepository.GetDisplayFields();
             }
             catch (UnauthorizedException)
             {
@@ -458,7 +600,7 @@ namespace MixERP.Net.Api.Config
         {
             try
             {
-                return this.OpenExchangeRateContext.GetCustomFields(null);
+                return this.OpenExchangeRateRepository.GetCustomFields(null);
             }
             catch (UnauthorizedException)
             {
@@ -489,7 +631,7 @@ namespace MixERP.Net.Api.Config
         {
             try
             {
-                return this.OpenExchangeRateContext.GetCustomFields(resourceId);
+                return this.OpenExchangeRateRepository.GetCustomFields(resourceId);
             }
             catch (UnauthorizedException)
             {
@@ -528,7 +670,7 @@ namespace MixERP.Net.Api.Config
 
             try
             {
-                return this.OpenExchangeRateContext.AddOrEdit(openExchangeRate, customFields);
+                return this.OpenExchangeRateRepository.AddOrEdit(openExchangeRate, customFields);
             }
             catch (UnauthorizedException)
             {
@@ -564,7 +706,7 @@ namespace MixERP.Net.Api.Config
 
             try
             {
-                this.OpenExchangeRateContext.Add(openExchangeRate);
+                this.OpenExchangeRateRepository.Add(openExchangeRate);
             }
             catch (UnauthorizedException)
             {
@@ -601,7 +743,7 @@ namespace MixERP.Net.Api.Config
 
             try
             {
-                this.OpenExchangeRateContext.Update(openExchangeRate, key);
+                this.OpenExchangeRateRepository.Update(openExchangeRate, key);
             }
             catch (UnauthorizedException)
             {
@@ -646,7 +788,7 @@ namespace MixERP.Net.Api.Config
 
             try
             {
-                return this.OpenExchangeRateContext.BulkImport(openExchangeRateCollection);
+                return this.OpenExchangeRateRepository.BulkImport(openExchangeRateCollection);
             }
             catch (UnauthorizedException)
             {
@@ -677,7 +819,7 @@ namespace MixERP.Net.Api.Config
         {
             try
             {
-                this.OpenExchangeRateContext.Delete(key);
+                this.OpenExchangeRateRepository.Delete(key);
             }
             catch (UnauthorizedException)
             {

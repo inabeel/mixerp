@@ -16,7 +16,7 @@ namespace MixERP.Net.Schemas.Core.Data
     /// <summary>
     /// Provides simplified data access features to perform SCRUD operation on the database table "core.item_types".
     /// </summary>
-    public class ItemType : DbAccess
+    public class ItemType : DbAccess, IItemTypeRepository
     {
         /// <summary>
         /// The schema of this table. Returns literal "core".
@@ -73,7 +73,7 @@ namespace MixERP.Net.Schemas.Core.Data
         }
 
         /// <summary>
-        /// Executes a select query on the table "core.item_types" to return a all instances of the "ItemType" class. 
+        /// Executes a select query on the table "core.item_types" to return all instances of the "ItemType" class. 
         /// </summary>
         /// <returns>Returns a non-live, non-mapped instances of "ItemType" class.</returns>
         /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
@@ -102,7 +102,7 @@ namespace MixERP.Net.Schemas.Core.Data
         }
 
         /// <summary>
-        /// Executes a select query on the table "core.item_types" to return a all instances of the "ItemType" class to export. 
+        /// Executes a select query on the table "core.item_types" to return all instances of the "ItemType" class to export. 
         /// </summary>
         /// <returns>Returns a non-live, non-mapped instances of "ItemType" class.</returns>
         /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
@@ -158,6 +158,125 @@ namespace MixERP.Net.Schemas.Core.Data
 
             const string sql = "SELECT * FROM core.item_types WHERE item_type_id=@0;";
             return Factory.Get<MixERP.Net.Entities.Core.ItemType>(this._Catalog, sql, itemTypeId).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Gets the first record of the table "core.item_types". 
+        /// </summary>
+        /// <returns>Returns a non-live, non-mapped instance of "ItemType" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.Core.ItemType GetFirst()
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the first record of entity \"ItemType\" was denied to the user with Login ID {_LoginId}", this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM core.item_types ORDER BY item_type_id LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.Core.ItemType>(this._Catalog, sql).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Gets the previous record of the table "core.item_types" sorted by itemTypeId.
+        /// </summary>
+        /// <param name="itemTypeId">The column "item_type_id" parameter used to find the next record.</param>
+        /// <returns>Returns a non-live, non-mapped instance of "ItemType" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.Core.ItemType GetPrevious(int itemTypeId)
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the previous entity of \"ItemType\" by \"ItemTypeId\" with value {ItemTypeId} was denied to the user with Login ID {_LoginId}", itemTypeId, this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM core.item_types WHERE item_type_id < @0 ORDER BY item_type_id DESC LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.Core.ItemType>(this._Catalog, sql, itemTypeId).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Gets the next record of the table "core.item_types" sorted by itemTypeId.
+        /// </summary>
+        /// <param name="itemTypeId">The column "item_type_id" parameter used to find the next record.</param>
+        /// <returns>Returns a non-live, non-mapped instance of "ItemType" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.Core.ItemType GetNext(int itemTypeId)
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the next entity of \"ItemType\" by \"ItemTypeId\" with value {ItemTypeId} was denied to the user with Login ID {_LoginId}", itemTypeId, this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM core.item_types WHERE item_type_id > @0 ORDER BY item_type_id LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.Core.ItemType>(this._Catalog, sql, itemTypeId).FirstOrDefault();
+        }
+
+
+        /// <summary>
+        /// Gets the last record of the table "core.item_types". 
+        /// </summary>
+        /// <returns>Returns a non-live, non-mapped instance of "ItemType" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.Core.ItemType GetLast()
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the last record of entity \"ItemType\" was denied to the user with Login ID {_LoginId}", this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM core.item_types ORDER BY item_type_id DESC LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.Core.ItemType>(this._Catalog, sql).FirstOrDefault();
         }
 
         /// <summary>
@@ -559,7 +678,7 @@ namespace MixERP.Net.Schemas.Core.Data
             return Factory.Get<MixERP.Net.Entities.Core.ItemType>(this._Catalog, sql, offset);
         }
 
-        private List<EntityParser.Filter> GetFilters(string catalog, string filterName)
+        public List<EntityParser.Filter> GetFilters(string catalog, string filterName)
         {
             const string sql = "SELECT * FROM core.filters WHERE object_name='core.item_types' AND lower(filter_name)=lower(@0);";
             return Factory.Get<EntityParser.Filter>(catalog, sql, filterName).ToList();

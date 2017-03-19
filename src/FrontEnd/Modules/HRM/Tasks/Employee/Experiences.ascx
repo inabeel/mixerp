@@ -23,10 +23,15 @@
     };
 
     scrudFactory.layout = [
-        ["EmployeeExperienceId", "EmployeeId", "", ""],
-        ["OrganizationName", "Title", "", ""],
-        ["StartedOn", "EndedOn", "", ""],
-        ["Details", ""]
+        {
+            tab: "",
+            fields: [
+                ["EmployeeExperienceId", "EmployeeId", "", ""],
+                ["OrganizationName", "Title", "", ""],
+                ["StartedOn", "EndedOn", "", ""],
+                ["Details", ""]
+            ]
+        }
     ];
 
     scrudFactory.live = "Title";

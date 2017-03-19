@@ -12,6 +12,7 @@ using MixERP.Net.Framework;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using PetaPoco;
+using MixERP.Net.Schemas.Core.Data;
 
 namespace MixERP.Net.Api.Core
 {
@@ -22,9 +23,9 @@ namespace MixERP.Net.Api.Core
     public class CardTypeController : ApiController
     {
         /// <summary>
-        ///     The CardType data context.
+        ///     The CardType repository.
         /// </summary>
-        private readonly MixERP.Net.Schemas.Core.Data.CardType CardTypeContext;
+        private readonly ICardTypeRepository CardTypeRepository;
 
         public CardTypeController()
         {
@@ -33,12 +34,22 @@ namespace MixERP.Net.Api.Core
             this._OfficeId = AppUsers.GetCurrent().View.OfficeId.ToInt();
             this._Catalog = AppUsers.GetCurrentUserDB();
 
-            this.CardTypeContext = new MixERP.Net.Schemas.Core.Data.CardType
+            this.CardTypeRepository = new MixERP.Net.Schemas.Core.Data.CardType
             {
                 _Catalog = this._Catalog,
                 _LoginId = this._LoginId,
                 _UserId = this._UserId
             };
+        }
+
+        public CardTypeController(ICardTypeRepository repository, string catalog, LoginView view)
+        {
+            this._LoginId = view.LoginId.ToLong();
+            this._UserId = view.UserId.ToInt();
+            this._OfficeId = view.OfficeId.ToInt();
+            this._Catalog = catalog;
+
+            this.CardTypeRepository = repository;
         }
 
         public long _LoginId { get; }
@@ -55,6 +66,11 @@ namespace MixERP.Net.Api.Core
         [Route("~/api/core/card-type/meta")]
         public EntityView GetEntityView()
         {
+            if (this._LoginId == 0)
+            {
+                return new EntityView();
+            }
+
             return new EntityView
             {
                 PrimaryKey = "card_type_id",
@@ -78,7 +94,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.CardTypeContext.Count();
+                return this.CardTypeRepository.Count();
             }
             catch (UnauthorizedException)
             {
@@ -109,7 +125,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.CardTypeContext.GetAll();
+                return this.CardTypeRepository.GetAll();
             }
             catch (UnauthorizedException)
             {
@@ -140,7 +156,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.CardTypeContext.Export();
+                return this.CardTypeRepository.Export();
             }
             catch (UnauthorizedException)
             {
@@ -172,7 +188,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.CardTypeContext.Get(cardTypeId);
+                return this.CardTypeRepository.Get(cardTypeId);
             }
             catch (UnauthorizedException)
             {
@@ -199,7 +215,133 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.CardTypeContext.Get(cardTypeIds);
+                return this.CardTypeRepository.Get(cardTypeIds);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the first instance of card type.
+        /// </summary>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("first")]
+        [Route("~/api/core/card-type/first")]
+        public MixERP.Net.Entities.Core.CardType GetFirst()
+        {
+            try
+            {
+                return this.CardTypeRepository.GetFirst();
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the previous instance of card type.
+        /// </summary>
+        /// <param name="cardTypeId">Enter CardTypeId to search for.</param>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("previous/{cardTypeId}")]
+        [Route("~/api/core/card-type/previous/{cardTypeId}")]
+        public MixERP.Net.Entities.Core.CardType GetPrevious(int cardTypeId)
+        {
+            try
+            {
+                return this.CardTypeRepository.GetPrevious(cardTypeId);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the next instance of card type.
+        /// </summary>
+        /// <param name="cardTypeId">Enter CardTypeId to search for.</param>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("next/{cardTypeId}")]
+        [Route("~/api/core/card-type/next/{cardTypeId}")]
+        public MixERP.Net.Entities.Core.CardType GetNext(int cardTypeId)
+        {
+            try
+            {
+                return this.CardTypeRepository.GetNext(cardTypeId);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the last instance of card type.
+        /// </summary>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("last")]
+        [Route("~/api/core/card-type/last")]
+        public MixERP.Net.Entities.Core.CardType GetLast()
+        {
+            try
+            {
+                return this.CardTypeRepository.GetLast();
             }
             catch (UnauthorizedException)
             {
@@ -230,7 +372,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.CardTypeContext.GetPaginatedResult();
+                return this.CardTypeRepository.GetPaginatedResult();
             }
             catch (UnauthorizedException)
             {
@@ -262,7 +404,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.CardTypeContext.GetPaginatedResult(pageNumber);
+                return this.CardTypeRepository.GetPaginatedResult(pageNumber);
             }
             catch (UnauthorizedException)
             {
@@ -295,7 +437,7 @@ namespace MixERP.Net.Api.Core
             try
             {
                 List<EntityParser.Filter> f = filters.ToObject<List<EntityParser.Filter>>(JsonHelper.GetJsonSerializer());
-                return this.CardTypeContext.CountWhere(f);
+                return this.CardTypeRepository.CountWhere(f);
             }
             catch (UnauthorizedException)
             {
@@ -329,7 +471,7 @@ namespace MixERP.Net.Api.Core
             try
             {
                 List<EntityParser.Filter> f = filters.ToObject<List<EntityParser.Filter>>(JsonHelper.GetJsonSerializer());
-                return this.CardTypeContext.GetWhere(pageNumber, f);
+                return this.CardTypeRepository.GetWhere(pageNumber, f);
             }
             catch (UnauthorizedException)
             {
@@ -361,7 +503,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.CardTypeContext.CountFiltered(filterName);
+                return this.CardTypeRepository.CountFiltered(filterName);
             }
             catch (UnauthorizedException)
             {
@@ -394,7 +536,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.CardTypeContext.GetFiltered(pageNumber, filterName);
+                return this.CardTypeRepository.GetFiltered(pageNumber, filterName);
             }
             catch (UnauthorizedException)
             {
@@ -425,7 +567,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.CardTypeContext.GetDisplayFields();
+                return this.CardTypeRepository.GetDisplayFields();
             }
             catch (UnauthorizedException)
             {
@@ -456,7 +598,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.CardTypeContext.GetCustomFields(null);
+                return this.CardTypeRepository.GetCustomFields(null);
             }
             catch (UnauthorizedException)
             {
@@ -487,7 +629,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.CardTypeContext.GetCustomFields(resourceId);
+                return this.CardTypeRepository.GetCustomFields(resourceId);
             }
             catch (UnauthorizedException)
             {
@@ -526,7 +668,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                return this.CardTypeContext.AddOrEdit(cardType, customFields);
+                return this.CardTypeRepository.AddOrEdit(cardType, customFields);
             }
             catch (UnauthorizedException)
             {
@@ -562,7 +704,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                this.CardTypeContext.Add(cardType);
+                this.CardTypeRepository.Add(cardType);
             }
             catch (UnauthorizedException)
             {
@@ -599,7 +741,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                this.CardTypeContext.Update(cardType, cardTypeId);
+                this.CardTypeRepository.Update(cardType, cardTypeId);
             }
             catch (UnauthorizedException)
             {
@@ -644,7 +786,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                return this.CardTypeContext.BulkImport(cardTypeCollection);
+                return this.CardTypeRepository.BulkImport(cardTypeCollection);
             }
             catch (UnauthorizedException)
             {
@@ -675,7 +817,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                this.CardTypeContext.Delete(cardTypeId);
+                this.CardTypeRepository.Delete(cardTypeId);
             }
             catch (UnauthorizedException)
             {

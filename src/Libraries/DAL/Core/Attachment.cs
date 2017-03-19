@@ -16,7 +16,7 @@ namespace MixERP.Net.Schemas.Core.Data
     /// <summary>
     /// Provides simplified data access features to perform SCRUD operation on the database table "core.attachments".
     /// </summary>
-    public class Attachment : DbAccess
+    public class Attachment : DbAccess, IAttachmentRepository
     {
         /// <summary>
         /// The schema of this table. Returns literal "core".
@@ -73,7 +73,7 @@ namespace MixERP.Net.Schemas.Core.Data
         }
 
         /// <summary>
-        /// Executes a select query on the table "core.attachments" to return a all instances of the "Attachment" class. 
+        /// Executes a select query on the table "core.attachments" to return all instances of the "Attachment" class. 
         /// </summary>
         /// <returns>Returns a non-live, non-mapped instances of "Attachment" class.</returns>
         /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
@@ -102,7 +102,7 @@ namespace MixERP.Net.Schemas.Core.Data
         }
 
         /// <summary>
-        /// Executes a select query on the table "core.attachments" to return a all instances of the "Attachment" class to export. 
+        /// Executes a select query on the table "core.attachments" to return all instances of the "Attachment" class to export. 
         /// </summary>
         /// <returns>Returns a non-live, non-mapped instances of "Attachment" class.</returns>
         /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
@@ -158,6 +158,125 @@ namespace MixERP.Net.Schemas.Core.Data
 
             const string sql = "SELECT * FROM core.attachments WHERE attachment_id=@0;";
             return Factory.Get<MixERP.Net.Entities.Core.Attachment>(this._Catalog, sql, attachmentId).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Gets the first record of the table "core.attachments". 
+        /// </summary>
+        /// <returns>Returns a non-live, non-mapped instance of "Attachment" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.Core.Attachment GetFirst()
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the first record of entity \"Attachment\" was denied to the user with Login ID {_LoginId}", this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM core.attachments ORDER BY attachment_id LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.Core.Attachment>(this._Catalog, sql).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Gets the previous record of the table "core.attachments" sorted by attachmentId.
+        /// </summary>
+        /// <param name="attachmentId">The column "attachment_id" parameter used to find the next record.</param>
+        /// <returns>Returns a non-live, non-mapped instance of "Attachment" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.Core.Attachment GetPrevious(long attachmentId)
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the previous entity of \"Attachment\" by \"AttachmentId\" with value {AttachmentId} was denied to the user with Login ID {_LoginId}", attachmentId, this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM core.attachments WHERE attachment_id < @0 ORDER BY attachment_id DESC LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.Core.Attachment>(this._Catalog, sql, attachmentId).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Gets the next record of the table "core.attachments" sorted by attachmentId.
+        /// </summary>
+        /// <param name="attachmentId">The column "attachment_id" parameter used to find the next record.</param>
+        /// <returns>Returns a non-live, non-mapped instance of "Attachment" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.Core.Attachment GetNext(long attachmentId)
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the next entity of \"Attachment\" by \"AttachmentId\" with value {AttachmentId} was denied to the user with Login ID {_LoginId}", attachmentId, this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM core.attachments WHERE attachment_id > @0 ORDER BY attachment_id LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.Core.Attachment>(this._Catalog, sql, attachmentId).FirstOrDefault();
+        }
+
+
+        /// <summary>
+        /// Gets the last record of the table "core.attachments". 
+        /// </summary>
+        /// <returns>Returns a non-live, non-mapped instance of "Attachment" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.Core.Attachment GetLast()
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the last record of entity \"Attachment\" was denied to the user with Login ID {_LoginId}", this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM core.attachments ORDER BY attachment_id DESC LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.Core.Attachment>(this._Catalog, sql).FirstOrDefault();
         }
 
         /// <summary>
@@ -557,7 +676,7 @@ namespace MixERP.Net.Schemas.Core.Data
             return Factory.Get<MixERP.Net.Entities.Core.Attachment>(this._Catalog, sql, offset);
         }
 
-        private List<EntityParser.Filter> GetFilters(string catalog, string filterName)
+        public List<EntityParser.Filter> GetFilters(string catalog, string filterName)
         {
             const string sql = "SELECT * FROM core.filters WHERE object_name='core.attachments' AND lower(filter_name)=lower(@0);";
             return Factory.Get<EntityParser.Filter>(catalog, sql, filterName).ToList();

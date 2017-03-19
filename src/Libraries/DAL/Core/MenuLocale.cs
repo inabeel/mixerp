@@ -16,7 +16,7 @@ namespace MixERP.Net.Schemas.Core.Data
     /// <summary>
     /// Provides simplified data access features to perform SCRUD operation on the database table "core.menu_locale".
     /// </summary>
-    public class MenuLocale : DbAccess
+    public class MenuLocale : DbAccess, IMenuLocaleRepository
     {
         /// <summary>
         /// The schema of this table. Returns literal "core".
@@ -73,7 +73,7 @@ namespace MixERP.Net.Schemas.Core.Data
         }
 
         /// <summary>
-        /// Executes a select query on the table "core.menu_locale" to return a all instances of the "MenuLocale" class. 
+        /// Executes a select query on the table "core.menu_locale" to return all instances of the "MenuLocale" class. 
         /// </summary>
         /// <returns>Returns a non-live, non-mapped instances of "MenuLocale" class.</returns>
         /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
@@ -102,7 +102,7 @@ namespace MixERP.Net.Schemas.Core.Data
         }
 
         /// <summary>
-        /// Executes a select query on the table "core.menu_locale" to return a all instances of the "MenuLocale" class to export. 
+        /// Executes a select query on the table "core.menu_locale" to return all instances of the "MenuLocale" class to export. 
         /// </summary>
         /// <returns>Returns a non-live, non-mapped instances of "MenuLocale" class.</returns>
         /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
@@ -158,6 +158,125 @@ namespace MixERP.Net.Schemas.Core.Data
 
             const string sql = "SELECT * FROM core.menu_locale WHERE menu_locale_id=@0;";
             return Factory.Get<MixERP.Net.Entities.Core.MenuLocale>(this._Catalog, sql, menuLocaleId).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Gets the first record of the table "core.menu_locale". 
+        /// </summary>
+        /// <returns>Returns a non-live, non-mapped instance of "MenuLocale" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.Core.MenuLocale GetFirst()
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the first record of entity \"MenuLocale\" was denied to the user with Login ID {_LoginId}", this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM core.menu_locale ORDER BY menu_locale_id LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.Core.MenuLocale>(this._Catalog, sql).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Gets the previous record of the table "core.menu_locale" sorted by menuLocaleId.
+        /// </summary>
+        /// <param name="menuLocaleId">The column "menu_locale_id" parameter used to find the next record.</param>
+        /// <returns>Returns a non-live, non-mapped instance of "MenuLocale" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.Core.MenuLocale GetPrevious(int menuLocaleId)
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the previous entity of \"MenuLocale\" by \"MenuLocaleId\" with value {MenuLocaleId} was denied to the user with Login ID {_LoginId}", menuLocaleId, this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM core.menu_locale WHERE menu_locale_id < @0 ORDER BY menu_locale_id DESC LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.Core.MenuLocale>(this._Catalog, sql, menuLocaleId).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Gets the next record of the table "core.menu_locale" sorted by menuLocaleId.
+        /// </summary>
+        /// <param name="menuLocaleId">The column "menu_locale_id" parameter used to find the next record.</param>
+        /// <returns>Returns a non-live, non-mapped instance of "MenuLocale" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.Core.MenuLocale GetNext(int menuLocaleId)
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the next entity of \"MenuLocale\" by \"MenuLocaleId\" with value {MenuLocaleId} was denied to the user with Login ID {_LoginId}", menuLocaleId, this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM core.menu_locale WHERE menu_locale_id > @0 ORDER BY menu_locale_id LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.Core.MenuLocale>(this._Catalog, sql, menuLocaleId).FirstOrDefault();
+        }
+
+
+        /// <summary>
+        /// Gets the last record of the table "core.menu_locale". 
+        /// </summary>
+        /// <returns>Returns a non-live, non-mapped instance of "MenuLocale" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.Core.MenuLocale GetLast()
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the last record of entity \"MenuLocale\" was denied to the user with Login ID {_LoginId}", this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM core.menu_locale ORDER BY menu_locale_id DESC LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.Core.MenuLocale>(this._Catalog, sql).FirstOrDefault();
         }
 
         /// <summary>
@@ -557,7 +676,7 @@ namespace MixERP.Net.Schemas.Core.Data
             return Factory.Get<MixERP.Net.Entities.Core.MenuLocale>(this._Catalog, sql, offset);
         }
 
-        private List<EntityParser.Filter> GetFilters(string catalog, string filterName)
+        public List<EntityParser.Filter> GetFilters(string catalog, string filterName)
         {
             const string sql = "SELECT * FROM core.filters WHERE object_name='core.menu_locale' AND lower(filter_name)=lower(@0);";
             return Factory.Get<EntityParser.Filter>(catalog, sql, filterName).ToList();

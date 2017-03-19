@@ -12,6 +12,7 @@ using MixERP.Net.Framework;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using PetaPoco;
+using MixERP.Net.Schemas.Core.Data;
 
 namespace MixERP.Net.Api.Core
 {
@@ -22,9 +23,9 @@ namespace MixERP.Net.Api.Core
     public class AgeingSlabController : ApiController
     {
         /// <summary>
-        ///     The AgeingSlab data context.
+        ///     The AgeingSlab repository.
         /// </summary>
-        private readonly MixERP.Net.Schemas.Core.Data.AgeingSlab AgeingSlabContext;
+        private readonly IAgeingSlabRepository AgeingSlabRepository;
 
         public AgeingSlabController()
         {
@@ -33,12 +34,22 @@ namespace MixERP.Net.Api.Core
             this._OfficeId = AppUsers.GetCurrent().View.OfficeId.ToInt();
             this._Catalog = AppUsers.GetCurrentUserDB();
 
-            this.AgeingSlabContext = new MixERP.Net.Schemas.Core.Data.AgeingSlab
+            this.AgeingSlabRepository = new MixERP.Net.Schemas.Core.Data.AgeingSlab
             {
                 _Catalog = this._Catalog,
                 _LoginId = this._LoginId,
                 _UserId = this._UserId
             };
+        }
+
+        public AgeingSlabController(IAgeingSlabRepository repository, string catalog, LoginView view)
+        {
+            this._LoginId = view.LoginId.ToLong();
+            this._UserId = view.UserId.ToInt();
+            this._OfficeId = view.OfficeId.ToInt();
+            this._Catalog = catalog;
+
+            this.AgeingSlabRepository = repository;
         }
 
         public long _LoginId { get; }
@@ -55,6 +66,11 @@ namespace MixERP.Net.Api.Core
         [Route("~/api/core/ageing-slab/meta")]
         public EntityView GetEntityView()
         {
+            if (this._LoginId == 0)
+            {
+                return new EntityView();
+            }
+
             return new EntityView
             {
                 PrimaryKey = "ageing_slab_id",
@@ -81,7 +97,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.AgeingSlabContext.Count();
+                return this.AgeingSlabRepository.Count();
             }
             catch (UnauthorizedException)
             {
@@ -112,7 +128,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.AgeingSlabContext.GetAll();
+                return this.AgeingSlabRepository.GetAll();
             }
             catch (UnauthorizedException)
             {
@@ -143,7 +159,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.AgeingSlabContext.Export();
+                return this.AgeingSlabRepository.Export();
             }
             catch (UnauthorizedException)
             {
@@ -175,7 +191,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.AgeingSlabContext.Get(ageingSlabId);
+                return this.AgeingSlabRepository.Get(ageingSlabId);
             }
             catch (UnauthorizedException)
             {
@@ -202,7 +218,133 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.AgeingSlabContext.Get(ageingSlabIds);
+                return this.AgeingSlabRepository.Get(ageingSlabIds);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the first instance of ageing slab.
+        /// </summary>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("first")]
+        [Route("~/api/core/ageing-slab/first")]
+        public MixERP.Net.Entities.Core.AgeingSlab GetFirst()
+        {
+            try
+            {
+                return this.AgeingSlabRepository.GetFirst();
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the previous instance of ageing slab.
+        /// </summary>
+        /// <param name="ageingSlabId">Enter AgeingSlabId to search for.</param>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("previous/{ageingSlabId}")]
+        [Route("~/api/core/ageing-slab/previous/{ageingSlabId}")]
+        public MixERP.Net.Entities.Core.AgeingSlab GetPrevious(int ageingSlabId)
+        {
+            try
+            {
+                return this.AgeingSlabRepository.GetPrevious(ageingSlabId);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the next instance of ageing slab.
+        /// </summary>
+        /// <param name="ageingSlabId">Enter AgeingSlabId to search for.</param>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("next/{ageingSlabId}")]
+        [Route("~/api/core/ageing-slab/next/{ageingSlabId}")]
+        public MixERP.Net.Entities.Core.AgeingSlab GetNext(int ageingSlabId)
+        {
+            try
+            {
+                return this.AgeingSlabRepository.GetNext(ageingSlabId);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the last instance of ageing slab.
+        /// </summary>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("last")]
+        [Route("~/api/core/ageing-slab/last")]
+        public MixERP.Net.Entities.Core.AgeingSlab GetLast()
+        {
+            try
+            {
+                return this.AgeingSlabRepository.GetLast();
             }
             catch (UnauthorizedException)
             {
@@ -233,7 +375,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.AgeingSlabContext.GetPaginatedResult();
+                return this.AgeingSlabRepository.GetPaginatedResult();
             }
             catch (UnauthorizedException)
             {
@@ -265,7 +407,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.AgeingSlabContext.GetPaginatedResult(pageNumber);
+                return this.AgeingSlabRepository.GetPaginatedResult(pageNumber);
             }
             catch (UnauthorizedException)
             {
@@ -298,7 +440,7 @@ namespace MixERP.Net.Api.Core
             try
             {
                 List<EntityParser.Filter> f = filters.ToObject<List<EntityParser.Filter>>(JsonHelper.GetJsonSerializer());
-                return this.AgeingSlabContext.CountWhere(f);
+                return this.AgeingSlabRepository.CountWhere(f);
             }
             catch (UnauthorizedException)
             {
@@ -332,7 +474,7 @@ namespace MixERP.Net.Api.Core
             try
             {
                 List<EntityParser.Filter> f = filters.ToObject<List<EntityParser.Filter>>(JsonHelper.GetJsonSerializer());
-                return this.AgeingSlabContext.GetWhere(pageNumber, f);
+                return this.AgeingSlabRepository.GetWhere(pageNumber, f);
             }
             catch (UnauthorizedException)
             {
@@ -364,7 +506,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.AgeingSlabContext.CountFiltered(filterName);
+                return this.AgeingSlabRepository.CountFiltered(filterName);
             }
             catch (UnauthorizedException)
             {
@@ -397,7 +539,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.AgeingSlabContext.GetFiltered(pageNumber, filterName);
+                return this.AgeingSlabRepository.GetFiltered(pageNumber, filterName);
             }
             catch (UnauthorizedException)
             {
@@ -428,7 +570,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.AgeingSlabContext.GetDisplayFields();
+                return this.AgeingSlabRepository.GetDisplayFields();
             }
             catch (UnauthorizedException)
             {
@@ -459,7 +601,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.AgeingSlabContext.GetCustomFields(null);
+                return this.AgeingSlabRepository.GetCustomFields(null);
             }
             catch (UnauthorizedException)
             {
@@ -490,7 +632,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.AgeingSlabContext.GetCustomFields(resourceId);
+                return this.AgeingSlabRepository.GetCustomFields(resourceId);
             }
             catch (UnauthorizedException)
             {
@@ -529,7 +671,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                return this.AgeingSlabContext.AddOrEdit(ageingSlab, customFields);
+                return this.AgeingSlabRepository.AddOrEdit(ageingSlab, customFields);
             }
             catch (UnauthorizedException)
             {
@@ -565,7 +707,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                this.AgeingSlabContext.Add(ageingSlab);
+                this.AgeingSlabRepository.Add(ageingSlab);
             }
             catch (UnauthorizedException)
             {
@@ -602,7 +744,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                this.AgeingSlabContext.Update(ageingSlab, ageingSlabId);
+                this.AgeingSlabRepository.Update(ageingSlab, ageingSlabId);
             }
             catch (UnauthorizedException)
             {
@@ -647,7 +789,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                return this.AgeingSlabContext.BulkImport(ageingSlabCollection);
+                return this.AgeingSlabRepository.BulkImport(ageingSlabCollection);
             }
             catch (UnauthorizedException)
             {
@@ -678,7 +820,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                this.AgeingSlabContext.Delete(ageingSlabId);
+                this.AgeingSlabRepository.Delete(ageingSlabId);
             }
             catch (UnauthorizedException)
             {

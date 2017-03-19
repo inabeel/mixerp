@@ -16,7 +16,7 @@ namespace MixERP.Net.Schemas.Core.Data
     /// <summary>
     /// Provides simplified data access features to perform SCRUD operation on the database table "core.rounding_methods".
     /// </summary>
-    public class RoundingMethod : DbAccess
+    public class RoundingMethod : DbAccess, IRoundingMethodRepository
     {
         /// <summary>
         /// The schema of this table. Returns literal "core".
@@ -73,7 +73,7 @@ namespace MixERP.Net.Schemas.Core.Data
         }
 
         /// <summary>
-        /// Executes a select query on the table "core.rounding_methods" to return a all instances of the "RoundingMethod" class. 
+        /// Executes a select query on the table "core.rounding_methods" to return all instances of the "RoundingMethod" class. 
         /// </summary>
         /// <returns>Returns a non-live, non-mapped instances of "RoundingMethod" class.</returns>
         /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
@@ -102,7 +102,7 @@ namespace MixERP.Net.Schemas.Core.Data
         }
 
         /// <summary>
-        /// Executes a select query on the table "core.rounding_methods" to return a all instances of the "RoundingMethod" class to export. 
+        /// Executes a select query on the table "core.rounding_methods" to return all instances of the "RoundingMethod" class to export. 
         /// </summary>
         /// <returns>Returns a non-live, non-mapped instances of "RoundingMethod" class.</returns>
         /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
@@ -158,6 +158,125 @@ namespace MixERP.Net.Schemas.Core.Data
 
             const string sql = "SELECT * FROM core.rounding_methods WHERE rounding_method_code=@0;";
             return Factory.Get<MixERP.Net.Entities.Core.RoundingMethod>(this._Catalog, sql, roundingMethodCode).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Gets the first record of the table "core.rounding_methods". 
+        /// </summary>
+        /// <returns>Returns a non-live, non-mapped instance of "RoundingMethod" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.Core.RoundingMethod GetFirst()
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the first record of entity \"RoundingMethod\" was denied to the user with Login ID {_LoginId}", this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM core.rounding_methods ORDER BY rounding_method_code LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.Core.RoundingMethod>(this._Catalog, sql).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Gets the previous record of the table "core.rounding_methods" sorted by roundingMethodCode.
+        /// </summary>
+        /// <param name="roundingMethodCode">The column "rounding_method_code" parameter used to find the next record.</param>
+        /// <returns>Returns a non-live, non-mapped instance of "RoundingMethod" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.Core.RoundingMethod GetPrevious(string roundingMethodCode)
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the previous entity of \"RoundingMethod\" by \"RoundingMethodCode\" with value {RoundingMethodCode} was denied to the user with Login ID {_LoginId}", roundingMethodCode, this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM core.rounding_methods WHERE rounding_method_code < @0 ORDER BY rounding_method_code DESC LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.Core.RoundingMethod>(this._Catalog, sql, roundingMethodCode).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Gets the next record of the table "core.rounding_methods" sorted by roundingMethodCode.
+        /// </summary>
+        /// <param name="roundingMethodCode">The column "rounding_method_code" parameter used to find the next record.</param>
+        /// <returns>Returns a non-live, non-mapped instance of "RoundingMethod" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.Core.RoundingMethod GetNext(string roundingMethodCode)
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the next entity of \"RoundingMethod\" by \"RoundingMethodCode\" with value {RoundingMethodCode} was denied to the user with Login ID {_LoginId}", roundingMethodCode, this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM core.rounding_methods WHERE rounding_method_code > @0 ORDER BY rounding_method_code LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.Core.RoundingMethod>(this._Catalog, sql, roundingMethodCode).FirstOrDefault();
+        }
+
+
+        /// <summary>
+        /// Gets the last record of the table "core.rounding_methods". 
+        /// </summary>
+        /// <returns>Returns a non-live, non-mapped instance of "RoundingMethod" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.Core.RoundingMethod GetLast()
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the last record of entity \"RoundingMethod\" was denied to the user with Login ID {_LoginId}", this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM core.rounding_methods ORDER BY rounding_method_code DESC LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.Core.RoundingMethod>(this._Catalog, sql).FirstOrDefault();
         }
 
         /// <summary>
@@ -557,7 +676,7 @@ namespace MixERP.Net.Schemas.Core.Data
             return Factory.Get<MixERP.Net.Entities.Core.RoundingMethod>(this._Catalog, sql, offset);
         }
 
-        private List<EntityParser.Filter> GetFilters(string catalog, string filterName)
+        public List<EntityParser.Filter> GetFilters(string catalog, string filterName)
         {
             const string sql = "SELECT * FROM core.filters WHERE object_name='core.rounding_methods' AND lower(filter_name)=lower(@0);";
             return Factory.Get<EntityParser.Filter>(catalog, sql, filterName).ToList();

@@ -16,7 +16,7 @@ namespace MixERP.Net.Schemas.Config.Data
     /// <summary>
     /// Provides simplified data access features to perform SCRUD operation on the database table "config.smtp".
     /// </summary>
-    public class Smtp : DbAccess
+    public class Smtp : DbAccess, ISmtpRepository
     {
         /// <summary>
         /// The schema of this table. Returns literal "config".
@@ -73,7 +73,7 @@ namespace MixERP.Net.Schemas.Config.Data
         }
 
         /// <summary>
-        /// Executes a select query on the table "config.smtp" to return a all instances of the "Smtp" class. 
+        /// Executes a select query on the table "config.smtp" to return all instances of the "Smtp" class. 
         /// </summary>
         /// <returns>Returns a non-live, non-mapped instances of "Smtp" class.</returns>
         /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
@@ -102,7 +102,7 @@ namespace MixERP.Net.Schemas.Config.Data
         }
 
         /// <summary>
-        /// Executes a select query on the table "config.smtp" to return a all instances of the "Smtp" class to export. 
+        /// Executes a select query on the table "config.smtp" to return all instances of the "Smtp" class to export. 
         /// </summary>
         /// <returns>Returns a non-live, non-mapped instances of "Smtp" class.</returns>
         /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
@@ -158,6 +158,125 @@ namespace MixERP.Net.Schemas.Config.Data
 
             const string sql = "SELECT * FROM config.smtp WHERE smtp_id=@0;";
             return Factory.Get<MixERP.Net.Entities.Config.Smtp>(this._Catalog, sql, smtpId).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Gets the first record of the table "config.smtp". 
+        /// </summary>
+        /// <returns>Returns a non-live, non-mapped instance of "Smtp" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.Config.Smtp GetFirst()
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the first record of entity \"Smtp\" was denied to the user with Login ID {_LoginId}", this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM config.smtp ORDER BY smtp_id LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.Config.Smtp>(this._Catalog, sql).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Gets the previous record of the table "config.smtp" sorted by smtpId.
+        /// </summary>
+        /// <param name="smtpId">The column "smtp_id" parameter used to find the next record.</param>
+        /// <returns>Returns a non-live, non-mapped instance of "Smtp" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.Config.Smtp GetPrevious(int smtpId)
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the previous entity of \"Smtp\" by \"SmtpId\" with value {SmtpId} was denied to the user with Login ID {_LoginId}", smtpId, this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM config.smtp WHERE smtp_id < @0 ORDER BY smtp_id DESC LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.Config.Smtp>(this._Catalog, sql, smtpId).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Gets the next record of the table "config.smtp" sorted by smtpId.
+        /// </summary>
+        /// <param name="smtpId">The column "smtp_id" parameter used to find the next record.</param>
+        /// <returns>Returns a non-live, non-mapped instance of "Smtp" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.Config.Smtp GetNext(int smtpId)
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the next entity of \"Smtp\" by \"SmtpId\" with value {SmtpId} was denied to the user with Login ID {_LoginId}", smtpId, this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM config.smtp WHERE smtp_id > @0 ORDER BY smtp_id LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.Config.Smtp>(this._Catalog, sql, smtpId).FirstOrDefault();
+        }
+
+
+        /// <summary>
+        /// Gets the last record of the table "config.smtp". 
+        /// </summary>
+        /// <returns>Returns a non-live, non-mapped instance of "Smtp" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.Config.Smtp GetLast()
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the last record of entity \"Smtp\" was denied to the user with Login ID {_LoginId}", this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM config.smtp ORDER BY smtp_id DESC LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.Config.Smtp>(this._Catalog, sql).FirstOrDefault();
         }
 
         /// <summary>
@@ -559,7 +678,7 @@ namespace MixERP.Net.Schemas.Config.Data
             return Factory.Get<MixERP.Net.Entities.Config.Smtp>(this._Catalog, sql, offset);
         }
 
-        private List<EntityParser.Filter> GetFilters(string catalog, string filterName)
+        public List<EntityParser.Filter> GetFilters(string catalog, string filterName)
         {
             const string sql = "SELECT * FROM core.filters WHERE object_name='config.smtp' AND lower(filter_name)=lower(@0);";
             return Factory.Get<EntityParser.Filter>(catalog, sql, filterName).ToList();

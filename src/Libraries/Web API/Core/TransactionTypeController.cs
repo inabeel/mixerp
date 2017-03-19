@@ -12,6 +12,7 @@ using MixERP.Net.Framework;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using PetaPoco;
+using MixERP.Net.Schemas.Core.Data;
 
 namespace MixERP.Net.Api.Core
 {
@@ -22,9 +23,9 @@ namespace MixERP.Net.Api.Core
     public class TransactionTypeController : ApiController
     {
         /// <summary>
-        ///     The TransactionType data context.
+        ///     The TransactionType repository.
         /// </summary>
-        private readonly MixERP.Net.Schemas.Core.Data.TransactionType TransactionTypeContext;
+        private readonly ITransactionTypeRepository TransactionTypeRepository;
 
         public TransactionTypeController()
         {
@@ -33,12 +34,22 @@ namespace MixERP.Net.Api.Core
             this._OfficeId = AppUsers.GetCurrent().View.OfficeId.ToInt();
             this._Catalog = AppUsers.GetCurrentUserDB();
 
-            this.TransactionTypeContext = new MixERP.Net.Schemas.Core.Data.TransactionType
+            this.TransactionTypeRepository = new MixERP.Net.Schemas.Core.Data.TransactionType
             {
                 _Catalog = this._Catalog,
                 _LoginId = this._LoginId,
                 _UserId = this._UserId
             };
+        }
+
+        public TransactionTypeController(ITransactionTypeRepository repository, string catalog, LoginView view)
+        {
+            this._LoginId = view.LoginId.ToLong();
+            this._UserId = view.UserId.ToInt();
+            this._OfficeId = view.OfficeId.ToInt();
+            this._Catalog = catalog;
+
+            this.TransactionTypeRepository = repository;
         }
 
         public long _LoginId { get; }
@@ -55,6 +66,11 @@ namespace MixERP.Net.Api.Core
         [Route("~/api/core/transaction-type/meta")]
         public EntityView GetEntityView()
         {
+            if (this._LoginId == 0)
+            {
+                return new EntityView();
+            }
+
             return new EntityView
             {
                 PrimaryKey = "transaction_type_id",
@@ -78,7 +94,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.TransactionTypeContext.Count();
+                return this.TransactionTypeRepository.Count();
             }
             catch (UnauthorizedException)
             {
@@ -109,7 +125,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.TransactionTypeContext.GetAll();
+                return this.TransactionTypeRepository.GetAll();
             }
             catch (UnauthorizedException)
             {
@@ -140,7 +156,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.TransactionTypeContext.Export();
+                return this.TransactionTypeRepository.Export();
             }
             catch (UnauthorizedException)
             {
@@ -172,7 +188,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.TransactionTypeContext.Get(transactionTypeId);
+                return this.TransactionTypeRepository.Get(transactionTypeId);
             }
             catch (UnauthorizedException)
             {
@@ -199,7 +215,133 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.TransactionTypeContext.Get(transactionTypeIds);
+                return this.TransactionTypeRepository.Get(transactionTypeIds);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the first instance of transaction type.
+        /// </summary>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("first")]
+        [Route("~/api/core/transaction-type/first")]
+        public MixERP.Net.Entities.Core.TransactionType GetFirst()
+        {
+            try
+            {
+                return this.TransactionTypeRepository.GetFirst();
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the previous instance of transaction type.
+        /// </summary>
+        /// <param name="transactionTypeId">Enter TransactionTypeId to search for.</param>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("previous/{transactionTypeId}")]
+        [Route("~/api/core/transaction-type/previous/{transactionTypeId}")]
+        public MixERP.Net.Entities.Core.TransactionType GetPrevious(short transactionTypeId)
+        {
+            try
+            {
+                return this.TransactionTypeRepository.GetPrevious(transactionTypeId);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the next instance of transaction type.
+        /// </summary>
+        /// <param name="transactionTypeId">Enter TransactionTypeId to search for.</param>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("next/{transactionTypeId}")]
+        [Route("~/api/core/transaction-type/next/{transactionTypeId}")]
+        public MixERP.Net.Entities.Core.TransactionType GetNext(short transactionTypeId)
+        {
+            try
+            {
+                return this.TransactionTypeRepository.GetNext(transactionTypeId);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the last instance of transaction type.
+        /// </summary>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("last")]
+        [Route("~/api/core/transaction-type/last")]
+        public MixERP.Net.Entities.Core.TransactionType GetLast()
+        {
+            try
+            {
+                return this.TransactionTypeRepository.GetLast();
             }
             catch (UnauthorizedException)
             {
@@ -230,7 +372,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.TransactionTypeContext.GetPaginatedResult();
+                return this.TransactionTypeRepository.GetPaginatedResult();
             }
             catch (UnauthorizedException)
             {
@@ -262,7 +404,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.TransactionTypeContext.GetPaginatedResult(pageNumber);
+                return this.TransactionTypeRepository.GetPaginatedResult(pageNumber);
             }
             catch (UnauthorizedException)
             {
@@ -295,7 +437,7 @@ namespace MixERP.Net.Api.Core
             try
             {
                 List<EntityParser.Filter> f = filters.ToObject<List<EntityParser.Filter>>(JsonHelper.GetJsonSerializer());
-                return this.TransactionTypeContext.CountWhere(f);
+                return this.TransactionTypeRepository.CountWhere(f);
             }
             catch (UnauthorizedException)
             {
@@ -329,7 +471,7 @@ namespace MixERP.Net.Api.Core
             try
             {
                 List<EntityParser.Filter> f = filters.ToObject<List<EntityParser.Filter>>(JsonHelper.GetJsonSerializer());
-                return this.TransactionTypeContext.GetWhere(pageNumber, f);
+                return this.TransactionTypeRepository.GetWhere(pageNumber, f);
             }
             catch (UnauthorizedException)
             {
@@ -361,7 +503,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.TransactionTypeContext.CountFiltered(filterName);
+                return this.TransactionTypeRepository.CountFiltered(filterName);
             }
             catch (UnauthorizedException)
             {
@@ -394,7 +536,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.TransactionTypeContext.GetFiltered(pageNumber, filterName);
+                return this.TransactionTypeRepository.GetFiltered(pageNumber, filterName);
             }
             catch (UnauthorizedException)
             {
@@ -425,7 +567,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.TransactionTypeContext.GetDisplayFields();
+                return this.TransactionTypeRepository.GetDisplayFields();
             }
             catch (UnauthorizedException)
             {
@@ -456,7 +598,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.TransactionTypeContext.GetCustomFields(null);
+                return this.TransactionTypeRepository.GetCustomFields(null);
             }
             catch (UnauthorizedException)
             {
@@ -487,7 +629,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                return this.TransactionTypeContext.GetCustomFields(resourceId);
+                return this.TransactionTypeRepository.GetCustomFields(resourceId);
             }
             catch (UnauthorizedException)
             {
@@ -526,7 +668,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                return this.TransactionTypeContext.AddOrEdit(transactionType, customFields);
+                return this.TransactionTypeRepository.AddOrEdit(transactionType, customFields);
             }
             catch (UnauthorizedException)
             {
@@ -562,7 +704,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                this.TransactionTypeContext.Add(transactionType);
+                this.TransactionTypeRepository.Add(transactionType);
             }
             catch (UnauthorizedException)
             {
@@ -599,7 +741,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                this.TransactionTypeContext.Update(transactionType, transactionTypeId);
+                this.TransactionTypeRepository.Update(transactionType, transactionTypeId);
             }
             catch (UnauthorizedException)
             {
@@ -644,7 +786,7 @@ namespace MixERP.Net.Api.Core
 
             try
             {
-                return this.TransactionTypeContext.BulkImport(transactionTypeCollection);
+                return this.TransactionTypeRepository.BulkImport(transactionTypeCollection);
             }
             catch (UnauthorizedException)
             {
@@ -675,7 +817,7 @@ namespace MixERP.Net.Api.Core
         {
             try
             {
-                this.TransactionTypeContext.Delete(transactionTypeId);
+                this.TransactionTypeRepository.Delete(transactionTypeId);
             }
             catch (UnauthorizedException)
             {

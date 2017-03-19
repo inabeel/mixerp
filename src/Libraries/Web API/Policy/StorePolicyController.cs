@@ -12,6 +12,7 @@ using MixERP.Net.Framework;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using PetaPoco;
+using MixERP.Net.Schemas.Policy.Data;
 
 namespace MixERP.Net.Api.Policy
 {
@@ -22,9 +23,9 @@ namespace MixERP.Net.Api.Policy
     public class StorePolicyController : ApiController
     {
         /// <summary>
-        ///     The StorePolicy data context.
+        ///     The StorePolicy repository.
         /// </summary>
-        private readonly MixERP.Net.Schemas.Policy.Data.StorePolicy StorePolicyContext;
+        private readonly IStorePolicyRepository StorePolicyRepository;
 
         public StorePolicyController()
         {
@@ -33,12 +34,22 @@ namespace MixERP.Net.Api.Policy
             this._OfficeId = AppUsers.GetCurrent().View.OfficeId.ToInt();
             this._Catalog = AppUsers.GetCurrentUserDB();
 
-            this.StorePolicyContext = new MixERP.Net.Schemas.Policy.Data.StorePolicy
+            this.StorePolicyRepository = new MixERP.Net.Schemas.Policy.Data.StorePolicy
             {
                 _Catalog = this._Catalog,
                 _LoginId = this._LoginId,
                 _UserId = this._UserId
             };
+        }
+
+        public StorePolicyController(IStorePolicyRepository repository, string catalog, LoginView view)
+        {
+            this._LoginId = view.LoginId.ToLong();
+            this._UserId = view.UserId.ToInt();
+            this._OfficeId = view.OfficeId.ToInt();
+            this._Catalog = catalog;
+
+            this.StorePolicyRepository = repository;
         }
 
         public long _LoginId { get; }
@@ -55,6 +66,11 @@ namespace MixERP.Net.Api.Policy
         [Route("~/api/policy/store-policy/meta")]
         public EntityView GetEntityView()
         {
+            if (this._LoginId == 0)
+            {
+                return new EntityView();
+            }
+
             return new EntityView
             {
                 PrimaryKey = "store_policy_id",
@@ -80,7 +96,7 @@ namespace MixERP.Net.Api.Policy
         {
             try
             {
-                return this.StorePolicyContext.Count();
+                return this.StorePolicyRepository.Count();
             }
             catch (UnauthorizedException)
             {
@@ -111,7 +127,7 @@ namespace MixERP.Net.Api.Policy
         {
             try
             {
-                return this.StorePolicyContext.GetAll();
+                return this.StorePolicyRepository.GetAll();
             }
             catch (UnauthorizedException)
             {
@@ -142,7 +158,7 @@ namespace MixERP.Net.Api.Policy
         {
             try
             {
-                return this.StorePolicyContext.Export();
+                return this.StorePolicyRepository.Export();
             }
             catch (UnauthorizedException)
             {
@@ -174,7 +190,7 @@ namespace MixERP.Net.Api.Policy
         {
             try
             {
-                return this.StorePolicyContext.Get(storePolicyId);
+                return this.StorePolicyRepository.Get(storePolicyId);
             }
             catch (UnauthorizedException)
             {
@@ -201,7 +217,133 @@ namespace MixERP.Net.Api.Policy
         {
             try
             {
-                return this.StorePolicyContext.Get(storePolicyIds);
+                return this.StorePolicyRepository.Get(storePolicyIds);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the first instance of store policy.
+        /// </summary>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("first")]
+        [Route("~/api/policy/store-policy/first")]
+        public MixERP.Net.Entities.Policy.StorePolicy GetFirst()
+        {
+            try
+            {
+                return this.StorePolicyRepository.GetFirst();
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the previous instance of store policy.
+        /// </summary>
+        /// <param name="storePolicyId">Enter StorePolicyId to search for.</param>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("previous/{storePolicyId}")]
+        [Route("~/api/policy/store-policy/previous/{storePolicyId}")]
+        public MixERP.Net.Entities.Policy.StorePolicy GetPrevious(long storePolicyId)
+        {
+            try
+            {
+                return this.StorePolicyRepository.GetPrevious(storePolicyId);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the next instance of store policy.
+        /// </summary>
+        /// <param name="storePolicyId">Enter StorePolicyId to search for.</param>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("next/{storePolicyId}")]
+        [Route("~/api/policy/store-policy/next/{storePolicyId}")]
+        public MixERP.Net.Entities.Policy.StorePolicy GetNext(long storePolicyId)
+        {
+            try
+            {
+                return this.StorePolicyRepository.GetNext(storePolicyId);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the last instance of store policy.
+        /// </summary>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("last")]
+        [Route("~/api/policy/store-policy/last")]
+        public MixERP.Net.Entities.Policy.StorePolicy GetLast()
+        {
+            try
+            {
+                return this.StorePolicyRepository.GetLast();
             }
             catch (UnauthorizedException)
             {
@@ -232,7 +374,7 @@ namespace MixERP.Net.Api.Policy
         {
             try
             {
-                return this.StorePolicyContext.GetPaginatedResult();
+                return this.StorePolicyRepository.GetPaginatedResult();
             }
             catch (UnauthorizedException)
             {
@@ -264,7 +406,7 @@ namespace MixERP.Net.Api.Policy
         {
             try
             {
-                return this.StorePolicyContext.GetPaginatedResult(pageNumber);
+                return this.StorePolicyRepository.GetPaginatedResult(pageNumber);
             }
             catch (UnauthorizedException)
             {
@@ -297,7 +439,7 @@ namespace MixERP.Net.Api.Policy
             try
             {
                 List<EntityParser.Filter> f = filters.ToObject<List<EntityParser.Filter>>(JsonHelper.GetJsonSerializer());
-                return this.StorePolicyContext.CountWhere(f);
+                return this.StorePolicyRepository.CountWhere(f);
             }
             catch (UnauthorizedException)
             {
@@ -331,7 +473,7 @@ namespace MixERP.Net.Api.Policy
             try
             {
                 List<EntityParser.Filter> f = filters.ToObject<List<EntityParser.Filter>>(JsonHelper.GetJsonSerializer());
-                return this.StorePolicyContext.GetWhere(pageNumber, f);
+                return this.StorePolicyRepository.GetWhere(pageNumber, f);
             }
             catch (UnauthorizedException)
             {
@@ -363,7 +505,7 @@ namespace MixERP.Net.Api.Policy
         {
             try
             {
-                return this.StorePolicyContext.CountFiltered(filterName);
+                return this.StorePolicyRepository.CountFiltered(filterName);
             }
             catch (UnauthorizedException)
             {
@@ -396,7 +538,7 @@ namespace MixERP.Net.Api.Policy
         {
             try
             {
-                return this.StorePolicyContext.GetFiltered(pageNumber, filterName);
+                return this.StorePolicyRepository.GetFiltered(pageNumber, filterName);
             }
             catch (UnauthorizedException)
             {
@@ -427,7 +569,7 @@ namespace MixERP.Net.Api.Policy
         {
             try
             {
-                return this.StorePolicyContext.GetDisplayFields();
+                return this.StorePolicyRepository.GetDisplayFields();
             }
             catch (UnauthorizedException)
             {
@@ -458,7 +600,7 @@ namespace MixERP.Net.Api.Policy
         {
             try
             {
-                return this.StorePolicyContext.GetCustomFields(null);
+                return this.StorePolicyRepository.GetCustomFields(null);
             }
             catch (UnauthorizedException)
             {
@@ -489,7 +631,7 @@ namespace MixERP.Net.Api.Policy
         {
             try
             {
-                return this.StorePolicyContext.GetCustomFields(resourceId);
+                return this.StorePolicyRepository.GetCustomFields(resourceId);
             }
             catch (UnauthorizedException)
             {
@@ -528,7 +670,7 @@ namespace MixERP.Net.Api.Policy
 
             try
             {
-                return this.StorePolicyContext.AddOrEdit(storePolicy, customFields);
+                return this.StorePolicyRepository.AddOrEdit(storePolicy, customFields);
             }
             catch (UnauthorizedException)
             {
@@ -564,7 +706,7 @@ namespace MixERP.Net.Api.Policy
 
             try
             {
-                this.StorePolicyContext.Add(storePolicy);
+                this.StorePolicyRepository.Add(storePolicy);
             }
             catch (UnauthorizedException)
             {
@@ -601,7 +743,7 @@ namespace MixERP.Net.Api.Policy
 
             try
             {
-                this.StorePolicyContext.Update(storePolicy, storePolicyId);
+                this.StorePolicyRepository.Update(storePolicy, storePolicyId);
             }
             catch (UnauthorizedException)
             {
@@ -646,7 +788,7 @@ namespace MixERP.Net.Api.Policy
 
             try
             {
-                return this.StorePolicyContext.BulkImport(storePolicyCollection);
+                return this.StorePolicyRepository.BulkImport(storePolicyCollection);
             }
             catch (UnauthorizedException)
             {
@@ -677,7 +819,7 @@ namespace MixERP.Net.Api.Policy
         {
             try
             {
-                this.StorePolicyContext.Delete(storePolicyId);
+                this.StorePolicyRepository.Delete(storePolicyId);
             }
             catch (UnauthorizedException)
             {

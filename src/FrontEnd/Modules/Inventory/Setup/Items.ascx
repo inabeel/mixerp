@@ -31,19 +31,92 @@ along with MixERP.  If not, see <http://www.gnu.org/licenses />.
     scrudFactory.live = "ItemName";
 
 
-    scrudFactory.excludedColumns = ["AuditUserId", "AuditTs"];
+    scrudFactory.excludedColumns = ["AuditUserId", "AuditTs", "Photo"];
     scrudFactory.disableOnEdit = ["ItemCode", "MaintainStock", "ItemGroupId"];
-       
+    scrudFactory.hiddenColumns = ["IsVariantOf"];
+           
     scrudFactory.allowDelete = true;
     scrudFactory.allowEdit = true;
 
     scrudFactory.queryStringKey = "ItemId";
+    
     scrudFactory.layout = [
-        ["ItemId", ""],
-        ["Photo", ""],
-        ["ItemCode", "ItemName", "", ""]
-        //The rest will be figured out by scrud
+        {
+            tab: "item",
+            fields: [
+                ["Photo", ""],
+                ["ItemId", ""],
+                ["ItemCode", "ItemName", "", ""],
+                ["ItemGroupId", "ItemTypeId", "", ""],
+                ["BrandId", "PreferredSupplierId", "", ""],
+                ["UnitId", "", "", ""],
+                ["AllowSales", "AllowPurchase", "", ""],
+            ]
+        },
+        {
+            tab: "shipping",
+            fields:[
+                ["Machinable", "", "", ""],
+                ["PreferredShippingMailTypeId", "ShippingPackageShapeId", "", ""],
+                ["WeightInGrams", "", "", ""],
+                ["WidthInCentimeters", "HeightInCentimeters", "", ""],
+                ["LengthInCentimeters", "", "", ""],
+            ]
+        },
+        {
+            tab: "stock",
+            fields:[
+                ["ReorderLevel", "", "", ""],
+                ["ReorderUnitId", "ReorderQuantity", "", ""],
+                ["MaintainStock", "", "", ""]
+            ]
+        },
+        {
+            tab: "price",
+            fields: [
+                ["CostPrice", "", "", ""],
+                ["SellingPrice", "SellingPriceIncludesTax", "", ""],
+                ["SalesTaxId", "", "", ""]
+            ]
+        },
+        {
+            tab: "other",
+            fields:[
+                ["HotItem", "", "", ""],
+                ["LeadTimeInDays", "", "", ""]
+            ]
+        }
     ];
+
+    scrudFactory.tabs = [
+        {
+            sort: 0,
+            id: "item",
+            name: window.Resources.Titles.ItemInformation(),
+            active: true
+        },
+        {
+            sort: 1,
+            id: "shipping",
+            name: window.Resources.Titles.ShippingInformation()
+        },
+        {
+            sort: 2,
+            id: "price",
+            name: window.Resources.Titles.PriceDetails()
+        },
+        {
+            sort: 3,
+            id: "stock",
+            name: window.Resources.Titles.StockDetails()
+        },
+        {
+            sort: 4,
+            id: "other",
+            name: window.Resources.Titles.OtherInformation()
+        }        
+    ];
+
 
     scrudFactory.keys = [
         {
@@ -124,6 +197,14 @@ along with MixERP.  If not, see <http://www.gnu.org/licenses />.
 <div data-ng-include="'/Modules/ScrudFactory/View.html'"></div>
 <div data-ng-include="'/Modules/ScrudFactory/Form.html'"></div>
 
-
+<script type="text/javascript">
+    $(document).on("onsaving", function(){
+        if($("#is_variant_of").val()){
+            $("#is_variant").dropdown("set selected", "yes");
+        }else{
+            $("#is_variant").dropdown("set selected", "no");            
+        };
+    });
+</script>
 
 

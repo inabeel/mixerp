@@ -16,7 +16,7 @@ namespace MixERP.Net.Schemas.Core.Data
     /// <summary>
     /// Provides simplified data access features to perform SCRUD operation on the database table "core.flags".
     /// </summary>
-    public class Flag : DbAccess
+    public class Flag : DbAccess, IFlagRepository
     {
         /// <summary>
         /// The schema of this table. Returns literal "core".
@@ -73,7 +73,7 @@ namespace MixERP.Net.Schemas.Core.Data
         }
 
         /// <summary>
-        /// Executes a select query on the table "core.flags" to return a all instances of the "Flag" class. 
+        /// Executes a select query on the table "core.flags" to return all instances of the "Flag" class. 
         /// </summary>
         /// <returns>Returns a non-live, non-mapped instances of "Flag" class.</returns>
         /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
@@ -102,7 +102,7 @@ namespace MixERP.Net.Schemas.Core.Data
         }
 
         /// <summary>
-        /// Executes a select query on the table "core.flags" to return a all instances of the "Flag" class to export. 
+        /// Executes a select query on the table "core.flags" to return all instances of the "Flag" class to export. 
         /// </summary>
         /// <returns>Returns a non-live, non-mapped instances of "Flag" class.</returns>
         /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
@@ -158,6 +158,125 @@ namespace MixERP.Net.Schemas.Core.Data
 
             const string sql = "SELECT * FROM core.flags WHERE flag_id=@0;";
             return Factory.Get<MixERP.Net.Entities.Core.Flag>(this._Catalog, sql, flagId).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Gets the first record of the table "core.flags". 
+        /// </summary>
+        /// <returns>Returns a non-live, non-mapped instance of "Flag" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.Core.Flag GetFirst()
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the first record of entity \"Flag\" was denied to the user with Login ID {_LoginId}", this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM core.flags ORDER BY flag_id LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.Core.Flag>(this._Catalog, sql).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Gets the previous record of the table "core.flags" sorted by flagId.
+        /// </summary>
+        /// <param name="flagId">The column "flag_id" parameter used to find the next record.</param>
+        /// <returns>Returns a non-live, non-mapped instance of "Flag" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.Core.Flag GetPrevious(long flagId)
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the previous entity of \"Flag\" by \"FlagId\" with value {FlagId} was denied to the user with Login ID {_LoginId}", flagId, this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM core.flags WHERE flag_id < @0 ORDER BY flag_id DESC LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.Core.Flag>(this._Catalog, sql, flagId).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Gets the next record of the table "core.flags" sorted by flagId.
+        /// </summary>
+        /// <param name="flagId">The column "flag_id" parameter used to find the next record.</param>
+        /// <returns>Returns a non-live, non-mapped instance of "Flag" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.Core.Flag GetNext(long flagId)
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the next entity of \"Flag\" by \"FlagId\" with value {FlagId} was denied to the user with Login ID {_LoginId}", flagId, this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM core.flags WHERE flag_id > @0 ORDER BY flag_id LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.Core.Flag>(this._Catalog, sql, flagId).FirstOrDefault();
+        }
+
+
+        /// <summary>
+        /// Gets the last record of the table "core.flags". 
+        /// </summary>
+        /// <returns>Returns a non-live, non-mapped instance of "Flag" class mapped to the database row.</returns>
+        /// <exception cref="UnauthorizedException">Thown when the application user does not have sufficient privilege to perform this action.</exception>
+        public MixERP.Net.Entities.Core.Flag GetLast()
+        {
+            if (string.IsNullOrWhiteSpace(this._Catalog))
+            {
+                return null;
+            }
+
+            if (!this.SkipValidation)
+            {
+                if (!this.Validated)
+                {
+                    this.Validate(AccessTypeEnum.Read, this._LoginId, this._Catalog, false);
+                }
+                if (!this.HasAccess)
+                {
+                    Log.Information("Access to the get the last record of entity \"Flag\" was denied to the user with Login ID {_LoginId}", this._LoginId);
+                    throw new UnauthorizedException("Access is denied.");
+                }
+            }
+
+            const string sql = "SELECT * FROM core.flags ORDER BY flag_id DESC LIMIT 1;";
+            return Factory.Get<MixERP.Net.Entities.Core.Flag>(this._Catalog, sql).FirstOrDefault();
         }
 
         /// <summary>
@@ -557,7 +676,7 @@ namespace MixERP.Net.Schemas.Core.Data
             return Factory.Get<MixERP.Net.Entities.Core.Flag>(this._Catalog, sql, offset);
         }
 
-        private List<EntityParser.Filter> GetFilters(string catalog, string filterName)
+        public List<EntityParser.Filter> GetFilters(string catalog, string filterName)
         {
             const string sql = "SELECT * FROM core.filters WHERE object_name='core.flags' AND lower(filter_name)=lower(@0);";
             return Factory.Get<EntityParser.Filter>(catalog, sql, filterName).ToList();

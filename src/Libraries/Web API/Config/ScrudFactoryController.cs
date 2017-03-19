@@ -12,6 +12,7 @@ using MixERP.Net.Framework;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using PetaPoco;
+using MixERP.Net.Schemas.Config.Data;
 
 namespace MixERP.Net.Api.Config
 {
@@ -22,9 +23,9 @@ namespace MixERP.Net.Api.Config
     public class ScrudFactoryController : ApiController
     {
         /// <summary>
-        ///     The ScrudFactory data context.
+        ///     The ScrudFactory repository.
         /// </summary>
-        private readonly MixERP.Net.Schemas.Config.Data.ScrudFactory ScrudFactoryContext;
+        private readonly IScrudFactoryRepository ScrudFactoryRepository;
 
         public ScrudFactoryController()
         {
@@ -33,12 +34,22 @@ namespace MixERP.Net.Api.Config
             this._OfficeId = AppUsers.GetCurrent().View.OfficeId.ToInt();
             this._Catalog = AppUsers.GetCurrentUserDB();
 
-            this.ScrudFactoryContext = new MixERP.Net.Schemas.Config.Data.ScrudFactory
+            this.ScrudFactoryRepository = new MixERP.Net.Schemas.Config.Data.ScrudFactory
             {
                 _Catalog = this._Catalog,
                 _LoginId = this._LoginId,
                 _UserId = this._UserId
             };
+        }
+
+        public ScrudFactoryController(IScrudFactoryRepository repository, string catalog, LoginView view)
+        {
+            this._LoginId = view.LoginId.ToLong();
+            this._UserId = view.UserId.ToInt();
+            this._OfficeId = view.OfficeId.ToInt();
+            this._Catalog = catalog;
+
+            this.ScrudFactoryRepository = repository;
         }
 
         public long _LoginId { get; }
@@ -55,6 +66,11 @@ namespace MixERP.Net.Api.Config
         [Route("~/api/config/scrud-factory/meta")]
         public EntityView GetEntityView()
         {
+            if (this._LoginId == 0)
+            {
+                return new EntityView();
+            }
+
             return new EntityView
             {
                 PrimaryKey = "key",
@@ -79,7 +95,7 @@ namespace MixERP.Net.Api.Config
         {
             try
             {
-                return this.ScrudFactoryContext.Count();
+                return this.ScrudFactoryRepository.Count();
             }
             catch (UnauthorizedException)
             {
@@ -110,7 +126,7 @@ namespace MixERP.Net.Api.Config
         {
             try
             {
-                return this.ScrudFactoryContext.GetAll();
+                return this.ScrudFactoryRepository.GetAll();
             }
             catch (UnauthorizedException)
             {
@@ -141,7 +157,7 @@ namespace MixERP.Net.Api.Config
         {
             try
             {
-                return this.ScrudFactoryContext.Export();
+                return this.ScrudFactoryRepository.Export();
             }
             catch (UnauthorizedException)
             {
@@ -173,7 +189,7 @@ namespace MixERP.Net.Api.Config
         {
             try
             {
-                return this.ScrudFactoryContext.Get(key);
+                return this.ScrudFactoryRepository.Get(key);
             }
             catch (UnauthorizedException)
             {
@@ -200,7 +216,133 @@ namespace MixERP.Net.Api.Config
         {
             try
             {
-                return this.ScrudFactoryContext.Get(keys);
+                return this.ScrudFactoryRepository.Get(keys);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the first instance of scrud factory.
+        /// </summary>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("first")]
+        [Route("~/api/config/scrud-factory/first")]
+        public MixERP.Net.Entities.Config.ScrudFactory GetFirst()
+        {
+            try
+            {
+                return this.ScrudFactoryRepository.GetFirst();
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the previous instance of scrud factory.
+        /// </summary>
+        /// <param name="key">Enter Key to search for.</param>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("previous/{key}")]
+        [Route("~/api/config/scrud-factory/previous/{key}")]
+        public MixERP.Net.Entities.Config.ScrudFactory GetPrevious(string key)
+        {
+            try
+            {
+                return this.ScrudFactoryRepository.GetPrevious(key);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the next instance of scrud factory.
+        /// </summary>
+        /// <param name="key">Enter Key to search for.</param>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("next/{key}")]
+        [Route("~/api/config/scrud-factory/next/{key}")]
+        public MixERP.Net.Entities.Config.ScrudFactory GetNext(string key)
+        {
+            try
+            {
+                return this.ScrudFactoryRepository.GetNext(key);
+            }
+            catch (UnauthorizedException)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
+            }
+            catch (MixERPException ex)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    Content = new StringContent(ex.Message),
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
+            }
+            catch
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+        }
+
+        /// <summary>
+        ///     Returns the last instance of scrud factory.
+        /// </summary>
+        /// <returns></returns>
+        [AcceptVerbs("GET", "HEAD")]
+        [Route("last")]
+        [Route("~/api/config/scrud-factory/last")]
+        public MixERP.Net.Entities.Config.ScrudFactory GetLast()
+        {
+            try
+            {
+                return this.ScrudFactoryRepository.GetLast();
             }
             catch (UnauthorizedException)
             {
@@ -231,7 +373,7 @@ namespace MixERP.Net.Api.Config
         {
             try
             {
-                return this.ScrudFactoryContext.GetPaginatedResult();
+                return this.ScrudFactoryRepository.GetPaginatedResult();
             }
             catch (UnauthorizedException)
             {
@@ -263,7 +405,7 @@ namespace MixERP.Net.Api.Config
         {
             try
             {
-                return this.ScrudFactoryContext.GetPaginatedResult(pageNumber);
+                return this.ScrudFactoryRepository.GetPaginatedResult(pageNumber);
             }
             catch (UnauthorizedException)
             {
@@ -296,7 +438,7 @@ namespace MixERP.Net.Api.Config
             try
             {
                 List<EntityParser.Filter> f = filters.ToObject<List<EntityParser.Filter>>(JsonHelper.GetJsonSerializer());
-                return this.ScrudFactoryContext.CountWhere(f);
+                return this.ScrudFactoryRepository.CountWhere(f);
             }
             catch (UnauthorizedException)
             {
@@ -330,7 +472,7 @@ namespace MixERP.Net.Api.Config
             try
             {
                 List<EntityParser.Filter> f = filters.ToObject<List<EntityParser.Filter>>(JsonHelper.GetJsonSerializer());
-                return this.ScrudFactoryContext.GetWhere(pageNumber, f);
+                return this.ScrudFactoryRepository.GetWhere(pageNumber, f);
             }
             catch (UnauthorizedException)
             {
@@ -362,7 +504,7 @@ namespace MixERP.Net.Api.Config
         {
             try
             {
-                return this.ScrudFactoryContext.CountFiltered(filterName);
+                return this.ScrudFactoryRepository.CountFiltered(filterName);
             }
             catch (UnauthorizedException)
             {
@@ -395,7 +537,7 @@ namespace MixERP.Net.Api.Config
         {
             try
             {
-                return this.ScrudFactoryContext.GetFiltered(pageNumber, filterName);
+                return this.ScrudFactoryRepository.GetFiltered(pageNumber, filterName);
             }
             catch (UnauthorizedException)
             {
@@ -426,7 +568,7 @@ namespace MixERP.Net.Api.Config
         {
             try
             {
-                return this.ScrudFactoryContext.GetDisplayFields();
+                return this.ScrudFactoryRepository.GetDisplayFields();
             }
             catch (UnauthorizedException)
             {
@@ -457,7 +599,7 @@ namespace MixERP.Net.Api.Config
         {
             try
             {
-                return this.ScrudFactoryContext.GetCustomFields(null);
+                return this.ScrudFactoryRepository.GetCustomFields(null);
             }
             catch (UnauthorizedException)
             {
@@ -488,7 +630,7 @@ namespace MixERP.Net.Api.Config
         {
             try
             {
-                return this.ScrudFactoryContext.GetCustomFields(resourceId);
+                return this.ScrudFactoryRepository.GetCustomFields(resourceId);
             }
             catch (UnauthorizedException)
             {
@@ -527,7 +669,7 @@ namespace MixERP.Net.Api.Config
 
             try
             {
-                return this.ScrudFactoryContext.AddOrEdit(scrudFactory, customFields);
+                return this.ScrudFactoryRepository.AddOrEdit(scrudFactory, customFields);
             }
             catch (UnauthorizedException)
             {
@@ -563,7 +705,7 @@ namespace MixERP.Net.Api.Config
 
             try
             {
-                this.ScrudFactoryContext.Add(scrudFactory);
+                this.ScrudFactoryRepository.Add(scrudFactory);
             }
             catch (UnauthorizedException)
             {
@@ -600,7 +742,7 @@ namespace MixERP.Net.Api.Config
 
             try
             {
-                this.ScrudFactoryContext.Update(scrudFactory, key);
+                this.ScrudFactoryRepository.Update(scrudFactory, key);
             }
             catch (UnauthorizedException)
             {
@@ -645,7 +787,7 @@ namespace MixERP.Net.Api.Config
 
             try
             {
-                return this.ScrudFactoryContext.BulkImport(scrudFactoryCollection);
+                return this.ScrudFactoryRepository.BulkImport(scrudFactoryCollection);
             }
             catch (UnauthorizedException)
             {
@@ -676,7 +818,7 @@ namespace MixERP.Net.Api.Config
         {
             try
             {
-                this.ScrudFactoryContext.Delete(key);
+                this.ScrudFactoryRepository.Delete(key);
             }
             catch (UnauthorizedException)
             {
